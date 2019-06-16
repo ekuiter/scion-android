@@ -1,0 +1,9 @@
+[submodule "app/src/main/cpp/gobind-scion"]
+	path = app/src/main/cpp/gobind-scion
+	url = git@gitlab.com:TpmKranz/gobind-scion.git
+[submodule "app/src/main/cpp/uthash"]
+	path = app/src/main/cpp/uthash
+	url = git@github.com:troydhanson/uthash.git
+[submodule "app/src/main/cpp/zlog"]
+	path = app/src/main/cpp/zlog
+	url = git@github.com:HardySimpson/zlog.git
