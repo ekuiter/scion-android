@@ -3,7 +3,7 @@
 
 int main(int, char**);
 
-JNIEXPORT jint JNICALL Java_com_example_myapplication_MainActivity_main(
+JNIEXPORT jint JNICALL Java_com_example_myapplication_DispatcherService_main(
         JNIEnv *env,          /* interface pointer */
         jobject obj,          /* "this" pointer */
         jstring confFileName) /* argument #1 */ {
