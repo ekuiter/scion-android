@@ -1,11 +1,13 @@
 package com.example.myapplication;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import java.util.Locale;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.obsez.android.lib.filechooser.ChooserDialog;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,7 +23,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         output = findViewById(R.id.textview);
 
+
+        new ChooserDialog(this)
+                .withChosenListener((path, pathFile) -> startServices(path)).build().show();
+    }
+
+    private void startServices(String sciondCfgPath) {
         startService(new Intent(this, DispatcherService.class));
-        // output.setText(String.format(Locale.UK,"Dispatcher Main returned: %d", retValue));
+        startService(
+                new Intent(this, SciondService.class)
+                        .putExtra(SciondService.PARAM_CONFIG_PATH, sciondCfgPath)
+        );
     }
 }
