@@ -2,37 +2,77 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
+
+import java.util.Optional;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView output;
+    private static final String SCIOND_CFG_PATH = MainActivity.class.getCanonicalName() + ".SCIOND";
+    private static final String DISP_CFG_PATH = MainActivity.class.getCanonicalName() + ".DISPATCHER";
 
-    static {
-        System.loadLibrary("dispatcher-wrapper");
-    }
+    private Optional<String> sciondCfgPath;
+    private Optional<String> dispCfgPath;
+    private AppCompatButton sciondButton;
+    private AppCompatButton dispButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        output = findViewById(R.id.textview);
+        Optional<Bundle> sIS = Optional.ofNullable(savedInstanceState);
 
+        sciondCfgPath = sIS.map(i->i.getString(SCIOND_CFG_PATH));
+        dispCfgPath = sIS.map(i->i.getString(DISP_CFG_PATH));
 
-        new ChooserDialog(this)
-                .withChosenListener((path, pathFile) -> startServices(path)).build().show();
+        sciondButton = findViewById(R.id.sciondbutton);
+        dispButton = findViewById(R.id.dispbutton);
+
+        sciondButton.setEnabled(!sciondCfgPath.isPresent());
+        dispButton.setEnabled(!dispCfgPath.isPresent());
+
+        sciondButton.setOnClickListener(view ->
+            new ChooserDialog(view.getContext())
+                    .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
+                    .withChosenListener((path, pathFile) -> {
+                        sciondCfgPath = Optional.ofNullable(path);
+                        sciondButton.setEnabled(!sciondCfgPath.isPresent());
+                        startServices();
+                    }).build().show()
+        );
+        dispButton.setOnClickListener(view ->
+            new ChooserDialog(view.getContext())
+                    .withResources(R.string.choosedispcfg, R.string.ok, R.string.cancel)
+                    .withChosenListener((path, pathFile) -> {
+                        dispCfgPath = Optional.ofNullable(path);
+                        dispButton.setEnabled(!dispCfgPath.isPresent());
+                        startServices();
+                    }).build().show()
+        );
     }
 
-    private void startServices(String sciondCfgPath) {
-        startService(new Intent(this, DispatcherService.class));
-        startService(
-                new Intent(this, SciondService.class)
-                        .putExtra(SciondService.PARAM_CONFIG_PATH, sciondCfgPath)
-        );
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        sciondCfgPath.ifPresent(s->outState.putString(SCIOND_CFG_PATH, s));
+        dispCfgPath.ifPresent(s->outState.putString(DISP_CFG_PATH, s));
+    }
+
+    private void startServices() {
+        if (sciondCfgPath.isPresent() && dispCfgPath.isPresent()) {
+            startService(
+                    new Intent(this, DispatcherService.class)
+                            .putExtra(DispatcherService.PARAM_CONFIG_PATH, dispCfgPath.get())
+            );
+            startService(
+                    new Intent(this, SciondService.class)
+                            .putExtra(SciondService.PARAM_CONFIG_PATH, sciondCfgPath.get())
+            );
+        }
     }
 }

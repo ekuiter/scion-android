@@ -10,7 +10,7 @@ import sciondgobind.Sciondgobind;
 
 public class SciondService extends IntentService {
 
-    public static final String PARAM_CONFIG_PATH = "com.example.myapplication.SciondService.CONFIG_PATH";
+    public static final String PARAM_CONFIG_PATH = SciondService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final String TAG = "sciond";
 
     public SciondService() {
