@@ -1,17 +1,15 @@
 package com.example.myapplication;
 
-import android.app.IntentService;
 import android.content.Intent;
-import android.util.Log;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import androidx.annotation.NonNull;
 
-public class DispatcherService extends IntentService {
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class DispatcherService extends BackgroundService {
     public static final String PARAM_CONFIG_PATH = DispatcherService.class.getCanonicalName() + ".CONFIG_PATH";
+    private static final int NID = 1;
     private static final String TAG = "dispatcher";
 
     static {
@@ -23,33 +21,34 @@ public class DispatcherService extends IntentService {
     }
 
     @Override
+    protected int getNotificationId() {
+        return NID;
+    }
+
+    @NonNull
+    @Override
+    protected String getTag() {
+        return TAG;
+    }
+
+    @Override
     protected void onHandleIntent (Intent intent) {
         if (intent == null) return;
         String confPath = intent.getStringExtra(PARAM_CONFIG_PATH);
         if (confPath == null) return;
-        Log.d(TAG, "Setting up dispatcher service");
+        super.onHandleIntent(intent);
 
-        boolean existed;
-        boolean success;
+        log(R.string.servicesetup);
 
-        File shm = new File(getFilesDir(), "run/shm");
-        existed = shm.exists();
-        success = shm.mkdirs();
-        Log.d(TAG, String.format("Creating shm dir %s: %b %b %b", shm.getAbsolutePath(), existed, success, shm.exists()));
+        Path shm = Paths.get("run", "shm");
+        mkdir(shm);
 
-        File logs = new File(getFilesDir(), "logs");
-        existed = logs.exists();
-        success = logs.mkdirs();
-        Log.d(TAG, String.format("Creating logs dir %s: %b %b %b", logs.getAbsolutePath(), existed, success, logs.exists()));
+        delete(shm.resolve("dispatcher/default.sock"));
 
-        File socket = new File(shm, "dispatcher/default.sock");
-        existed = socket.exists();
-        success = socket.delete();
-        Log.d(TAG, String.format("Deleting dispatcher socket %s: %b %b %b", socket.getAbsolutePath(), existed, success, socket.exists()));
+        log(R.string.servicestart);
 
-        Log.d(TAG, "Starting dispatcher service");
-
-        main(confPath);
+        int ret = main(confPath);
+        log(R.string.servicereturn, ret);
     }
 
     public native int main(String confFileName);

@@ -6,4 +6,14 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="choosesciondcfg">Choose sciond config</string>
+    <string name="servicechannel_name">Service survival</string>
+    <string name="servicechannel_description">These keep the background services alive when the app is not in the foreground.</string>
+    <!-- Formatted strings for com.example.myapplication.BackgroundService.log get the service's tag as the first two parameters. -->
+    <!-- The first parameter is the tag's first character (for capitalization) and the second one is the rest. -->
+    <string name="servicemkdir" formatted="true">Creating dir %3$s: (existed: %4$b created: %5$b exists: %6$b)</string>
+    <string name="servicedelete" formatted="true">Deleting file %3$s: (existed: %4$b deleted: %5$b exists: %6$b)</string>
+    <string name="servicetitle" formatted="true">%1$S%2$s service</string>
+    <string name="servicesetup" formatted="true">Setting up %1$s%2$s service</string>
+    <string name="servicestart" formatted="true">Starting %1$s%2$s service</string>
+    <string name="servicereturn" formatted="true">%1$S%2$s returned with value %3$d</string>
 </resources>
