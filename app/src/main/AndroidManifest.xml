@@ -13,11 +13,16 @@
             android:theme="@style/AppTheme" tools:ignore="GoogleAppIndexingWarning">
         <service
             android:name=".DispatcherService"
-            android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:process=":DispatcherProcess" />
         <service
             android:name=".SciondService"
-            android:exported="false" />
+            android:exported="false"
+            android:process=":SciondProcess" />
+        <service
+            android:name=".PingpongService"
+            android:exported="false"
+            android:process=":PingpongProcess" />
 
         <activity android:name=".MainActivity">
             <intent-filter>

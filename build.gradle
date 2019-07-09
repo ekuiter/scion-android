@@ -17,6 +17,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenCentral()
         ivy {
             url "https://tpmkranz.gitlab.io/gobind-scion"
             patternLayout {

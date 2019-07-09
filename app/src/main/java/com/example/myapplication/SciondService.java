@@ -6,19 +6,14 @@ import androidx.annotation.NonNull;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
 
-import sciondgobind.Sciondgobind;
+import sciond.Sciond;
 
 public class SciondService extends BackgroundService {
 
     public static final String PARAM_CONFIG_PATH = SciondService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 2;
     private static final String TAG = "sciond";
-
-    static {
-        System.loadLibrary("dispatcher-wrapper");
-    }
 
     public SciondService() {
         super("SciondService");
@@ -40,7 +35,7 @@ public class SciondService extends BackgroundService {
         delete(shm.resolve("sciond/default.unix"));
 
         log(R.string.servicestart);
-        long ret = Sciondgobind.realMain(confPath);
+        long ret = Sciond.main(commandLine("-config", confPath), "", "");
         log(R.string.servicereturn, ret);
     }
 

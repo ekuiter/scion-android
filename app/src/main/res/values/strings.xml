@@ -16,4 +16,10 @@
     <string name="servicesetup" formatted="true">Setting up %1$s%2$s service</string>
     <string name="servicestart" formatted="true">Starting %1$s%2$s service</string>
     <string name="servicereturn" formatted="true">%1$S%2$s returned with value %3$d</string>
+    <string name="pingpongbutton">Start pingpong</string>
+    <string name="pingpongcreatekey" formatted="true">Created private key: %3$s</string>
+    <string name="pingpongreadkey" formatted="true">Read private key: %3$s</string>
+    <string name="pingpongcreatecert" formatted="true">Created self-signed certificate: %3$s</string>
+    <string name="pingpongcertexists" formatted="true">Key and certificate already exist: %3$s %4$s</string>
+    <string name="pingpongcmdline">Pingpong command line arguments (newline-separated)</string>
 </resources>

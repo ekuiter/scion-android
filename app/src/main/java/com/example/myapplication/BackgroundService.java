@@ -14,8 +14,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import java.io.File;
+import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class BackgroundService extends IntentService {
@@ -42,6 +44,25 @@ public abstract class BackgroundService extends IntentService {
         notifLog = new StringBuilder();
     }
 
+
+    @NonNull
+    public static String commandLine(@NonNull String... args) {
+        //noinspection deprecation
+        return Arrays.stream(args)
+                .map(URLEncoder::encode)
+                .collect(Collectors.joining("&"));
+    }
+
+    @NonNull
+    public static String env(@NonNull String[]... env) {
+        //noinspection deprecation
+        return Arrays.stream(env)
+                .filter(kv -> kv.length >= 2)
+                .map(kv -> Arrays.stream(kv)
+                        .map(URLEncoder::encode)
+                        .collect(Collectors.joining("=")))
+                .collect(Collectors.joining("&"));
+    }
 
     public BackgroundService(String name) { super(name); }
 
