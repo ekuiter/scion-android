@@ -13,19 +13,19 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String SCIOND_CFG_PATH = MainActivity.class.getCanonicalName() + ".SCIOND";
     private static final String DISP_CFG_PATH = MainActivity.class.getCanonicalName() + ".DISPATCHER";
-    private static final String SERVICES_STARTED = MainActivity.class.getCanonicalName() + ".SERVICES_STARTED";
     private static final String PINGPONG_CMD_LINE = MainActivity.class.getCanonicalName() + ".PPCMDLINE";
     static final String SERVICE_CHANNEL = MainActivity.class.getCanonicalName() + ".SERVICES";
 
     private Optional<String> sciondCfgPath;
     private Optional<String> dispCfgPath;
-    private boolean servicesStarted;
     private AppCompatButton sciondButton;
     private AppCompatButton dispButton;
     private AppCompatButton pingButton;
@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
         sciondCfgPath = sIS.map(i->i.getString(SCIOND_CFG_PATH));
         dispCfgPath = sIS.map(i->i.getString(DISP_CFG_PATH));
-        servicesStarted = sIS.map(i->i.getBoolean(SERVICES_STARTED)).orElse(false);
 
         createNotificationChannel();
 
@@ -50,50 +49,60 @@ public class MainActivity extends AppCompatActivity {
         pingCmdLine = findViewById(R.id.pingpongcmdline);
         prefs = getPreferences(MODE_PRIVATE);
 
-        sciondButton.setEnabled(!sciondCfgPath.isPresent() && !servicesStarted);
-        dispButton.setEnabled(!dispCfgPath.isPresent() && !servicesStarted);
-        pingButton.setEnabled(servicesStarted);
+        activateButtons();
         pingCmdLine.setText(sIS.map(i->i.getString(PINGPONG_CMD_LINE)).orElse(prefs.getString(PINGPONG_CMD_LINE, "")));
 
         sciondButton.setOnClickListener(view ->
             new ChooserDialog(view.getContext())
                     .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
                     .withStartFile(prefs.getString(SCIOND_CFG_PATH, null))
-                    .withChosenListener((path, pathFile) -> {
-                        sciondCfgPath = Optional.ofNullable(path);
-                        sciondButton.setEnabled(!sciondCfgPath.isPresent());
-                        startServices();
-                    }).build().show()
+                    .withChosenListener((path, pathFile) ->
+                            (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {
+                                startService(new Intent(this, SciondService.class)
+                                        .putExtra(SciondService.PARAM_CONFIG_PATH, p));
+                                putString(SCIOND_CFG_PATH, p);
+                                activateButtons();
+                            })
+                    ).build().show()
         );
         dispButton.setOnClickListener(view ->
             new ChooserDialog(view.getContext())
                     .withResources(R.string.choosedispcfg, R.string.ok, R.string.cancel)
                     .withStartFile(prefs.getString(DISP_CFG_PATH, null))
-                    .withChosenListener((path, pathFile) -> {
-                        dispCfgPath = Optional.ofNullable(path);
-                        dispButton.setEnabled(!dispCfgPath.isPresent());
-                        startServices();
-                    }).build().show()
+                    .withChosenListener((path, pathFile) ->
+                            (dispCfgPath = Optional.ofNullable(path)).ifPresent(p->{
+                                startService(new Intent(this, DispatcherService.class)
+                                        .putExtra(DispatcherService.PARAM_CONFIG_PATH, p));
+                                putString(DISP_CFG_PATH, p);
+                                activateButtons();
+                            })
+                    ).build().show()
         );
 
         pingButton.setOnClickListener(view -> {
+            String cmdLine = Optional.ofNullable(pingCmdLine.getText()).map(CharSequence::toString).orElse("");
             startService(
-                new Intent(this, PingpongService.class)
-                        .putExtra(PingpongService.PARAM_ARGS_QUERY, BackgroundService.commandLine(
-                                pingCmdLine.getText().toString().split("\n")
-                        ))
+                    new Intent(this, PingpongService.class)
+                            .putExtra(
+                                    PingpongService.PARAM_ARGS_QUERY,
+                                    BackgroundService.commandLine(cmdLine.split("\n"))
+                            )
             );
-            prefs.edit().putString(PINGPONG_CMD_LINE, pingCmdLine.getText().toString()).apply();
+            putString(PINGPONG_CMD_LINE, cmdLine);
         });
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        sciondCfgPath.ifPresent(s->outState.putString(SCIOND_CFG_PATH, s));
-        dispCfgPath.ifPresent(s->outState.putString(DISP_CFG_PATH, s));
-        outState.putBoolean(SERVICES_STARTED, servicesStarted);
-        outState.putString(PINGPONG_CMD_LINE, pingCmdLine.getText().toString());
+        Function<String,Consumer<CharSequence>> putter = key->cs->outState.putString(key, cs.toString());
+        sciondCfgPath.ifPresent(putter.apply(SCIOND_CFG_PATH));
+        dispCfgPath.ifPresent(putter.apply(DISP_CFG_PATH));
+        Optional.ofNullable(pingCmdLine.getText()).ifPresent(putter.apply(PINGPONG_CMD_LINE));
+    }
+
+    private void putString(String key, String value) {
+        prefs.edit().putString(key, value).apply();
     }
 
     private void createNotificationChannel() {
@@ -106,22 +115,10 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.createNotificationChannel(channel);
     }
 
-    private void startServices() {
-        if (sciondCfgPath.isPresent() && dispCfgPath.isPresent()) {
-            SharedPreferences.Editor e = prefs.edit();
-            startService(
-                    new Intent(this, DispatcherService.class)
-                            .putExtra(DispatcherService.PARAM_CONFIG_PATH, dispCfgPath.get())
-            );
-            startService(
-                    new Intent(this, SciondService.class)
-                            .putExtra(SciondService.PARAM_CONFIG_PATH, sciondCfgPath.get())
-            );
-            servicesStarted = true;
-            pingButton.setEnabled(true);
-            e.putString(SCIOND_CFG_PATH, sciondCfgPath.get());
-            e.putString(DISP_CFG_PATH, dispCfgPath.get());
-            e.apply();
-        }
+    private void activateButtons() {
+        sciondButton.setEnabled(!sciondCfgPath.isPresent());
+        dispButton.setEnabled(!dispCfgPath.isPresent());
+        pingButton.setEnabled(sciondCfgPath.isPresent() && dispCfgPath.isPresent());
     }
+
 }

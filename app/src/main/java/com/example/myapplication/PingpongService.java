@@ -36,7 +36,7 @@ import pingpong.Pingpong;
 
 public class PingpongService extends BackgroundService {
 
-    public static final String PARAM_ARGS_QUERY = SciondService.class.getCanonicalName() + ".CONFIG_PATH";
+    public static final String PARAM_ARGS_QUERY = PingpongService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 3;
     private static final String TAG = "pingpong";
 
