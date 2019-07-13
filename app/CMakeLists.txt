@@ -49,7 +49,7 @@ add_library(scion STATIC
 add_definitions(-D_DEFINES_H_)
 
 add_definitions(-DSCIOND_API_PORT=3333)
-add_definitions(-DDISPATCHER_DIR="/data/data/com.example.myapplication/files/run/shm/dispatcher")
+add_definitions(-DDISPATCHER_DIR="/data/data/org.scionlab.endhost/files/run/shm/dispatcher")
 add_definitions(-DDEFAULT_DISPATCHER_ID="default")
 
 add_definitions(-DDISPATCHER_BUF_SIZE=65535)

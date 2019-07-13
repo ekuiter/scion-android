@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package org.scionlab.endhost;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;

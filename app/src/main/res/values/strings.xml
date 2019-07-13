@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">SCION Endhost</string>
     <string name="dispbutton">Load dispatcher config</string>
     <string name="sciondbutton">Load sciond config</string>
     <string name="choosedispcfg">Choose dispatcher config</string>

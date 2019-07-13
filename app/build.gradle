@@ -7,7 +7,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     defaultConfig {
-        applicationId "com.example.myapplication"
+        applicationId "org.scionlab.endhost"
         minSdkVersion 28
         targetSdkVersion 28
         versionCode 1
@@ -36,6 +36,7 @@ dependencies {
     implementation 'com.madgag.spongycastle:core:1.58.0.0'
     implementation 'com.madgag.spongycastle:pkix:1.54.0.0'
     implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.core:core:1.0.2'
     // If symbols have changed and are unavailable for you, either pull the newest version of this
     // repo or consider gradle's --refresh-dependencies option to get the freshest library
     implementation name: 'sciondgobind', ext: 'aar'

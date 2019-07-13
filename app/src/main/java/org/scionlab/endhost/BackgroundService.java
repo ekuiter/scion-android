@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package org.scionlab.endhost;
 
 import android.app.IntentService;
 import android.app.Notification;

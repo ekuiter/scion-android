@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package org.scionlab.endhost;
 
 import android.content.Intent;
 import android.util.Log;
