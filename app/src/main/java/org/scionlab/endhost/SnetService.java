@@ -16,12 +16,17 @@ import snet.Snet;
 public class SnetService extends Service {
     private static final String TAG = "snet";
 
-    static final int MSG_DIAL_SCION = 1;
-    static final int MSG_WRITE = 2;
-    static final int MSG_READ_FROM = 30;
-    static final int MSG_READ_FROM_RESULT = 31;
+    public static final int MSG_INIT = 0;
+    public static final int MSG_DIAL_SCION = 1;
+    public static final int MSG_WRITE = 2;
+    public static final int MSG_READ_FROM = 30;
+    public static final int MSG_READ_FROM_RESULT = 31;
 
-    static boolean isInitialized = false;
+    public static final String CLIENT_ADDRESS = "org.scionlab.CLIENT_ADDRESS";
+    public static final String SERVER_ADDRESS = "org.scionlab.SERVER_ADDRESS";
+    public static final String WRITE_BUFFER = "org.scionlab.WRITE_BUFFER";
+    public static final String READ_BUFFER = "org.scionlab.READ_BUFFER";
+    public static final String BUFFER_SIZE = "org.scionlab.BUFFER_SIZE";
 
     Messenger messenger;
 
@@ -37,39 +42,38 @@ public class SnetService extends Service {
         private Context applicationContext;
 
         IncomingHandler(Context context) {
-            applicationContext = context.getApplicationContext();
+            applicationContext = context;
         }
 
         @Override
         public void handleMessage(Message msg) {
             Log.d(TAG, "Received message: " + msg.what);
             Bundle bundle = msg.getData();
-
-            if (!isInitialized) {
-                Log.d(TAG, "Initializing SCION");
-                String clientAddress = bundle.getString("org.scionlab.CLIENT_ADDRESS");
-                Snet.init(applicationContext.getFilesDir().getAbsolutePath(), "run/shm/sciond/default.sock", "run/shm/dispatcher/default.sock", clientAddress);
-                isInitialized = true;
-            }
+            String clientAddress;
 
             switch (msg.what) {
+                case MSG_INIT:
+                    clientAddress = bundle.getString(CLIENT_ADDRESS);
+                    Snet.init(applicationContext.getFilesDir().getAbsolutePath(), "run/shm/sciond/default.sock", "run/shm/dispatcher/default.sock", clientAddress);
+                    break;
                 case MSG_DIAL_SCION:
-                    String serverAddress = bundle.getString("org.scionlab.SERVER_ADDRESS");
-                    String clientAddress = bundle.getString("org.scionlab.CLIENT_ADDRESS");
+                    clientAddress = bundle.getString(CLIENT_ADDRESS);
+                    String serverAddress = bundle.getString(SERVER_ADDRESS);
                     Log.d(TAG, "Dialing SCION: Local: " + clientAddress + " Remote: " + serverAddress);
                     Snet.dialScion(serverAddress, clientAddress);
                     break;
                 case MSG_WRITE:
                     Log.d(TAG, "Writing to SCION");
-                    byte[] writeBuffer = bundle.getByteArray("com.scionlab.WRITE_BUFFER");
+                    byte[] writeBuffer = bundle.getByteArray(WRITE_BUFFER);
                     Snet.write(writeBuffer);
                     break;
                 case MSG_READ_FROM:
                     Log.d(TAG, "Reading from SCION");
-                    byte[] readBuffer = Snet.readFrom(2500);
+                    long bufferSize = bundle.getLong(BUFFER_SIZE, 2500);
+                    byte[] readBuffer = Snet.readFrom(bufferSize);
                     Log.d(TAG, "Read from SCION");
                     Bundle replyBundle = new Bundle();
-                    replyBundle.putByteArray("org.scionlab.READ_FROM_RESULT", readBuffer);
+                    replyBundle.putByteArray(READ_BUFFER, readBuffer);
                     Messenger replyMessenger = msg.replyTo;
                     Message reply = Message.obtain(null, MSG_READ_FROM_RESULT, 0,0);
                     reply.setData(replyBundle);

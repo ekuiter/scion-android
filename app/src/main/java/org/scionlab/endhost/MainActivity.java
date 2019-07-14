@@ -1,5 +1,6 @@
 package org.scionlab.endhost;
 
+import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.obsez.android.lib.filechooser.ChooserDialog;
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                     .withStartFile(prefs.getString(SCIOND_CFG_PATH, null))
                     .withChosenListener((path, pathFile) ->
                             (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {
+                                ensureWritePermissions();
                                 startService(new Intent(this, SciondService.class)
                                         .putExtra(SciondService.PARAM_CONFIG_PATH, p));
                                 putString(SCIOND_CFG_PATH, p);
@@ -71,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     .withStartFile(prefs.getString(DISP_CFG_PATH, null))
                     .withChosenListener((path, pathFile) ->
                             (dispCfgPath = Optional.ofNullable(path)).ifPresent(p->{
+                                ensureWritePermissions();
                                 startService(new Intent(this, DispatcherService.class)
                                         .putExtra(DispatcherService.PARAM_CONFIG_PATH, p));
                                 putString(DISP_CFG_PATH, p);
@@ -121,4 +125,11 @@ public class MainActivity extends AppCompatActivity {
         pingButton.setEnabled(sciondCfgPath.isPresent() && dispCfgPath.isPresent());
     }
 
+    private void ensureWritePermissions() {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                0
+        );
+    }
 }
