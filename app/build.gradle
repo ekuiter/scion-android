@@ -39,8 +39,7 @@ dependencies {
     implementation 'androidx.core:core:1.0.2'
     // If symbols have changed and are unavailable for you, either pull the newest version of this
     // repo or consider gradle's --refresh-dependencies option to get the freshest library
-    implementation name: 'sciondgobind', ext: 'aar'
-    compileOnly name: 'sciondgobind-sources'
+    implementation ':sciondgobind:0.0.0@aar'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
