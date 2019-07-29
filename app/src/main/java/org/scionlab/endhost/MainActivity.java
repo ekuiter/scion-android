@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         sciondButton.setOnClickListener(view ->
             new ChooserDialog(view.getContext())
                     .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
+                    .withFilter(true, true)
                     .withStartFile(prefs.getString(SCIOND_CFG_PATH, null))
                     .withChosenListener((path, pathFile) ->
                             (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {

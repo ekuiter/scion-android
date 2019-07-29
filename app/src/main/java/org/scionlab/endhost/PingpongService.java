@@ -1,7 +1,6 @@
 package org.scionlab.endhost;
 
 import android.content.Intent;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +21,6 @@ import org.spongycastle.operator.jcajce.JcaContentSignerBuilder;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.math.BigInteger;
 import java.nio.file.Paths;
 import java.security.KeyPair;
@@ -63,7 +61,7 @@ public class PingpongService extends BackgroundService {
         log(R.string.servicesetup);
 
         try {
-            File gencert = mkdir(Paths.get("gen-certs"));
+            File gencert = mkdir(Paths.get("gen-certs")).toFile();
             Provider bcProvider = new BouncyCastleProvider();
             Security.addProvider(bcProvider);
             File key = new File(gencert, "tls.key");
@@ -103,12 +101,11 @@ public class PingpongService extends BackgroundService {
                 log(R.string.pingpongcreatecert, cert.getAbsolutePath());
             }
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            pw.close();
-            Log.e(getTag(), sw.toString());
+            e.printStackTrace();
+            die(R.string.serviceexception, e.getLocalizedMessage());
+            return;
         }
         Pingpong.main(arguments, "", getFilesDir().getAbsolutePath());
+        die(R.string.servicefin);
     }
 }

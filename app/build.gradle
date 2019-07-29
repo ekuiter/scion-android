@@ -1,6 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
+    splits {
+        abi {
+            enable true
+        }
+    }
     compileSdkVersion 28
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -10,8 +15,8 @@ android {
         applicationId "org.scionlab.endhost"
         minSdkVersion 28
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "0.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -28,6 +33,34 @@ android {
     }
 }
 
+// Map for the version code that gives each ABI a value.
+ext.abiCodes = [x86:0, x86_64:1, 'armeabi-v7a':2, 'arm64-v8a':3]
+
+import com.android.build.OutputFile
+
+// For each APK output variant, override versionCode with a combination of
+// ext.abiCodes.size() * variant.versionCode + ext.abiCodes. In this example, variant.versionCode
+// is equal to defaultConfig.versionCode. If you configure product flavors that
+// define their own versionCode, variant.versionCode uses that value instead.
+android.applicationVariants.all { variant ->
+
+    // Assigns a different version code for each output APK
+    // other than the universal APK.
+    variant.outputs.each { output ->
+
+        // Stores the value of ext.abiCodes that is associated with the ABI for this variant.
+        def abiVersionCode =
+                // Determines the ABI for this variant and returns the mapped value.
+                project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+
+        // Assigns the new version code to versionCodeOverride, which changes the version code
+        // for only the output APK, not for the variant itself. Skipping this step simply
+        // causes Gradle to use the value of variant.versionCode for the APK.
+        output.versionCodeOverride =
+              project.ext.abiCodes.size() * variant.versionCode + abiVersionCode
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
@@ -40,6 +73,7 @@ dependencies {
     // If symbols have changed and are unavailable for you, either pull the newest version of this
     // repo or consider gradle's --refresh-dependencies option to get the freshest library
     implementation ':sciondgobind:0.0.0@aar'
+    implementation 'com.moandjiezana.toml:toml4j:0.7.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

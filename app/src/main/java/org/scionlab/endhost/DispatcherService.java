@@ -35,21 +35,24 @@ public class DispatcherService extends BackgroundService {
     protected void onHandleIntent (Intent intent) {
         if (intent == null) return;
         String confPath = intent.getStringExtra(PARAM_CONFIG_PATH);
-        if (confPath == null) return;
+        if (confPath == null) {
+            die(R.string.servicenoconf);
+            return;
+        }
         super.onHandleIntent(intent);
 
         log(R.string.servicesetup);
 
-        Path shm = Paths.get("run", "shm");
-        mkdir(shm);
-
-        delete(shm.resolve("dispatcher/default.sock"));
+        // Depends on DISPATCHER_DIR and DEFAULT_DISPATCHER_ID from CMakeLists.txt
+        Path dispSocket = Paths.get("run/shm/dispatcher/default.sock");
+        mkdir(dispSocket.getParent());
+        delete(dispSocket);
 
         log(R.string.servicestart);
 
-        int ret = main(confPath);
-        log(R.string.servicereturn, ret);
+        int ret = main(confPath, getFilesDir().getAbsolutePath());
+        die(R.string.servicereturn, ret);
     }
 
-    public native int main(String confFileName);
+    public native int main(String confFileName, String workingDir);
 }
