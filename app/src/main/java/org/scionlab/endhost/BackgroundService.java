@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.file.FileAlreadyExistsException;
@@ -26,11 +28,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class BackgroundService extends IntentService {
+    public static final String PARAM_LOG_PATH = BackgroundService.class.getCanonicalName() + ".LOG_PATH";
 
     private Notification.Builder notifB;
     private NotificationManager notifM;
     private StringBuilder notifLog;
     private Resources res;
+
+    private static final int MAX_NOTIFICATION_LENGTH = 5 * 1024;
 
     @Override
     @CallSuper
@@ -44,13 +49,42 @@ public abstract class BackgroundService extends IntentService {
                 .setContentTitle(res.getString(R.string.servicetitle, tagHead, tagTail))
                 .setSmallIcon(R.drawable.ic_launcher_foreground);
         notifM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notifLog = new StringBuilder();
     }
 
     @Override
     @CallSuper
     protected void onHandleIntent(@Nullable Intent intent) {
         startForeground(getNotificationId(), notifB.build());
-        notifLog = new StringBuilder();
+
+        // create empty notification
+        String tag = getTag();
+        String tagHead = tag.isEmpty() ? tag : tag.substring(0, 1);
+        String tagTail = tag.isEmpty() ? tag : tag.substring(1);
+        notifB.setContentTitle(res.getString(R.string.servicetitle, tagHead, tagTail));
+        notifM.notify(getNotificationId(), notifB.build());
+
+        // notification updater thread
+        String logPath = intent.getStringExtra(PARAM_LOG_PATH);
+        new Thread(() -> {
+            try {
+                FileReader logFile = new FileReader(logPath);
+                BufferedReader logReader = new BufferedReader(logFile);
+                String line;
+
+                while(true) {
+                    while ((line = logReader.readLine()) != null) {
+                        log(line);
+                    }
+
+                    updateNotification();
+
+                    Thread.sleep(5000);
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
 
@@ -96,17 +130,25 @@ public abstract class BackgroundService extends IntentService {
                         Arrays.stream(formatArgs)
                 ).toArray()
         );
-        Log.d(tag, line);
-        if (notifLog.length() > 0) notifLog.append('\n');
-        notifLog.append(line);
-        if (notifLog.length() > 5 * 1024) {
-            notifLog.replace(0, notifLog.length() - 5 * 1024, "");
-        }
-        notifB.setStyle(
-                new Notification.BigTextStyle()
-                        .bigText(notifLog.toString())
-                        .setBigContentTitle(res.getString(R.string.servicetitle, tagHead, tagTail))
-        );
+
+        log(line);
+    }
+
+    protected void log(String line) {
+        if (line.length() == 0) return;
+
+        // write to android log
+        Log.d(getTag(), line);
+
+        // prepend to notification log
+        if (line.charAt(line.length() - 1) != '\n') line += '\n';
+        notifLog.insert(0, line);
+    }
+
+    protected void updateNotification() {
+        int end = notifLog.length() > MAX_NOTIFICATION_LENGTH ? MAX_NOTIFICATION_LENGTH : notifLog.length();
+        String newText = notifLog.substring(0, end);
+        notifB.setStyle(new Notification.BigTextStyle().bigText(newText));
         notifM.notify(getNotificationId(), notifB.build());
     }
 
@@ -123,6 +165,21 @@ public abstract class BackgroundService extends IntentService {
         }
         log(R.string.servicemkdir, dir.toString(), existed, success, Files.exists(dir));
         return dir;
+    }
+
+    @NonNull
+    protected Path mkfile(@NonNull Path filePath) {
+        Path f = getFilesDir().toPath().resolve(filePath);
+        boolean existed = Files.exists(filePath);
+        boolean success = false;
+        try {
+            f = Files.createFile(f);
+            success = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        log(R.string.servicemkfile, f.toString(), existed, success, Files.exists(f));
+        return f;
     }
 
     @NonNull

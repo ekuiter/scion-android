@@ -24,6 +24,7 @@ public class SciondService extends BackgroundService {
     public static final String PARAM_CONFIG_PATH = SciondService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 2;
     private static final String TAG = "sciond";
+    private static final String CONF_FILE_NAME = "sciond.toml";
 
     public SciondService() {
         super("SciondService");
@@ -32,12 +33,12 @@ public class SciondService extends BackgroundService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent == null) return;
-        super.onHandleIntent(intent);
         String confPath = intent.getStringExtra(PARAM_CONFIG_PATH);
         if (confPath == null) {
             die(R.string.servicenoconf);
             return;
         }
+
         log(R.string.servicesetup);
 
         Path confDir;
@@ -59,7 +60,7 @@ public class SciondService extends BackgroundService {
             die(R.string.serviceexception, e.getLocalizedMessage());
             return;
         }
-        Path confFile = confDir.resolve("sciond.toml");
+        Path confFile = confDir.resolve(CONF_FILE_NAME);
         if (!Files.exists(confFile)) {
             die(R.string.servicefilenotfound, confFile.getFileName().toString(), confPath);
             return;
@@ -128,15 +129,20 @@ public class SciondService extends BackgroundService {
             return;
         }
 
+        intent.putExtra(BackgroundService.PARAM_LOG_PATH, logFile.toString());
+
         mkdir(reliable.getParent());
         delete(reliable);
         mkdir(unix.getParent());
         delete(unix);
         mkdir(logFile.getParent());
         delete(logFile);
+        mkfile(logFile);
         mkdir(trustDBConnection.getParent());
 
         log(R.string.servicestart);
+        super.onHandleIntent(intent);
+
         long ret = Sciond.main(commandLine("-config", confFile.toString()), "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
     }

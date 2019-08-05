@@ -11,6 +11,7 @@
     <!-- Formatted strings for com.example.myapplication.BackgroundService.log get the service's tag as the first two parameters. -->
     <!-- The first parameter is the tag's first character (for capitalization) and the second one is the rest. -->
     <string name="servicemkdir" formatted="true">Creating dir %3$s: (existed: %4$b created: %5$b exists: %6$b)</string>
+    <string name="servicemkfile" formatted="true">Creating file %3$s: (existed: %4$b created: %5$b exists: %6$b)</string>
     <string name="servicedelete" formatted="true">Deleting file %3$s: (existed: %4$b deleted: %5$b exists: %6$b)</string>
     <string name="servicedeletedir" formatted="true">Recursively deleting directory %3$s: (dir: %4$b files: %5$d dirs: %6$d exists: %7$b)</string>
     <string name="servicecopydir" formatted="true">Recursively copying directory %3$s to %4$s: (dir: %5$b files: %6$d dirs: %7$d exists: %8$b)</string>
