@@ -6,9 +6,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center"
         tools:context=".MainActivity">
-
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_width="match_parent"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
     <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/dispbutton"
             android:layout_width="wrap_content"
@@ -36,5 +48,5 @@
                 android:importantForAutofill="no"
                 android:inputType="textMultiLine|textVisiblePassword"/>
     </com.google.android.material.textfield.TextInputLayout>
-
+    </LinearLayout>
 </LinearLayout>

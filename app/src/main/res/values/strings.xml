@@ -29,4 +29,6 @@
     <string name="pingpongcreatecert" formatted="true">Created self-signed certificate: %3$s</string>
     <string name="pingpongcertexists" formatted="true">Key and certificate already exist: %3$s %4$s</string>
     <string name="pingpongcmdline">Pingpong command line arguments (newline-separated)</string>
+    <string name="action_help">How to use</string>
+    <string name="help_asset_name">README.md</string>
 </resources>

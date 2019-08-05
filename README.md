@@ -1,7 +1,7 @@
 # How to make it work
 ## Prerequisites
 - Android device with at least Android 9 Pie (henceforth referred to as “endhost”)
-- Working scion AS that is reachable via IP from the endhost
+- Working scion AS with services set up to be reachable via IP from the endhost
 
 ## Import endhost configuration
 1. From your AS' `gen` directory, transfer the `endhost` directory onto your endhost's user accessible storage.
@@ -16,6 +16,8 @@
 Open the app and push the “Load dispatcher config” button. In the dialog that appears, navigate to your endhost's `dispatcher.zlog.conf` file. Your notification drawer should now have a new permanent entry called “Dispatcher service”.
 Push the “Set endhost directory” button. In the dialog that appears, navigate to your endhost's `endhost` directory and press “OK”. Your notification drawer should now have a new permanent entry called “Sciond service”.
 The log files defined in the aforementioned config files should now get populated and not contain error messages.
+
+## Testing connectivity with pingpong
 In the text box, put in command line parameters for a call to the pingpong application. These should be newline-separated and _must_ include the `-sciond` and `-dispatcher` flags.
 Since all calls set [the app's files dir](https://developer.android.com/reference/android/content/Context.html#getFilesDir()) as the working directory and the dispatcher and sciond place their sockets relative to that, these should be relative paths.
 It is also advised to set the `-count` flag to a non-zero value since there is currently no way to gracefully interrupt the pingpong process, once started.
