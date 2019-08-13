@@ -16,7 +16,10 @@ public class DispatcherService extends BackgroundService {
     public static final String PARAM_CONFIG_PATH = DispatcherService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 1;
     private static final String TAG = "dispatcher";
-    private static final String DEFAULT_LOG_PATH = Paths.get("logs/dispatcher.log").toString();
+    private static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]+] \\(\\d+:dispatcher:\\.\\./\\.\\./\\.\\./\\.\\./src/main/cpp/gobind-scion/c/dispatcher/dispatcher\\.c:\\d+\\)\\s+");
+    // Depends on DISPATCHER_DIR and DEFAULT_DISPATCHER_ID from CMakeLists.txt
+    private static final Path DEFAULT_DISP_SOCKET_PATH = Paths.get("run/shm/dispatcher/default.sock");
+    private static final Path DEFAULT_LOG_PATH = Paths.get("logs/dispatcher.log");
 
     static {
         System.loadLibrary("dispatcher-wrapper");
@@ -37,38 +40,42 @@ public class DispatcherService extends BackgroundService {
         return TAG;
     }
 
+    @NonNull
+    @Override
+    protected Pattern getLogDeleter() {
+        return LOG_DELETER_PATTERN;
+    }
+
     @Override
     protected void onHandleIntent (Intent intent) {
         if (intent == null) return;
+        super.onHandleIntent(intent);
         String confPath = intent.getStringExtra(PARAM_CONFIG_PATH);
         if (confPath == null) {
             die(R.string.servicenoconf);
             return;
         }
-        String logPath = getLogPath(confPath);
+        Path logPath = getLogPath(confPath);
         if (logPath == null) {
             logPath = DEFAULT_LOG_PATH;
         }
-        intent.putExtra(BackgroundService.PARAM_LOG_PATH, logPath);
 
         log(R.string.servicesetup);
 
-        // Depends on DISPATCHER_DIR and DEFAULT_DISPATCHER_ID from CMakeLists.txt
-        Path dispSocket = Paths.get("run/shm/dispatcher/default.sock");
+        Path dispSocket = DEFAULT_DISP_SOCKET_PATH;
         mkdir(dispSocket.getParent());
         delete(dispSocket);
 
-        delete(Paths.get(logPath));
-        mkfile(Paths.get(logPath));
+        logPath = mkfile(delete(logPath));
 
         log(R.string.servicestart);
-        super.onHandleIntent(intent);
+        setupLogUpdater(logPath).start();
 
         int ret = main(confPath, getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
     }
 
-    private String getLogPath (String confPath) {
+    private Path getLogPath (String confPath) {
         try (FileReader confFile = new FileReader(confPath)) {
             BufferedReader confReader = new BufferedReader(confFile);
             Pattern pattern = Pattern.compile("dispatcher.DEBUG \"(.*)\".*");
@@ -76,7 +83,7 @@ public class DispatcherService extends BackgroundService {
             while ((line = confReader.readLine()) != null) {
                 Matcher matcher = pattern.matcher(line);
                 if (matcher.matches()) {
-                    return matcher.group(1);
+                    return Paths.get(matcher.group(1));
                 }
             }
         } catch (IOException e) {

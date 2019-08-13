@@ -24,18 +24,19 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class BackgroundService extends IntentService {
-    public static final String PARAM_LOG_PATH = BackgroundService.class.getCanonicalName() + ".LOG_PATH";
-
     private Notification.Builder notifB;
     private NotificationManager notifM;
-    private StringBuilder notifLog;
+    private StringBuffer notifLog;
     private Resources res;
+    private boolean runLogUpdater;
 
     private static final int MAX_NOTIFICATION_LENGTH = 5 * 1024;
+    private static final Pattern EMPTY_LOG_DELETER_PATTERN = Pattern.compile("");
 
     @Override
     @CallSuper
@@ -47,46 +48,41 @@ public abstract class BackgroundService extends IntentService {
         res = getResources();
         notifB = new Notification.Builder(this, MainActivity.SERVICE_CHANNEL)
                 .setContentTitle(res.getString(R.string.servicetitle, tagHead, tagTail))
-                .setSmallIcon(R.drawable.ic_launcher_foreground);
+                .setSmallIcon(R.drawable.ic_scion_logo);
         notifM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notifLog = new StringBuilder();
+        notifLog = new StringBuffer();
     }
 
     @Override
     @CallSuper
     protected void onHandleIntent(@Nullable Intent intent) {
         startForeground(getNotificationId(), notifB.build());
+    }
 
-        // create empty notification
-        String tag = getTag();
-        String tagHead = tag.isEmpty() ? tag : tag.substring(0, 1);
-        String tagTail = tag.isEmpty() ? tag : tag.substring(1);
-        notifB.setContentTitle(res.getString(R.string.servicetitle, tagHead, tagTail));
-        notifM.notify(getNotificationId(), notifB.build());
-
-        // notification updater thread
-        String logPath = intent.getStringExtra(PARAM_LOG_PATH);
-        new Thread(() -> {
-            try {
-                FileReader logFile = new FileReader(logPath);
-                BufferedReader logReader = new BufferedReader(logFile);
+    @NonNull
+    protected Thread setupLogUpdater(@NonNull Path log) {
+        runLogUpdater = true;
+        return new Thread(() -> {
+            try(BufferedReader logReader = new BufferedReader(new FileReader(log.toFile()))) {
                 String line;
 
-                while(true) {
+                while(shouldLogUpdaterRun()) {
                     while ((line = logReader.readLine()) != null) {
-                        log(line);
+                        log(getLogDeleter().matcher(line).replaceAll(""));
                     }
 
                     updateNotification();
 
-                    Thread.sleep(5000);
+                    Thread.sleep(getLogUpdateWaitTime());
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
+                log(R.string.serviceexceptioninfo, e);
+            } catch (InterruptedException e) {
+                // Why not…
             }
-        }).start();
+        });
     }
-
 
     @NonNull
     public static String commandLine(@NonNull String... args) {
@@ -114,7 +110,21 @@ public abstract class BackgroundService extends IntentService {
     @NonNull
     protected abstract String getTag();
 
+    @NonNull
+    protected Pattern getLogDeleter() {
+        return EMPTY_LOG_DELETER_PATTERN;
+    }
+
+    protected long getLogUpdateWaitTime() {
+        return 1000;
+    }
+
+    protected boolean shouldLogUpdaterRun() {
+        return runLogUpdater;
+    }
+
     protected void die(@StringRes int resID, Object... formatArgs) {
+        runLogUpdater = false;
         log(resID, formatArgs);
         stopForeground(STOP_FOREGROUND_DETACH);
     }
@@ -132,23 +142,20 @@ public abstract class BackgroundService extends IntentService {
         );
 
         log(line);
+        updateNotification();
     }
 
-    protected void log(String line) {
-        if (line.length() == 0) return;
+    private void log(String line) {
+        if (line == null || line.length() == 0) return;
 
         // write to android log
         Log.d(getTag(), line);
-
-        // prepend to notification log
-        if (line.charAt(line.length() - 1) != '\n') line += '\n';
-        notifLog.insert(0, line);
+        notifLog.insert(0, line + '\n');
     }
 
-    protected void updateNotification() {
-        int end = notifLog.length() > MAX_NOTIFICATION_LENGTH ? MAX_NOTIFICATION_LENGTH : notifLog.length();
-        String newText = notifLog.substring(0, end);
-        notifB.setStyle(new Notification.BigTextStyle().bigText(newText));
+    private void updateNotification() {
+        notifLog.setLength(Math.min(MAX_NOTIFICATION_LENGTH, notifLog.length()));
+        notifB.setStyle(new Notification.BigTextStyle().bigText(notifLog));
         notifM.notify(getNotificationId(), notifB.build());
     }
 
@@ -162,6 +169,7 @@ public abstract class BackgroundService extends IntentService {
             success = true;
         } catch (IOException e) {
             e.printStackTrace();
+            log(R.string.serviceexceptioninfo, e);
         }
         log(R.string.servicemkdir, dir.toString(), existed, success, Files.exists(dir));
         return dir;
@@ -175,8 +183,11 @@ public abstract class BackgroundService extends IntentService {
         try {
             f = Files.createFile(f);
             success = true;
+        } catch (FileAlreadyExistsException e) {
+            // OK
         } catch (IOException e) {
             e.printStackTrace();
+            log(R.string.serviceexceptioninfo, e);
         }
         log(R.string.servicemkfile, f.toString(), existed, success, Files.exists(f));
         return f;
@@ -191,6 +202,7 @@ public abstract class BackgroundService extends IntentService {
             success = Files.deleteIfExists(f);
         } catch (IOException e) {
             e.printStackTrace();
+            log(R.string.serviceexceptioninfo, e);
         }
         log(R.string.servicedelete, f.toString(), existed, success, Files.exists(f));
         return f;

@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import sciond.Sciond;
 
@@ -24,6 +25,7 @@ public class SciondService extends BackgroundService {
     public static final String PARAM_CONFIG_PATH = SciondService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 2;
     private static final String TAG = "sciond";
+    private static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]+]\\s+");
     private static final String CONF_FILE_NAME = "sciond.toml";
 
     public SciondService() {
@@ -33,6 +35,7 @@ public class SciondService extends BackgroundService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent == null) return;
+        super.onHandleIntent(intent);
         String confPath = intent.getStringExtra(PARAM_CONFIG_PATH);
         if (confPath == null) {
             die(R.string.servicenoconf);
@@ -129,19 +132,16 @@ public class SciondService extends BackgroundService {
             return;
         }
 
-        intent.putExtra(BackgroundService.PARAM_LOG_PATH, logFile.toString());
-
         mkdir(reliable.getParent());
         delete(reliable);
         mkdir(unix.getParent());
         delete(unix);
         mkdir(logFile.getParent());
-        delete(logFile);
-        mkfile(logFile);
+        logFile = mkfile(delete(logFile));
         mkdir(trustDBConnection.getParent());
 
         log(R.string.servicestart);
-        super.onHandleIntent(intent);
+        setupLogUpdater(logFile).start();
 
         long ret = Sciond.main(commandLine("-config", confFile.toString()), "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
@@ -156,5 +156,11 @@ public class SciondService extends BackgroundService {
     @Override
     protected String getTag() {
         return TAG;
+    }
+
+    @NonNull
+    @Override
+    protected Pattern getLogDeleter() {
+        return LOG_DELETER_PATTERN;
     }
 }
