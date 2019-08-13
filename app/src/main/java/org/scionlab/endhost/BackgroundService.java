@@ -180,6 +180,9 @@ public abstract class BackgroundService extends IntentService {
         Path f = getFilesDir().toPath().resolve(filePath);
         boolean existed = Files.exists(filePath);
         boolean success = false;
+        if (!Files.exists(filePath.getParent())) {
+            mkdir(filePath.getParent());
+        }
         try {
             f = Files.createFile(f);
             success = true;
