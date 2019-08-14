@@ -64,14 +64,15 @@ public abstract class BackgroundService extends IntentService {
         runLogUpdater = true;
         return new Thread(() -> {
             try(BufferedReader logReader = new BufferedReader(new FileReader(log.toFile()))) {
-                String line;
-
                 while(shouldLogUpdaterRun()) {
-                    while ((line = logReader.readLine()) != null) {
-                        log(getLogDeleter().matcher(line).replaceAll(""));
+                    boolean logChanged = false;
+                    for (String line = logReader.readLine(); line != null; line = logReader.readLine()) {
+                        // Mind the order; don't short-circuit the logging!
+                        logChanged = log(getLogDeleter().matcher(line).replaceAll("")) > 0 || logChanged;
                     }
-
-                    updateNotification();
+                    if (logChanged) {
+                        updateNotification();
+                    }
 
                     Thread.sleep(getLogUpdateWaitTime());
                 }
@@ -141,16 +142,18 @@ public abstract class BackgroundService extends IntentService {
                 ).toArray()
         );
 
-        log(line);
-        updateNotification();
+        if (log(line) > 0) {
+            updateNotification();
+        }
     }
 
-    private void log(String line) {
-        if (line == null || line.length() == 0) return;
+    private int log(String line) {
+        if (line == null || line.length() == 0) return 0;
 
         // write to android log
         Log.d(getTag(), line);
         notifLog.insert(0, line + '\n');
+        return line.length();
     }
 
     private void updateNotification() {
