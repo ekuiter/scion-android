@@ -17,10 +17,10 @@
 
 package org.scionlab.endhost;
 
-public class HelpActivity extends MarkdownActivity {
+public class AboutActivity extends MarkdownActivity {
 
     @Override
     int getMarkdownResId() {
-        return R.string.help_asset_name;
+        return R.string.about_asset_name;
     }
 }

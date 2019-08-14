@@ -26,7 +26,6 @@
             android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat"
-            app:title="@string/help_asset_name"
             app:navigationIcon="?homeAsUpIndicator"
             app:layout_scrollFlags="scroll|enterAlways"/>
     </com.google.android.material.appbar.AppBarLayout>
