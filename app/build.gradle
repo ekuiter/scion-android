@@ -13,10 +13,10 @@ android {
     }
     defaultConfig {
         applicationId "org.scionlab.endhost"
-        minSdkVersion 28
+        minSdkVersion 24
         targetSdkVersion 28
-        versionCode 7
-        versionName "0.0.6"
+        versionCode 8
+        versionName "0.0.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -30,6 +30,9 @@ android {
             path file('CMakeLists.txt')
             version "3.10.2"
         }
+    }
+    lintOptions {
+        abortOnError false
     }
 }
 

@@ -18,7 +18,6 @@
 package org.scionlab.endhost;
 
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
@@ -29,24 +28,24 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.app.NotificationCompat;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class BackgroundService extends IntentService {
-    private Notification.Builder notifB;
+    private NotificationCompat.Builder notifB;
     private NotificationManager notifM;
     private StringBuffer notifLog;
     private Resources res;
@@ -63,7 +62,7 @@ public abstract class BackgroundService extends IntentService {
         String tagHead = tag.isEmpty() ? tag : tag.substring(0, 1);
         String tagTail = tag.isEmpty() ? tag : tag.substring(1);
         res = getResources();
-        notifB = new Notification.Builder(this, MainActivity.SERVICE_CHANNEL)
+        notifB = new NotificationCompat.Builder(this, MainActivity.SERVICE_CHANNEL)
                 .setContentTitle(res.getString(R.string.servicetitle, tagHead, tagTail))
                 .setSmallIcon(R.drawable.ic_scion_logo);
         notifM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -77,10 +76,10 @@ public abstract class BackgroundService extends IntentService {
     }
 
     @NonNull
-    protected Thread setupLogUpdater(@NonNull Path log) {
+    protected Thread setupLogUpdater(@NonNull File log) {
         runLogUpdater = true;
         return new Thread(() -> {
-            try(BufferedReader logReader = new BufferedReader(new FileReader(log.toFile()))) {
+            try(BufferedReader logReader = new BufferedReader(new FileReader(log))) {
                 while(shouldLogUpdaterRun()) {
                     boolean logChanged = false;
                     for (String line = logReader.readLine(); line != null; line = logReader.readLine()) {
@@ -175,127 +174,95 @@ public abstract class BackgroundService extends IntentService {
 
     private void updateNotification() {
         notifLog.setLength(Math.min(MAX_NOTIFICATION_LENGTH, notifLog.length()));
-        notifB.setStyle(new Notification.BigTextStyle().bigText(notifLog));
+        notifB.setStyle(new NotificationCompat.BigTextStyle().bigText(notifLog));
         notifM.notify(getNotificationId(), notifB.build());
     }
 
     @NonNull
-    protected Path mkdir(@NonNull Path directory) {
-        Path dir = getFilesDir().toPath().resolve(directory);
-        boolean existed = Files.exists(dir);
-        boolean success = false;
-        try {
-            dir = Files.createDirectories(dir);
-            success = true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            log(R.string.serviceexceptioninfo, e);
-        }
-        log(R.string.servicemkdir, dir.toString(), existed, success, Files.exists(dir));
+    protected File mkdir(@NonNull String path) {
+        File dir = new File(path.startsWith("/") ? null : getFilesDir(), path);
+        boolean existed = dir.exists();
+        boolean success = dir.mkdirs();
+        log(R.string.servicemkdir, dir.toString(), existed, success, dir.exists());
         return dir;
     }
 
     @NonNull
-    protected Path mkfile(@NonNull Path filePath) {
-        Path f = getFilesDir().toPath().resolve(filePath);
-        boolean existed = Files.exists(filePath);
+    protected File mkfile(@NonNull String filePath) {
+        File f = new File(filePath.startsWith("/") ? null : getFilesDir(), filePath);
+        boolean existed = f.exists();
         boolean success = false;
-        if (!Files.exists(filePath.getParent())) {
-            mkdir(filePath.getParent());
+        if (!f.getParentFile().exists()) {
+            mkdir(f.getParent());
         }
         try {
-            f = Files.createFile(f);
-            success = true;
-        } catch (FileAlreadyExistsException e) {
-            // OK
+            success = f.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
             log(R.string.serviceexceptioninfo, e);
         }
-        log(R.string.servicemkfile, f.toString(), existed, success, Files.exists(f));
+        log(R.string.servicemkfile, f.toString(), existed, success, f.exists());
         return f;
     }
 
-    @NonNull
-    protected Path delete(@NonNull Path file) {
-        Path f = getFilesDir().toPath().resolve(file);
-        boolean existed = Files.exists(f);
-        boolean success = false;
-        try {
-            success = Files.deleteIfExists(f);
-        } catch (IOException e) {
-            e.printStackTrace();
-            log(R.string.serviceexceptioninfo, e);
-        }
-        log(R.string.servicedelete, f.toString(), existed, success, Files.exists(f));
-        return f;
+    protected int delete(@NonNull String path) {
+        File f = new File(path.startsWith("/") ? null : getFilesDir(), path);
+        boolean existed = f.exists();
+        int left = countRecursively(f) - deleteRecursively(f);
+        log(R.string.servicedelete, f.toString(), existed, left, f.exists());
+        return left;
     }
 
-    @NonNull
-    protected Path deleteRecursively(@NonNull Path directory) throws IOException {
-        Path d = getFilesDir().toPath().resolve(directory);
-        final int[] counters = {0, 0};
-        boolean isDir = Files.isDirectory(d);
-        if (isDir) {
-            Files.walkFileTree(d, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                        throws IOException
-                {
-                    Files.delete(file);
-                    counters[0]++;
-                    return FileVisitResult.CONTINUE;
-                }
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException e)
-                        throws IOException
-                {
-                    if (e == null) {
-                        Files.delete(dir);
-                        counters[1]++;
-                        return FileVisitResult.CONTINUE;
-                    } else {
-                        // directory iteration failed
-                        throw e;
-                    }
-                }
-            });
-        }
-        log(R.string.servicedeletedir, d.toString(), isDir, counters[0], counters[1], Files.exists(d));
-        return d;
+    protected int copy(@NonNull String source, @NonNull String target) {
+        File src = new File(source.startsWith("/") ? null : getFilesDir(), source);
+        File tgt = new File(target.startsWith("/") ? null : getFilesDir(), target);
+        boolean existed = src.exists();
+        int left = countRecursively(src) - copyRecursively(src, tgt);
+        log(R.string.servicecopydir, src.getAbsolutePath(), tgt.getAbsolutePath(), existed, left, tgt.exists());
+        return left;
     }
 
-    @NonNull
-    protected Path copyRecursively(@NonNull Path directory, Path target) throws IOException {
-        Path d = getFilesDir().toPath().resolve(directory);
-        Path t = getFilesDir().toPath().resolve(target);
-        boolean isDir = Files.isDirectory(d);
-        final int[] counters = {0, 0};
-        if (isDir) {
-            Files.walkFileTree(d, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                        throws IOException {
-                    Path targetdir = t.resolve(d.relativize(dir));
-                    try {
-                        Files.copy(dir, targetdir);
-                        counters[1]++;
-                    } catch (FileAlreadyExistsException e) {
-                        if (!Files.isDirectory(targetdir)) throw e;
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                        throws IOException {
-                    Files.copy(file, t.resolve(d.relativize(file)));
-                    counters[0]++;
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+    private int countRecursively(@NonNull File file) {
+        int counted = Boolean.compare(file.exists(), false);
+        if (file.isDirectory()) {
+            for (File c : file.listFiles()) {
+                counted += countRecursively(c);
+            }
         }
-        log(R.string.servicecopydir, d.toString(), t.toString(), isDir, counters[0], counters[1], Files.exists(t));
-        return t;
+        return counted;
     }
+
+    private int deleteRecursively(@NonNull File file) {
+        int deleted = 0;
+        if (file.isDirectory()) {
+            for (File c : file.listFiles()) {
+                deleted += deleteRecursively(c);
+            }
+        }
+        deleted += Boolean.compare(file.delete(), false);
+        return deleted;
+    }
+
+    private int copyRecursively(@NonNull File src, @NonNull File tgt) {
+        int copied = 0;
+        if (src.isDirectory()) {
+            copied += Boolean.compare(tgt.mkdirs(), false);
+            for (File c : src.listFiles()) {
+                copied += copyRecursively(c, new File(tgt, c.getName()));
+            }
+        } else {
+            byte[] buffer = new byte[4096];
+            try (InputStream in = new FileInputStream(src); OutputStream out = new FileOutputStream(tgt)) {
+                for (int len = in.read(buffer); len > 0; len = in.read(buffer)) {
+                    out.write(buffer, 0, len);
+                }
+                copied++;
+            } catch (IOException e) {
+                e.printStackTrace();
+                log(R.string.serviceexceptioninfo, e);
+            }
+        }
+        return copied;
+    }
+
 }

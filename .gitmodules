@@ -7,3 +7,6 @@
 [submodule "app/src/main/cpp/zlog"]
 	path = app/src/main/cpp/zlog
 	url = https://github.com/HardySimpson/zlog.git
+[submodule "app/src/main/cpp/bionic"]
+	path = app/src/main/cpp/bionic
+	url = https://android.googlesource.com/platform/bionic

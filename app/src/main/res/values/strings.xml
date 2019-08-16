@@ -12,12 +12,11 @@
     <!-- The first parameter is the tag's first character (for capitalization) and the second one is the rest. -->
     <string name="servicemkdir" formatted="true">Creating dir %3$s: (existed: %4$b created: %5$b exists: %6$b)</string>
     <string name="servicemkfile" formatted="true">Creating file %3$s: (existed: %4$b created: %5$b exists: %6$b)</string>
-    <string name="servicedelete" formatted="true">Deleting file %3$s: (existed: %4$b deleted: %5$b exists: %6$b)</string>
-    <string name="servicedeletedir" formatted="true">Recursively deleting directory %3$s: (dir: %4$b files: %5$d dirs: %6$d exists: %7$b)</string>
-    <string name="servicecopydir" formatted="true">Recursively copying directory %3$s to %4$s: (dir: %5$b files: %6$d dirs: %7$d exists: %8$b)</string>
+    <string name="servicedelete" formatted="true">Deleting %3$s: (existed: %4$b left: %5$d exists: %6$b)</string>
+    <string name="servicecopydir" formatted="true">Copying %3$s to %4$s: (existed: %5$b left: %6$d exists: %7$b)</string>
     <string name="servicetitle" formatted="true">%1$S%2$s service</string>
     <string name="servicenoconf" formatted="true">%1$S%2$s was\'nt started because no configuration was provided</string>
-    <string name="servicenocleanup" formatted="true">%1$S%2$s was\'nt started because it couldn\'t clean up %3$s</string>
+    <string name="servicenosetup" formatted="true">%1$S%2$s was\'nt started because it couldn\'t set up %3$s</string>
     <string name="servicefilenotfound" formatted="true">%1$S%2$s was\'nt started because it was unable to find %3$s in %4$s</string>
     <string name="serviceexception" formatted="true">%1$S%2$s was\'nt started because: %3$s</string>
     <string name="serviceexceptioninfo" formatted="true">%1$S%2$s encountered: %3$s</string>

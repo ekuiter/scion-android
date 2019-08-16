@@ -24,12 +24,10 @@ import androidx.annotation.NonNull;
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -61,62 +59,45 @@ public class SciondService extends BackgroundService {
 
         log(R.string.servicesetup);
 
-        Path confDir;
-        try {
-            confDir = deleteRecursively(Paths.get("endhost"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            die(R.string.serviceexception, e.getLocalizedMessage());
+        String confDir = new File(getFilesDir(), "endhost").getAbsolutePath();
+        if (delete(confDir) != 0 || copy(confPath, confDir) != 0) {
+            die(R.string.servicenosetup, confDir);
             return;
         }
-        if (Files.exists(confDir)) {
-            die(R.string.servicenocleanup, confDir.toString());
-            return;
-        }
-        try {
-            confDir = copyRecursively(Paths.get(confPath), confDir);
-        } catch (IOException e) {
-            e.printStackTrace();
-            die(R.string.serviceexception, e.getLocalizedMessage());
-            return;
-        }
-        Path confFile = confDir.resolve(CONF_FILE_NAME);
-        if (!Files.exists(confFile)) {
-            die(R.string.servicefilenotfound, confFile.getFileName().toString(), confPath);
+        File confFile = new File(confDir, CONF_FILE_NAME);
+        if (!confFile.exists()) {
+            die(R.string.servicefilenotfound, confFile.getName(), confPath);
             return;
         }
 
-        Path reliable = Paths.get("run/shm/sciond/default.sock");
-        Path unix = Paths.get("run/shm/sciond/default.unix");
-        Path logFile = Paths.get("logs/sciond.log");
-        Path trustDBConnection = Paths.get("gen-cache/sciond.trust.db");
+        String reliable = "run/shm/sciond/default.sock";
+        String unix = "run/shm/sciond/default.unix";
+        String logFile = "logs/sciond.log";
+        String trustDBConnection = "gen-cache/sciond.trust.db";
         try {
-            Map<String, Object> conf = new Toml().read(new FileInputStream(confFile.toFile())).toMap();
+            Map<String, Object> conf = new Toml().read(new FileInputStream(confFile)).toMap();
             Map<String, Object> general = (Map<String, Object>) conf.get("general");
             if (general == null) {
                 general = new HashMap<>();
                 conf.put("general", general);
             }
-            general.put("ConfigDir", confDir.toString());
-            // Depends on DISPATCHER_DIR and DEFAULT_DISPATCHER_ID from CMakeLists.txt
-            general.put("DispatcherPath", "run/shm/dispatcher/default.sock");
+            general.put("ConfigDir", confDir);
+            general.put("DispatcherPath", DispatcherService.DEFAULT_DISP_SOCKET_PATH);
             Map<String, Object> sd = (Map<String, Object>) conf.get("sd");
             if (sd == null) {
                 sd = new HashMap<>();
                 conf.put("sd", sd);
             }
-            reliable = Optional.ofNullable((String) sd.get("Reliable"))
-                    .map(Paths::get).orElse(reliable);
-            if (reliable.isAbsolute()) {
-                reliable = reliable.getRoot().relativize(reliable);
+            reliable = Optional.ofNullable((String) sd.get("Reliable")).orElse(reliable);
+            if (reliable.startsWith("/")) {
+                reliable = reliable.replaceFirst("/+", "");
             }
-            sd.put("Reliable", reliable.toString());
-            unix = Optional.ofNullable((String) sd.get("Unix"))
-                    .map(Paths::get).orElse(unix);
-            if (unix.isAbsolute()) {
-                unix = unix.getRoot().relativize(unix);
+            sd.put("Reliable", reliable);
+            unix = Optional.ofNullable((String) sd.get("Unix")).orElse(unix);
+            if (unix.startsWith("/")) {
+                unix = unix.replaceFirst("/+", "");
             }
-            sd.put("Unix", unix.toString());
+            sd.put("Unix", unix);
             Map<String, Object> logging = (Map<String, Object>) conf.get("logging");
             if (logging == null) {
                 logging = new HashMap<>();
@@ -127,18 +108,16 @@ public class SciondService extends BackgroundService {
                 file = new HashMap<>();
                 logging.put("file", file);
             }
-            logFile = Optional.ofNullable((String) file.get("Path"))
-                    .map(Paths::get).orElse(logFile);
-            file.put("Path", logFile.toString());
+            logFile = Optional.ofNullable((String) file.get("Path")).orElse(logFile);
+            file.put("Path", logFile);
             Map<String, Object> trustDB = (Map<String, Object>) conf.get("TrustDB");
             if (trustDB == null) {
                 trustDB = new HashMap<>();
                 conf.put("TrustDB", trustDB);
             }
-            trustDBConnection = Optional.ofNullable((String) trustDB.get("Connection"))
-                    .map(Paths::get).orElse(trustDBConnection);
-            trustDB.put("Connection", trustDBConnection.toString());
-            new TomlWriter().write(conf, confFile.toFile());
+            trustDBConnection = Optional.ofNullable((String) trustDB.get("Connection")).orElse(trustDBConnection);
+            trustDB.put("Connection", trustDBConnection);
+            new TomlWriter().write(conf, confFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             die(R.string.serviceexception, e.getLocalizedMessage());
@@ -149,16 +128,17 @@ public class SciondService extends BackgroundService {
             return;
         }
 
-        mkdir(reliable.getParent());
+        mkfile(reliable);
         delete(reliable);
-        mkdir(unix.getParent());
+        mkfile(unix);
         delete(unix);
-        mkdir(logFile.getParent());
-        logFile = mkfile(delete(logFile));
-        mkdir(trustDBConnection.getParent());
+        mkfile(logFile);
+        delete(logFile);
+        File log = mkfile(logFile);
+        mkfile(trustDBConnection);
 
         log(R.string.servicestart);
-        setupLogUpdater(logFile).start();
+        setupLogUpdater(log).start();
 
         long ret = Sciond.main(commandLine("-config", confFile.toString()), "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);

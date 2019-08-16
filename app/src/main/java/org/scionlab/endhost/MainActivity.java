@@ -22,6 +22,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -151,13 +152,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createNotificationChannel() {
-        CharSequence name = getString(R.string.servicechannel_name);
-        String description = getString(R.string.servicechannel_description);
-        int importance = NotificationManager.IMPORTANCE_LOW;
-        NotificationChannel channel = new NotificationChannel(SERVICE_CHANNEL, name, importance);
-        channel.setDescription(description);
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(channel);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.servicechannel_name);
+            String description = getString(R.string.servicechannel_description);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel channel = new NotificationChannel(SERVICE_CHANNEL, name, importance);
+            channel.setDescription(description);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     private void activateButtons() {

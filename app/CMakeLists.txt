@@ -30,6 +30,18 @@ add_library(zlog STATIC
     ${zlog_src_DIR}/level.c
 )
 target_include_directories(zlog PUBLIC ${zlog_src_DIR})
+target_compile_options(zlog BEFORE
+    PRIVATE -include${CMAKE_SOURCE_DIR}/src/main/cpp/bionic/libc/include/glob.h)
+add_library(glob STATIC
+    src/main/cpp/bionic/libc/upstream-freebsd/lib/libc/gen/glob.c
+    src/main/cpp/bionic/libc/upstream-openbsd/lib/libc/stdlib/reallocarray.c)
+target_include_directories(glob PRIVATE src/main/cpp/bionic/libc/upstream-freebsd/android/include)
+target_compile_options(glob BEFORE
+    PRIVATE -D__USE_BSD=1
+    PRIVATE -include${CMAKE_SOURCE_DIR}/src/main/cpp/bionic/libc/upstream-freebsd/android/include/freebsd-compat.h
+    PRIVATE -include${CMAKE_SOURCE_DIR}/src/main/cpp/bionic/libc/upstream-openbsd/android/include/openbsd-compat.h
+    PRIVATE -include${CMAKE_SOURCE_DIR}/src/main/cpp/bionic/libc/include/glob.h)
+target_link_libraries(zlog glob)
 target_link_libraries(dispatcher zlog)
 
 set(scion_src_DIR ${scion_C_DIR}/lib/scion)

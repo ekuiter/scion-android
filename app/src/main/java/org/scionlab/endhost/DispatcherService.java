@@ -22,21 +22,20 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DispatcherService extends BackgroundService {
+    // Depends on DISPATCHER_DIR and DEFAULT_DISPATCHER_ID from CMakeLists.txt
+    public static final String DEFAULT_DISP_SOCKET_PATH = "run/shm/dispatcher/default.sock";
     public static final String PARAM_CONFIG_PATH = DispatcherService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 1;
     private static final String TAG = "dispatcher";
     private static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]+] \\(\\d+:dispatcher:\\.\\./\\.\\./\\.\\./\\.\\./src/main/cpp/gobind-scion/c/dispatcher/dispatcher\\.c:\\d+\\)\\s+");
-    // Depends on DISPATCHER_DIR and DEFAULT_DISPATCHER_ID from CMakeLists.txt
-    private static final Path DEFAULT_DISP_SOCKET_PATH = Paths.get("run/shm/dispatcher/default.sock");
-    private static final Path DEFAULT_LOG_PATH = Paths.get("logs/dispatcher.log");
+    private static final String DEFAULT_LOG_PATH = "logs/dispatcher.log";
 
     static {
         System.loadLibrary("dispatcher-wrapper");
@@ -72,41 +71,38 @@ public class DispatcherService extends BackgroundService {
             die(R.string.servicenoconf);
             return;
         }
-        Path logPath = getLogPath(confPath);
-        if (logPath == null) {
-            logPath = DEFAULT_LOG_PATH;
-        }
+        String logPath = getLogPath(confPath);
 
         log(R.string.servicesetup);
 
-        Path dispSocket = DEFAULT_DISP_SOCKET_PATH;
-        mkdir(dispSocket.getParent());
-        delete(dispSocket);
+        mkfile(DEFAULT_DISP_SOCKET_PATH);
+        delete(DEFAULT_DISP_SOCKET_PATH);
 
-        logPath = mkfile(delete(logPath));
+        delete(logPath);
+        File log = mkfile(logPath);
 
         log(R.string.servicestart);
-        setupLogUpdater(logPath).start();
+        setupLogUpdater(log).start();
 
         int ret = main(confPath, getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
     }
 
-    private Path getLogPath (String confPath) {
-        try (FileReader confFile = new FileReader(confPath)) {
-            BufferedReader confReader = new BufferedReader(confFile);
+    @NonNull
+    private String getLogPath (@NonNull String confPath) {
+        try (BufferedReader confReader = new BufferedReader(new FileReader(confPath))) {
             Pattern pattern = Pattern.compile("dispatcher.DEBUG \"(.*)\".*");
-            String line;
-            while ((line = confReader.readLine()) != null) {
+            for (String line = confReader.readLine(); line != null; line = confReader.readLine()) {
                 Matcher matcher = pattern.matcher(line);
                 if (matcher.matches()) {
-                    return Paths.get(matcher.group(1));
+                    return matcher.group(1);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
+            log(R.string.serviceexceptioninfo, e);
         }
-        return null;
+        return DEFAULT_LOG_PATH;
     }
 
     public native int main(String confFileName, String workingDir);

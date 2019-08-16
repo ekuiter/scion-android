@@ -39,7 +39,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.math.BigInteger;
-import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Provider;
@@ -78,7 +77,7 @@ public class PingpongService extends BackgroundService {
         log(R.string.servicesetup);
 
         try {
-            File gencert = mkdir(Paths.get("gen-certs")).toFile();
+            File gencert = mkdir("gen-certs");
             Provider bcProvider = new BouncyCastleProvider();
             Security.addProvider(bcProvider);
             File key = new File(gencert, "tls.key");

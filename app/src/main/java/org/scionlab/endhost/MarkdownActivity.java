@@ -19,18 +19,14 @@ package org.scionlab.endhost;
 
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import org.commonmark.node.AbstractVisitor;
-
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import io.noties.markwon.Markwon;
@@ -47,8 +43,7 @@ public abstract class MarkdownActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
         Markwon md = Markwon.create(this);
         TextView tv = findViewById(R.id.markdown);
-        try(InputStream is = getAssets().open(getString(getMarkdownResId()))) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(getAssets().open(getString(getMarkdownResId()))))) {
             StringBuilder sb = new StringBuilder();
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
