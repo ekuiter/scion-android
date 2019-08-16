@@ -28,10 +28,23 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.moandjiezana.toml.Toml;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import snet.Snet;
 
 public class SnetService extends Service {
     private static final String TAG = "snet";
+
+    private static String SCIOND_SOCKET_PATH;
 
     public static final int MSG_INIT = 0;
     public static final int MSG_DIAL_SCION = 1;
@@ -46,6 +59,30 @@ public class SnetService extends Service {
     public static final String BUFFER_SIZE = "org.scionlab.BUFFER_SIZE";
 
     Messenger messenger;
+
+    @Override
+    public void onCreate () {
+        String confDir = new File(getFilesDir(), "endhost").getAbsolutePath();
+        File confFile = new File(confDir, SciondService.CONF_FILE_NAME);
+        String reliable = SciondService.DEFAULT_SCIOND_SOCKET_PATH;
+
+        try {
+            Map<String, Object> conf = new Toml().read(new FileInputStream(confFile)).toMap();
+            Map<String, Object> sd = (Map<String, Object>) conf.get("sd");
+            if (sd == null) {
+                sd = new HashMap<>();
+                conf.put("sd", sd);
+            }
+            reliable = Optional.ofNullable((String) sd.get("Reliable")).orElse(reliable);
+            if (reliable.startsWith("/")) {
+                reliable = reliable.replaceFirst("/+", "");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        SCIOND_SOCKET_PATH = reliable;
+    }
 
     @Override
     public IBinder onBind (Intent intent) {
@@ -71,7 +108,17 @@ public class SnetService extends Service {
             switch (msg.what) {
                 case MSG_INIT:
                     clientAddress = bundle.getString(CLIENT_ADDRESS);
-                    Snet.init(applicationContext.getFilesDir().getAbsolutePath(), "run/shm/sciond/default.sock", "run/shm/dispatcher/default.sock", clientAddress);
+                    Log.d(TAG, "Initializing SCION: chdir = "
+                            + applicationContext.getFilesDir().getAbsolutePath()
+                            + " sciondPath = " + SCIOND_SOCKET_PATH
+                            + " dispatcherPath = " + DispatcherService.DEFAULT_DISP_SOCKET_PATH
+                            + " clientAddress = " + clientAddress);
+                    Snet.init(
+                            applicationContext.getFilesDir().getAbsolutePath(),
+                            SCIOND_SOCKET_PATH,
+                            DispatcherService.DEFAULT_DISP_SOCKET_PATH.toString(),
+                            clientAddress
+                    );
                     break;
                 case MSG_DIAL_SCION:
                     clientAddress = bundle.getString(CLIENT_ADDRESS);
@@ -80,8 +127,8 @@ public class SnetService extends Service {
                     Snet.dialScion(serverAddress, clientAddress);
                     break;
                 case MSG_WRITE:
-                    Log.d(TAG, "Writing to SCION");
                     byte[] writeBuffer = bundle.getByteArray(WRITE_BUFFER);
+                    Log.d(TAG, "Writing to SCION");
                     Snet.write(writeBuffer);
                     break;
                 case MSG_READ_FROM:

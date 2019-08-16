@@ -36,12 +36,12 @@ import java.util.regex.Pattern;
 import sciond.Sciond;
 
 public class SciondService extends BackgroundService {
-
+    public static final String DEFAULT_SCIOND_SOCKET_PATH = "run/shm/sciond/default.sock";
     public static final String PARAM_CONFIG_PATH = SciondService.class.getCanonicalName() + ".CONFIG_PATH";
+    public static final String CONF_FILE_NAME = "sciond.toml";
     private static final int NID = 2;
     private static final String TAG = "sciond";
     private static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]+]\\s+");
-    private static final String CONF_FILE_NAME = "sciond.toml";
 
     public SciondService() {
         super("SciondService");
@@ -70,7 +70,7 @@ public class SciondService extends BackgroundService {
             return;
         }
 
-        String reliable = "run/shm/sciond/default.sock";
+        String reliable = DEFAULT_SCIOND_SOCKET_PATH;
         String unix = "run/shm/sciond/default.unix";
         String logFile = "logs/sciond.log";
         String trustDBConnection = "gen-cache/sciond.trust.db";
@@ -118,10 +118,6 @@ public class SciondService extends BackgroundService {
             trustDBConnection = Optional.ofNullable((String) trustDB.get("Connection")).orElse(trustDBConnection);
             trustDB.put("Connection", trustDBConnection);
             new TomlWriter().write(conf, confFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            die(R.string.serviceexception, e.getLocalizedMessage());
-            return;
         } catch (IOException e) {
             e.printStackTrace();
             die(R.string.serviceexception, e.getLocalizedMessage());
