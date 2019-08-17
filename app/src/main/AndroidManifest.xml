@@ -16,7 +16,8 @@
         tools:ignore="GoogleAppIndexingWarning">
         <service
             android:name=".SnetService"
-            android:exported="true" />
+            android:exported="true"
+            android:process=":SnetProcess" />
         <service
             android:name=".DispatcherService"
             android:exported="false"
