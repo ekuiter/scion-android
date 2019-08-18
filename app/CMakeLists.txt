@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.10.2)
 
+if(ANDROID_ABI MATCHES "^armeabi")
+    string(REGEX REPLACE "-O." "-O0" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+    string(REGEX REPLACE "-O." "-O0" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+endif()
+
 add_library(dispatcher-wrapper SHARED src/main/cpp/dispatcher-wrapper.c)
 
 set(scion_C_DIR src/main/cpp/gobind-scion/c)

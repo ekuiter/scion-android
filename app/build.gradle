@@ -15,9 +15,14 @@ android {
         applicationId "org.scionlab.endhost"
         minSdkVersion 24
         targetSdkVersion 28
-        versionCode 9
-        versionName "0.0.8"
+        versionCode 10
+        versionName "0.0.8.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                arguments "-DCMAKE_VERBOSE_MAKEFILE=ON"
+            }
+        }
     }
     buildTypes {
         release {
