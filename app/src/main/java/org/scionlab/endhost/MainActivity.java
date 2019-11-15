@@ -43,15 +43,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String SCIOND_CFG_PATH = MainActivity.class.getCanonicalName() + ".SCIOND";
     private static final String DISP_CFG_PATH = MainActivity.class.getCanonicalName() + ".DISPATCHER";
-    private static final String PINGPONG_CMD_LINE = MainActivity.class.getCanonicalName() + ".PPCMDLINE";
+    private static final String SCMP_CMD_LINE = MainActivity.class.getCanonicalName() + ".SCMPCMDLINE";
     static final String SERVICE_CHANNEL = MainActivity.class.getCanonicalName() + ".SERVICES";
 
     private Optional<String> sciondCfgPath;
     private Optional<String> dispCfgPath;
     private AppCompatButton sciondButton;
     private AppCompatButton dispButton;
-    private AppCompatButton pingButton;
-    private TextInputEditText pingCmdLine;
+    private AppCompatButton scmpButton;
+    private TextInputEditText scmpCmdLine;
     private SharedPreferences prefs;
 
     @Override
@@ -68,12 +68,12 @@ public class MainActivity extends AppCompatActivity {
 
         sciondButton = findViewById(R.id.sciondbutton);
         dispButton = findViewById(R.id.dispbutton);
-        pingButton = findViewById(R.id.pingpongbutton);
-        pingCmdLine = findViewById(R.id.pingpongcmdline);
+        scmpButton = findViewById(R.id.scmpbutton);
+        scmpCmdLine = findViewById(R.id.scmpcmdline);
         prefs = getPreferences(MODE_PRIVATE);
 
         activateButtons();
-        pingCmdLine.setText(sIS.map(i->i.getString(PINGPONG_CMD_LINE)).orElse(prefs.getString(PINGPONG_CMD_LINE, "")));
+        scmpCmdLine.setText(sIS.map(i->i.getString(SCMP_CMD_LINE)).orElse(prefs.getString(SCMP_CMD_LINE, "")));
 
         sciondButton.setOnClickListener(view ->
             new ChooserDialog(view.getContext())
@@ -105,16 +105,16 @@ public class MainActivity extends AppCompatActivity {
                     ).build().show()
         );
 
-        pingButton.setOnClickListener(view -> {
-            String cmdLine = Optional.ofNullable(pingCmdLine.getText()).map(CharSequence::toString).orElse("");
+        scmpButton.setOnClickListener(view -> {
+            String cmdLine = Optional.ofNullable(scmpCmdLine.getText()).map(CharSequence::toString).orElse("");
             startService(
-                    new Intent(this, PingpongService.class)
+                    new Intent(this, ScmpService.class)
                             .putExtra(
-                                    PingpongService.PARAM_ARGS_QUERY,
+                                    ScmpService.PARAM_ARGS_QUERY,
                                     BackgroundService.commandLine(cmdLine.split("\n"))
                             )
             );
-            putString(PINGPONG_CMD_LINE, cmdLine);
+            putString(SCMP_CMD_LINE, cmdLine);
         });
     }
 
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         Function<String,Consumer<CharSequence>> putter = key->cs->outState.putString(key, cs.toString());
         sciondCfgPath.ifPresent(putter.apply(SCIOND_CFG_PATH));
         dispCfgPath.ifPresent(putter.apply(DISP_CFG_PATH));
-        Optional.ofNullable(pingCmdLine.getText()).ifPresent(putter.apply(PINGPONG_CMD_LINE));
+        Optional.ofNullable(scmpCmdLine.getText()).ifPresent(putter.apply(SCMP_CMD_LINE));
     }
 
     private void putString(String key, String value) {
@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
     private void activateButtons() {
         sciondButton.setEnabled(!sciondCfgPath.isPresent());
         dispButton.setEnabled(!dispCfgPath.isPresent());
-        pingButton.setEnabled(sciondCfgPath.isPresent() && dispCfgPath.isPresent());
+        scmpButton.setEnabled(sciondCfgPath.isPresent() && dispCfgPath.isPresent());
     }
 
     private void ensureWritePermissions() {

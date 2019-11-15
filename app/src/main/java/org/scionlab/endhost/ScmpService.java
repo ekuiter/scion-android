@@ -46,15 +46,15 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
 
-import pingpong.Pingpong;
+import scmp.Scmp;
 
-public class PingpongService extends BackgroundService {
+public class ScmpService extends BackgroundService {
 
-    public static final String PARAM_ARGS_QUERY = PingpongService.class.getCanonicalName() + ".CONFIG_PATH";
+    public static final String PARAM_ARGS_QUERY = ScmpService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 3;
-    private static final String TAG = "pingpong";
+    private static final String TAG = "scmp";
 
-    public PingpongService() { super("PingpongService"); }
+    public ScmpService() { super("ScmpService"); }
 
     @Override
     protected int getNotificationId() {
@@ -91,14 +91,14 @@ public class PingpongService extends BackgroundService {
                 pWriter = new JcaPEMWriter(new PrintWriter(key));
                 pWriter.writeObject(kp);
                 pWriter.close();
-                log(R.string.pingpongcreatekey, key.getAbsolutePath());
+                log(R.string.scmpcreatekey, key.getAbsolutePath());
             } else if (!cert.exists()) {
                 PEMParser p = new PEMParser(new FileReader(key));
                 JcaPEMKeyConverter conv = new JcaPEMKeyConverter();
                 kp = conv.getKeyPair((PEMKeyPair) p.readObject());
-                log(R.string.pingpongreadkey, key.getAbsolutePath());
+                log(R.string.scmpreadkey, key.getAbsolutePath());
             } else {
-                log(R.string.pingpongcertexists, key.getAbsolutePath(), cert.getAbsolutePath());
+                log(R.string.scmpcertexists, key.getAbsolutePath(), cert.getAbsolutePath());
             }
             if (!cert.exists() && kp != null) {
                 ContentSigner signer = new JcaContentSignerBuilder("SHA256WithRSA").build(kp.getPrivate());
@@ -114,14 +114,14 @@ public class PingpongService extends BackgroundService {
                 pWriter = new JcaPEMWriter(new PrintWriter(cert));
                 pWriter.writeObject(new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(signer)));
                 pWriter.close();
-                log(R.string.pingpongcreatecert, cert.getAbsolutePath());
+                log(R.string.scmpcreatecert, cert.getAbsolutePath());
             }
         } catch (Exception e) {
             e.printStackTrace();
             die(R.string.serviceexception, e.getLocalizedMessage());
             return;
         }
-        Pingpong.main(arguments, "", getFilesDir().getAbsolutePath());
-        die(R.string.servicefin);
+        long ret = Scmp.main(arguments, "", getFilesDir().getAbsolutePath());
+        die(R.string.servicereturn, ret);
     }
 }

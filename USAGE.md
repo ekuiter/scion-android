@@ -17,21 +17,25 @@ Open the app and push the “Load dispatcher config” button. In the dialog tha
 Push the “Set endhost directory” button. In the dialog that appears, navigate to your endhost's `endhost` directory and press “OK”. Your notification drawer should now have a new permanent entry called “Sciond service”.
 The log files defined in the aforementioned config files should now get populated and not contain error messages.
 
-## Testing connectivity with pingpong
-In the text box, put in command line parameters for a call to the pingpong application. These should be newline-separated and _must_ include the `-sciond` and `-dispatcher` flags.
+## Testing connectivity with scmp
+In the text box, put in command line parameters for a call to the scmp application. These should be newline-separated and _must_ include the `-sciond` and `-dispatcher` flags.
 Since all calls set [the app's files dir](https://developer.android.com/reference/android/content/Context.html#getFilesDir()) as the working directory and the dispatcher and sciond place their sockets relative to that, these should be relative paths.
-It is also advised to set the `-count` flag to a non-zero value since there is currently no way to gracefully interrupt the pingpong process, once started.
+It is also advised to set the `-c` flag to a non-zero value since there is currently no way to gracefully interrupt the scmp process, once started.
 An example configuration would look as follows (mind the newlines!):
 ```
+echo
 -local
 [endhost address]
 -remote
-19-ffaa:0:1303,[141.44.25.144]:40002
--count
+19-ffaa:0:1303,[0.0.0.0]
+-c
 1
 -sciond
 run/shm/sciond/default.sock
 -dispatcher
 run/shm/dispatcher/default.sock
 ```
-Tap the “Start pingpong” button to test your endhost's connectivity. You should notice movement in your log files. With access to your endhost's logcat, you could even see pingpong's stdout and stderr outputs.
+Tap the “Start scmp” button to test your endhost's connectivity.
+You should notice movement in your log files.
+With access to your endhost's logcat, you could even see scmp's stdout and stderr outputs.
+If after some seconds, there is a notification titled “Scmp service” mentioning “Scmp returned with value 0”, you have SCION connectivity.

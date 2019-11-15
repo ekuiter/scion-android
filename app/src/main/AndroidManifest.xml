@@ -27,9 +27,9 @@
             android:exported="false"
             android:process=":SciondProcess" />
         <service
-            android:name=".PingpongService"
+            android:name=".ScmpService"
             android:exported="false"
-            android:process=":PingpongProcess" />
+            android:process=":ScmpProcess" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
