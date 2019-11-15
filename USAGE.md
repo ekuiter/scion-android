@@ -5,17 +5,16 @@
 
 ## Import endhost configuration
 1. From your AS' `gen` directory, transfer the `endhost` directory onto your endhost's user accessible storage.
-2. From your AS' `gen` directory, transfer the `dispatcher.zlog.conf` file onto your endhost's user accessible storage.
 3. In the endhost's `endhost` directory, find the `sciond.toml` file and make the following changes:
   - In the `[sd]` section's `Public` value, replace your AS' IP address with your endhost's IP address.
-  - If you want to be able to access the sciond's log output: Replace the `[logging.file]` section's `Path` value with an absolute path that is accessible to you, e.g. `"/sdcard/logs/sd***.log"`.
+  - If you want to be able to access the sciond's log output: Replace the `[logging.file]` section's `Path` value with an absolute path that is accessible to you, e.g. `"/sdcard/Android/data/org.scionlab.endhost/files/logs/sd***.log"`.
 4. In the endhost's `endhost` directory, find the `topology.json` file and make sure that the endhost can reach the AS' services.
-5. If you want to be able to access the dispatcher's log output: In the endhost's `dispatcher.zlog.conf` file, replace the relative paths with absolute ones that are accessible to you, e.g. `"/sdcard/logs/dispatcher.zlog.DEBUG"`.
 
 ## Starting the dispatcher and sciond
-Open the app and push the “Load dispatcher config” button. In the dialog that appears, navigate to your endhost's `dispatcher.zlog.conf` file. Your notification drawer should now have a new permanent entry called “Dispatcher service”.
+Open the app and push the “Start dispatcher” button. Your notification drawer should now have a new permanent entry called “Dispatcher service”.
 Push the “Set endhost directory” button. In the dialog that appears, navigate to your endhost's `endhost` directory and press “OK”. Your notification drawer should now have a new permanent entry called “Sciond service”.
-The log files defined in the aforementioned config files should now get populated and not contain error messages.
+The log files (usually) located in `/sdcard/Android/data/org.scionlab.endhost/files/logs/` should now get populated and not contain error messages.
+Apart from the `/sdcard/` prefix, the dispatcher logs are hardcoded to be in the aforementioned directory, while sciond's logs should be where they've been configured to be in the previous step.
 
 ## Testing connectivity with scmp
 In the text box, put in command line parameters for a call to the scmp application. These should be newline-separated and _must_ include the `-sciond` and `-dispatcher` flags.
