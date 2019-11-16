@@ -20,12 +20,18 @@ package org.scionlab.endhost;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -41,16 +47,32 @@ import java.util.function.Function;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String SCIOND_CFG_PATH = MainActivity.class.getCanonicalName() + ".SCIOND";
-    private static final String DISP_CFG_PATH = MainActivity.class.getCanonicalName() + ".DISPATCHER";
-    private static final String SCMP_CMD_LINE = MainActivity.class.getCanonicalName() + ".SCMPCMDLINE";
-    static final String SERVICE_CHANNEL = MainActivity.class.getCanonicalName() + ".SERVICES";
+    private static String getClassName() { return (new Object(){}).getClass().getEnclosingClass().getCanonicalName(); }
+    private static final String SCIOND_CFG_PATH = getClassName() + ".SCIOND";
+    private static final String SCMP_CMD_LINE = getClassName() + ".SCMPCMDLINE";
+    static final String SERVICE_CHANNEL = getClassName() + ".SERVICES";
+    static final String ACTION_SERVICE = getClassName() + ".SERVICE";
+    static final String EXTRA_SERVICE_PID = getClassName() + ".SERVICE_PID";
 
+    Optional<Bundle> optionalState;
+
+    private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                int pid = intent.getIntExtra(EXTRA_SERVICE_PID, -1);
+                if (pid != -1) {
+                    Process.killProcess(pid);
+                }
+                activateButtons();
+            }
+        }
+    };
     private Optional<String> sciondCfgPath;
-    private Optional<String> dispCfgPath;
-    private AppCompatButton sciondButton;
-    private AppCompatButton dispButton;
-    private AppCompatButton scmpButton;
+    private AppCompatButton[] buttons;
+    private Class<?>[] classes;
+    private View.OnClickListener[][] buttonClicks;
+    private int[][] buttonTextResIds;
     private TextInputEditText scmpCmdLine;
     private SharedPreferences prefs;
 
@@ -59,63 +81,97 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
-        Optional<Bundle> sIS = Optional.ofNullable(savedInstanceState);
 
-        sciondCfgPath = sIS.map(i->i.getString(SCIOND_CFG_PATH));
-        dispCfgPath = sIS.map(i->i.getString(DISP_CFG_PATH));
+        optionalState = Optional.ofNullable(savedInstanceState);
+
+        sciondCfgPath = optionalState.map(i->i.getString(SCIOND_CFG_PATH));
 
         createNotificationChannel();
 
-        sciondButton = findViewById(R.id.sciondbutton);
-        dispButton = findViewById(R.id.dispbutton);
-        scmpButton = findViewById(R.id.scmpbutton);
         scmpCmdLine = findViewById(R.id.scmpcmdline);
         prefs = getPreferences(MODE_PRIVATE);
 
+        buttons = new AppCompatButton[] {
+                findViewById(R.id.sciondbutton),
+                findViewById(R.id.dispbutton),
+                findViewById(R.id.scmpbutton)
+        };
+
+        buttonTextResIds = new int[][] {
+                { R.string.sciondbuttonstart, R.string.sciondbuttonstop },
+                { R.string.dispbuttonstart, R.string.dispbuttonstop },
+                { R.string.scmpbuttonstart, R.string.scmpbuttonstop }
+        };
+
+        classes = new Class[] {
+                SciondService.class,
+                DispatcherService.class,
+                ScmpService.class
+        };
+
+        buttonClicks = new View.OnClickListener[][]{
+                {
+                        view ->
+                                new ChooserDialog(view.getContext())
+                                        .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
+                                        .withFilter(true, true)
+                                        .withStartFile(prefs.getString(SCIOND_CFG_PATH, null))
+                                        .withChosenListener((path, pathFile) ->
+                                                (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {
+                                                    ensureWritePermissions();
+                                                    startService(new Intent(this, classes[0])
+                                                            .putExtra(SciondService.PARAM_CONFIG_PATH, p));
+                                                    putString(SCIOND_CFG_PATH, p);
+                                                    activateButtons();
+                                                })
+                                        ).build().show(),
+                        null
+                },
+                {
+                        view -> {
+                            ensureWritePermissions();
+                            startService(new Intent(this, classes[1]));
+                            activateButtons();
+                        },
+                        null
+                },
+                {
+                        view -> {
+                            String cmdLine = Optional
+                                    .ofNullable(scmpCmdLine.getText())
+                                    .map(CharSequence::toString)
+                                    .orElse("");
+                            startService(
+                                    new Intent(this, classes[2])
+                                            .putExtra(
+                                                    ScmpService.PARAM_ARGS_QUERY,
+                                                    BackgroundService.commandLine(cmdLine.split("\n"))
+                                            )
+                            );
+                            putString(SCMP_CMD_LINE, cmdLine);
+                            activateButtons();
+                        },
+                        null
+                }
+        };
+        for (int i = 0; i < classes.length; i++) {
+            final Intent intent = new Intent(this, classes[i]);
+            buttonClicks[i][1] = view -> { stopService(intent); activateButtons(); };
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter resetFilter = new IntentFilter();
+        resetFilter.addAction(ACTION_SERVICE);
+        registerReceiver(serviceReceiver, resetFilter);
         activateButtons();
-        scmpCmdLine.setText(sIS.map(i->i.getString(SCMP_CMD_LINE)).orElse(prefs.getString(SCMP_CMD_LINE, "")));
-
-        sciondButton.setOnClickListener(view ->
-            new ChooserDialog(view.getContext())
-                    .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
-                    .withFilter(true, true)
-                    .withStartFile(prefs.getString(SCIOND_CFG_PATH, null))
-                    .withChosenListener((path, pathFile) ->
-                            (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {
-                                ensureWritePermissions();
-                                startService(new Intent(this, SciondService.class)
-                                        .putExtra(SciondService.PARAM_CONFIG_PATH, p));
-                                putString(SCIOND_CFG_PATH, p);
-                                activateButtons();
-                            })
-                    ).build().show()
+        scmpCmdLine.setText(
+                optionalState
+                        .map(i->i.getString(SCMP_CMD_LINE))
+                        .orElse(prefs.getString(SCMP_CMD_LINE, ""))
         );
-        dispButton.setOnClickListener(view ->
-            new ChooserDialog(view.getContext())
-                    .withResources(R.string.choosedispcfg, R.string.ok, R.string.cancel)
-                    .withStartFile(prefs.getString(DISP_CFG_PATH, null))
-                    .withChosenListener((path, pathFile) ->
-                            (dispCfgPath = Optional.ofNullable(path)).ifPresent(p->{
-                                ensureWritePermissions();
-                                startService(new Intent(this, DispatcherService.class)
-                                        .putExtra(DispatcherService.PARAM_CONFIG_PATH, p));
-                                putString(DISP_CFG_PATH, p);
-                                activateButtons();
-                            })
-                    ).build().show()
-        );
-
-        scmpButton.setOnClickListener(view -> {
-            String cmdLine = Optional.ofNullable(scmpCmdLine.getText()).map(CharSequence::toString).orElse("");
-            startService(
-                    new Intent(this, ScmpService.class)
-                            .putExtra(
-                                    ScmpService.PARAM_ARGS_QUERY,
-                                    BackgroundService.commandLine(cmdLine.split("\n"))
-                            )
-            );
-            putString(SCMP_CMD_LINE, cmdLine);
-        });
     }
 
     @Override
@@ -143,7 +199,6 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         Function<String,Consumer<CharSequence>> putter = key->cs->outState.putString(key, cs.toString());
         sciondCfgPath.ifPresent(putter.apply(SCIOND_CFG_PATH));
-        dispCfgPath.ifPresent(putter.apply(DISP_CFG_PATH));
         Optional.ofNullable(scmpCmdLine.getText()).ifPresent(putter.apply(SCMP_CMD_LINE));
     }
 
@@ -164,9 +219,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void activateButtons() {
-        sciondButton.setEnabled(!sciondCfgPath.isPresent());
-        dispButton.setEnabled(!dispCfgPath.isPresent());
-        scmpButton.setEnabled(sciondCfgPath.isPresent() && dispCfgPath.isPresent());
+        boolean[] running = new boolean[classes.length];
+        for (int i = 0; i < running.length; i++) {
+            running[i] = BackgroundService.amIRunning(this, classes[i]);
+            buttons[i].setOnClickListener(buttonClicks[i][running[i] ? 1 : 0]);
+            buttons[i].setText(buttonTextResIds[i][running[i] ? 1 : 0]);
+        }
+        buttons[2].setEnabled((running[0] && running[1]) || running[2]);
     }
 
     private void ensureWritePermissions() {
@@ -175,5 +234,11 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 0
         );
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(serviceReceiver);
     }
 }

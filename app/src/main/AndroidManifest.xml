@@ -17,19 +17,19 @@
         <service
             android:name=".SnetService"
             android:exported="true"
-            android:process=":SnetProcess" />
+            android:process=":SnetService" />
         <service
             android:name=".DispatcherService"
             android:exported="false"
-            android:process=":DispatcherProcess" />
+            android:process=":DispatcherService" />
         <service
             android:name=".SciondService"
             android:exported="false"
-            android:process=":SciondProcess" />
+            android:process=":SciondService" />
         <service
             android:name=".ScmpService"
             android:exported="false"
-            android:process=":ScmpProcess" />
+            android:process=":ScmpService" />
 
         <activity android:name=".MainActivity">
             <intent-filter>

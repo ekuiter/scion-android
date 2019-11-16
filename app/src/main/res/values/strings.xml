@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">SCION Endhost</string>
-    <string name="dispbutton">Load dispatcher config</string>
-    <string name="sciondbutton">Set endhost directory</string>
-    <string name="choosedispcfg">Choose dispatcher config</string>
+    <string name="dispbuttonstart">Start dispatcher</string>
+    <string name="dispbuttonstop">Stop dispatcher</string>
+    <string name="sciondbuttonstart">Set endhost directory</string>
+    <string name="sciondbuttonstop">Stop sciond</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="choosesciondcfg">Choose endhost directory</string>
@@ -24,7 +25,9 @@
     <string name="servicestart" formatted="true">Starting %1$s%2$s service</string>
     <string name="servicereturn" formatted="true">%1$S%2$s returned with value %3$d</string>
     <string name="servicefin" formatted="true">%1$S%2$s returned and didn\'t crash</string>
-    <string name="scmpbutton">Start scmp tool</string>
+    <string name="servicestopped" formatted="true">%1$S%2$s service was stopped gracefully</string>
+    <string name="scmpbuttonstart">Start scmp tool</string>
+    <string name="scmpbuttonstop">Stop scmp tool</string>
     <string name="scmpcreatekey" formatted="true">Created private key: %3$s</string>
     <string name="scmpreadkey" formatted="true">Read private key: %3$s</string>
     <string name="scmpcreatecert" formatted="true">Created self-signed certificate: %3$s</string>
@@ -34,4 +37,5 @@
     <string name="help_asset_name">USAGE.md</string>
     <string name="action_about">About this app</string>
     <string name="about_asset_name">README.md</string>
+    <string name="serviceactionstop">Stop</string>
 </resources>

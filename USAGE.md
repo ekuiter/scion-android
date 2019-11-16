@@ -19,7 +19,7 @@ Apart from the `/sdcard/` prefix, the dispatcher logs are hardcoded to be in the
 ## Testing connectivity with scmp
 In the text box, put in command line parameters for a call to the scmp application. These should be newline-separated and _must_ include the `-sciond` and `-dispatcher` flags.
 Since all calls set [the app's files dir](https://developer.android.com/reference/android/content/Context.html#getFilesDir()) as the working directory and the dispatcher and sciond place their sockets relative to that, these should be relative paths.
-It is also advised to set the `-c` flag to a non-zero value since there is currently no way to gracefully interrupt the scmp process, once started.
+It is also advised to set the `-c` flag to a non-zero value since there is currently no way to gracefully *interrupt* the scmp process, once started.
 An example configuration would look as follows (mind the newlines!):
 ```
 echo

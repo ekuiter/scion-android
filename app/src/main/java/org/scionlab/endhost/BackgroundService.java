@@ -17,11 +17,16 @@
 
 package org.scionlab.endhost;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.IntentService;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.os.Process;
 import android.util.Log;
 
 import androidx.annotation.CallSuper;
@@ -40,6 +45,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,6 +56,7 @@ public abstract class BackgroundService extends IntentService {
     private StringBuffer notifLog;
     private Resources res;
     private boolean runLogUpdater;
+    private Intent activityResetIntent;
 
     private static final int MAX_NOTIFICATION_LENGTH = 5 * 1024;
     private static final Pattern EMPTY_LOG_DELETER_PATTERN = Pattern.compile("");
@@ -58,6 +65,8 @@ public abstract class BackgroundService extends IntentService {
     @CallSuper
     public void onCreate() {
         super.onCreate();
+        activityResetIntent = new Intent(MainActivity.ACTION_SERVICE);
+        sendBroadcast(activityResetIntent);
         String tag = getTag();
         String tagHead = tag.isEmpty() ? tag : tag.substring(0, 1);
         String tagTail = tag.isEmpty() ? tag : tag.substring(1);
@@ -122,6 +131,22 @@ public abstract class BackgroundService extends IntentService {
 
     public BackgroundService(String name) { super(name); }
 
+    public static boolean amIRunning(final Context ctx, final Class<?> cls) {
+        final String serviceName = cls.getSimpleName();
+        final ActivityManager activityManager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+        final List<RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
+        if (procInfos != null) {
+            for (final RunningAppProcessInfo processInfo : procInfos) {
+                Log.d(serviceName, processInfo.processName);
+                if (processInfo.processName.endsWith(":" + serviceName)) {
+                    return processInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE
+                            || processInfo.importance == RunningAppProcessInfo.IMPORTANCE_SERVICE;
+                }
+            }
+        }
+        return false;
+    }
+
     protected abstract int getNotificationId();
 
     @NonNull
@@ -144,6 +169,15 @@ public abstract class BackgroundService extends IntentService {
         runLogUpdater = false;
         log(resID, formatArgs);
         stopForeground(STOP_FOREGROUND_DETACH);
+    }
+
+    @Override
+    @CallSuper
+    public void onDestroy() {
+        die(R.string.servicestopped);
+        super.onDestroy();
+        activityResetIntent.putExtra(MainActivity.EXTRA_SERVICE_PID, Process.myPid());
+        sendBroadcast(activityResetIntent);
     }
 
     protected void log(@StringRes int resId, Object... formatArgs) {
