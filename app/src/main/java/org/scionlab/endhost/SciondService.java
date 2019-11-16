@@ -17,6 +17,7 @@
 
 package org.scionlab.endhost;
 
+import android.content.Context;
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
@@ -26,7 +27,6 @@ import com.moandjiezana.toml.TomlWriter;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,10 +37,13 @@ import sciond.Sciond;
 
 public class SciondService extends BackgroundService {
     public static final String DEFAULT_SCIOND_SOCKET_PATH = "run/shm/sciond/default.sock";
+    public static final String DEFAULT_SCIOND_UNIX_PATH = DEFAULT_SCIOND_SOCKET_PATH.replaceFirst("^(.*\\.)sock$", "\1unix");
+    public static String SCIOND_SOCKET_PATH = DEFAULT_SCIOND_SOCKET_PATH;
+    public static String SCIOND_UNIX_PATH = DEFAULT_SCIOND_UNIX_PATH;
     public static final String PARAM_CONFIG_PATH = SciondService.class.getCanonicalName() + ".CONFIG_PATH";
-    public static final String CONF_FILE_NAME = "sciond.toml";
     private static final int NID = 2;
     private static final String TAG = "sciond";
+    private static final String LOG_PATH = "logs/sciond.log";
     private static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]+]\\s+");
 
     public SciondService() {
@@ -64,18 +67,19 @@ public class SciondService extends BackgroundService {
             die(R.string.servicenosetup, confDir);
             return;
         }
-        File confFile = new File(confDir, CONF_FILE_NAME);
-        if (!confFile.exists()) {
-            die(R.string.servicefilenotfound, confFile.getName(), confPath);
+        Optional<File> confFile = findSciondToml(this);
+        if (!confFile.map(File::isFile).orElse(false)) {
+            die(R.string.servicefilenotfound, confFile.map(File::getName).orElse("s*d.toml"), confPath);
             return;
         }
 
         String reliable = DEFAULT_SCIOND_SOCKET_PATH;
-        String unix = "run/shm/sciond/default.unix";
-        String logFile = "logs/sciond.log";
+        String unix = DEFAULT_SCIOND_UNIX_PATH;
+        String logFile = new File(getExternalFilesDir(null), LOG_PATH).getAbsolutePath();
         String trustDBConnection = "gen-cache/sciond.trust.db";
+        String pathDBConnection = "gen-cache/sciond.path.db";
         try {
-            Map<String, Object> conf = new Toml().read(new FileInputStream(confFile)).toMap();
+            Map<String, Object> conf = new Toml().read(new FileInputStream(confFile.get())).toMap();
             Map<String, Object> general = (Map<String, Object>) conf.get("general");
             if (general == null) {
                 general = new HashMap<>();
@@ -88,16 +92,21 @@ public class SciondService extends BackgroundService {
                 sd = new HashMap<>();
                 conf.put("sd", sd);
             }
+            Map<String, Object> pathDB = (Map<String, Object>) sd.get("PathDB");
+            if (pathDB == null) {
+                pathDB = new HashMap<>();
+                sd.put("PathDB", pathDB);
+            }
+            pathDBConnection = Optional.ofNullable((String) pathDB.get("Connection")).orElse(pathDBConnection);
+            pathDB.put("Connection", pathDBConnection);
             reliable = Optional.ofNullable((String) sd.get("Reliable")).orElse(reliable);
-            if (reliable.startsWith("/")) {
-                reliable = reliable.replaceFirst("/+", "");
-            }
+            reliable = reliable.replaceFirst("^/+", "");
             sd.put("Reliable", reliable);
+            SCIOND_SOCKET_PATH = reliable;
             unix = Optional.ofNullable((String) sd.get("Unix")).orElse(unix);
-            if (unix.startsWith("/")) {
-                unix = unix.replaceFirst("/+", "");
-            }
+            unix = unix.replaceFirst("^/+", "");
             sd.put("Unix", unix);
+            SCIOND_UNIX_PATH = unix;
             Map<String, Object> logging = (Map<String, Object>) conf.get("logging");
             if (logging == null) {
                 logging = new HashMap<>();
@@ -112,18 +121,23 @@ public class SciondService extends BackgroundService {
             file.put("Path", logFile);
             Map<String, Object> trustDB = (Map<String, Object>) conf.get("TrustDB");
             if (trustDB == null) {
-                trustDB = new HashMap<>();
-                conf.put("TrustDB", trustDB);
+                trustDB = (Map<String, Object>) conf.get("trustDB");
+                if (trustDB == null) {
+                    trustDB = new HashMap<>();
+                    conf.put("TrustDB", trustDB);
+                }
             }
             trustDBConnection = Optional.ofNullable((String) trustDB.get("Connection")).orElse(trustDBConnection);
             trustDB.put("Connection", trustDBConnection);
-            new TomlWriter().write(conf, confFile);
+            new TomlWriter().write(conf, confFile.get());
         } catch (IOException e) {
             e.printStackTrace();
             die(R.string.serviceexception, e.getLocalizedMessage());
             return;
         }
 
+        mkfile(trustDBConnection);
+        mkfile(pathDBConnection);
         mkfile(reliable);
         delete(reliable);
         mkfile(unix);
@@ -131,13 +145,22 @@ public class SciondService extends BackgroundService {
         mkfile(logFile);
         delete(logFile);
         File log = mkfile(logFile);
-        mkfile(trustDBConnection);
 
         log(R.string.servicestart);
         setupLogUpdater(log).start();
 
-        long ret = Sciond.main(commandLine("-config", confFile.toString()), "", getFilesDir().getAbsolutePath());
+        long ret = Sciond.main(commandLine(false, "-config", confFile.get().getAbsolutePath()), "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
+    }
+
+    static Optional<File> findSciondToml(@NonNull Context ctx) {
+        final File dir = new File(ctx.getFilesDir(), "endhost");
+        for (final File child : dir.listFiles()) {
+            if (child.isFile() && child.getName().matches("^s.*d\\.toml$")) {
+                return Optional.of(child);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override

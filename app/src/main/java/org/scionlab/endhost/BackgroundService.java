@@ -45,6 +45,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -111,9 +112,18 @@ public abstract class BackgroundService extends IntentService {
     }
 
     @NonNull
-    public static String commandLine(@NonNull String... args) {
+    public static String commandLine(boolean addSockets, @NonNull String... args) {
+        List<String> additional = new LinkedList<>();
+        if (addSockets && Arrays.stream(args).noneMatch("-sciond"::equals)) {
+            additional.add("-sciond");
+            additional.add(SciondService.SCIOND_SOCKET_PATH);
+        }
+        if (addSockets && Arrays.stream(args).noneMatch("-dispatcher"::equals)) {
+            additional.add("-dispatcher");
+            additional.add(DispatcherService.DEFAULT_DISP_SOCKET_PATH);
+        }
         //noinspection deprecation
-        return Arrays.stream(args)
+        return Stream.concat(Arrays.stream(args), additional.stream())
                 .map(URLEncoder::encode)
                 .collect(Collectors.joining("&"));
     }

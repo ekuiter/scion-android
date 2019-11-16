@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                                     new Intent(this, classes[2])
                                             .putExtra(
                                                     ScmpService.PARAM_ARGS_QUERY,
-                                                    BackgroundService.commandLine(cmdLine.split("\n"))
+                                                    BackgroundService.commandLine(true, cmdLine.split("\n"))
                                             )
                             );
                             putString(SCMP_CMD_LINE, cmdLine);
