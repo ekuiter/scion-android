@@ -1,6 +1,6 @@
 # How to make it work
 ## Prerequisites
-- Android device with at least Android 9 Pie (henceforth referred to as “endhost”)
+- Android device with at least Android 7 (henceforth referred to as “endhost”)
 - Working scion AS with services set up to be reachable via IP from the endhost
 
 ## Import endhost configuration
