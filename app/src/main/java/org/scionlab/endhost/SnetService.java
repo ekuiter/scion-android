@@ -74,12 +74,12 @@ public class SnetService extends Service {
                     Log.d(TAG, "Initializing SCION: chdir = "
                             + applicationContext.getFilesDir().getAbsolutePath()
                             + " sciondPath = " + SciondService.SCIOND_SOCKET_PATH
-                            + " dispatcherPath = " + DispatcherService.DEFAULT_DISP_SOCKET_PATH
+                            + " dispatcherPath = " + DispatcherService.SOCKET_PATH
                             + " clientAddress = " + clientAddress);
                     Snet.init(
                             applicationContext.getFilesDir().getAbsolutePath(),
                             SciondService.SCIOND_SOCKET_PATH,
-                            DispatcherService.DEFAULT_DISP_SOCKET_PATH,
+                            DispatcherService.SOCKET_PATH,
                             clientAddress
                     );
                     break;

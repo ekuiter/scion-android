@@ -120,7 +120,7 @@ public abstract class BackgroundService extends IntentService {
         }
         if (addSockets && Arrays.stream(args).noneMatch("-dispatcher"::equals)) {
             additional.add("-dispatcher");
-            additional.add(DispatcherService.DEFAULT_DISP_SOCKET_PATH);
+            additional.add(DispatcherService.SOCKET_PATH);
         }
         //noinspection deprecation
         return Stream.concat(Arrays.stream(args), additional.stream())

@@ -86,7 +86,7 @@ public class SciondService extends BackgroundService {
                 conf.put("general", general);
             }
             general.put("ConfigDir", confDir);
-            general.put("DispatcherPath", DispatcherService.DEFAULT_DISP_SOCKET_PATH);
+            general.put("DispatcherPath", DispatcherService.SOCKET_PATH);
             Map<String, Object> sd = (Map<String, Object>) conf.get("sd");
             if (sd == null) {
                 sd = new HashMap<>();

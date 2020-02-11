@@ -18,6 +18,7 @@
 package org.scionlab.endhost;
 
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -27,18 +28,11 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class DispatcherService extends BackgroundService {
-    // Depends on DISPATCHER_DIR and DEFAULT_DISPATCHER_ID from CMakeLists.txt
-    public static final String DEFAULT_DISP_SOCKET_PATH = "run/shm/dispatcher/default.sock";
     private static final int NID = 1;
     private static final String TAG = "dispatcher";
-    private static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]+] \\(\\d+:dispatcher:\\.\\./\\.\\./\\.\\./\\.\\./src/main/cpp/gobind-scion/c/dispatcher/dispatcher\\.c:\\d+\\)\\s+");
-    private static final String CONFIG_PATH = "dispatcher.zlog.conf";
-    private static final String LOG_PATH = "logs/dispatcher.zlog";
-    private static final String[] LOG_FLAVOURS = { "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
-
-    static {
-        System.loadLibrary("dispatcher-wrapper");
-    }
+    private static final String CONFIG_PATH = "disp.toml";
+    private static final String LOG_PATH = "disp.log";
+    public static final String SOCKET_PATH = "disp.sock";
 
     public DispatcherService() {
         super("DispatcherService");
@@ -55,12 +49,6 @@ public class DispatcherService extends BackgroundService {
         return TAG;
     }
 
-    @NonNull
-    @Override
-    protected Pattern getLogDeleter() {
-        return LOG_DELETER_PATTERN;
-    }
-
     @Override
     protected void onHandleIntent (Intent intent) {
         if (intent == null) return;
@@ -71,18 +59,17 @@ public class DispatcherService extends BackgroundService {
         try {
             File logRoot = getExternalFilesDir(null);
             File conf = createConfigFile(logRoot);
-            mkfile(DEFAULT_DISP_SOCKET_PATH);
-            delete(DEFAULT_DISP_SOCKET_PATH);
+            String socketPath = new File(getFilesDir(), SOCKET_PATH).getAbsolutePath();
+            mkfile(socketPath);
+            delete(socketPath);
 
-            String logPath = getLogPath(logRoot, LOG_FLAVOURS[0]);
-
+            String logPath = new File(logRoot, LOG_PATH).getAbsolutePath();
             delete(logPath);
             File log = mkfile(logPath);
 
             log(R.string.servicestart);
             setupLogUpdater(log).start();
-
-            int ret = main(conf.getAbsolutePath(), getFilesDir().getAbsolutePath());
+            int ret = ScionProcess.run(getApplicationContext(), "godispatcher", "-lib_env_config", conf.getAbsolutePath());
             die(R.string.servicereturn, ret);
         } catch (Exception e) {
             die(R.string.serviceexception, e.getLocalizedMessage());
@@ -94,23 +81,21 @@ public class DispatcherService extends BackgroundService {
         File conf = mkfile(CONFIG_PATH);
         FileWriter w = new FileWriter(conf);
         w.write(
-            "[global]\n" +
-            "default format = \"%d(%F %T).%us%d(%z) [%V] (%p:%c:%F:%L) %m%n\"\n" +
-            "file perms = 644\n" +
-            "\n" +
-            "[rules]\n" +
-            "default.* >stdout\n"
+            "[dispatcher]\n" +
+                "ID = \"dispatcher\"\n" +
+                "SocketFileMode = \"0777\"\n" +
+                "ApplicationSocket = \"" + new File(getFilesDir(), SOCKET_PATH).getAbsolutePath() + "\"\n" +
+                "\n" +
+                "[metrics]\n" +
+                "Prometheus = \"[127.0.0.1]:30441\"\n" +
+                "\n" +
+                "[logging.file]\n" +
+                "Level = \"debug\"\n" +
+                "MaxAge = 3\n" +
+                "MaxBackups = 1\n" +
+                "Path = \"" + new File(logRoot, LOG_PATH).getAbsolutePath() + "\"\n"
         );
-        for (String flavour : LOG_FLAVOURS) {
-            w.write(String.format("dispatcher.%1$s \"%2$s\", 10MB*2\n", flavour, getLogPath(logRoot, flavour)));
-        }
         w.close();
         return conf;
     }
-
-    private String getLogPath(File root, String flavour) {
-        return String.format("%s.%s", new File(root, LOG_PATH).getAbsolutePath(), flavour);
-    }
-
-    public native int main(String confFileName, String workingDir);
 }

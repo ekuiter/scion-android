@@ -40,6 +40,10 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.material.textfield.TextInputEditText;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
