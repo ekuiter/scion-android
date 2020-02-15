@@ -1,0 +1,13 @@
+[dispatcher]
+ID = "dispatcher"
+SocketFileMode = "0777"
+ApplicationSocket = "%s"
+
+[metrics]
+Prometheus = "[127.0.0.1]:30441"
+
+[logging.file]
+Level = "debug"
+MaxAge = 3
+MaxBackups = 1
+Path = "%s"

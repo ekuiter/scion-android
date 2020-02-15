@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019  Vera Clemens, Tom Kranz
+ * Copyright (C) 2019-2020 Vera Clemens, Tom Kranz, Tom Heimbrodt, Elias Kuiter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +22,14 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 public class DispatcherService extends BackgroundService {
     private static final int NID = 1;
     private static final String TAG = "dispatcher";
-    private static final String CONFIG_PATH = "disp.toml";
-    private static final String LOG_PATH = "disp.log";
-    public static final String SOCKET_PATH = "disp.sock";
+    private static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml";
+    private static final String CONFIG_PATH = "dispatcher.toml";
+    private static final String LOG_PATH = "dispatcher.log";
+    public static final String SOCKET_PATH = "dispatcher.sock";
 
     public DispatcherService() {
         super("DispatcherService");
@@ -48,52 +47,29 @@ public class DispatcherService extends BackgroundService {
     }
 
     @Override
-    protected void onHandleIntent (Intent intent) {
-        if (intent == null) return;
+    protected void onHandleIntent(Intent intent) {
+        if (intent == null)
+            return;
         super.onHandleIntent(intent);
 
         log(R.string.servicesetup);
 
-        try {
-            File logRoot = getExternalFilesDir(null);
-            File conf = createConfigFile(logRoot);
-            String socketPath = new File(getFilesDir(), SOCKET_PATH).getAbsolutePath();
-            mkfile(socketPath);
-            delete(socketPath);
+        Storage internalStorage = Storage.from(this),
+                externalStorage = Storage.External.from(this);
 
-            String logPath = new File(logRoot, LOG_PATH).getAbsolutePath();
-            delete(logPath);
-            File log = mkfile(logPath);
+        internalStorage.deleteFileOrDirectory(SOCKET_PATH);
+        externalStorage.deleteFileOrDirectory(LOG_PATH);
+        File log = externalStorage.createFile(LOG_PATH);
 
-            log(R.string.servicestart);
-            setupLogUpdater(log).start();
-            int ret = ScionBinary.run(getApplicationContext(), "godispatcher", "-lib_env_config", conf.getAbsolutePath());
-            die(R.string.servicereturn, ret);
-        } catch (Exception e) {
-            die(R.string.serviceexception, e.getLocalizedMessage());
-        }
-    }
+        File configFile = externalStorage.writeFile(CONFIG_PATH, String.format(
+                internalStorage.readAssetFile(CONFIG_TEMPLATE_PATH),
+                internalStorage.getAbsolutePath(SOCKET_PATH),
+                externalStorage.getAbsolutePath(LOG_PATH)));
 
-    private File createConfigFile(File logRoot) throws IOException {
-        delete(CONFIG_PATH);
-        File conf = mkfile(CONFIG_PATH);
-        FileWriter w = new FileWriter(conf);
-        w.write(
-            "[dispatcher]\n" +
-                "ID = \"dispatcher\"\n" +
-                "SocketFileMode = \"0777\"\n" +
-                "ApplicationSocket = \"" + new File(getFilesDir(), SOCKET_PATH).getAbsolutePath() + "\"\n" +
-                "\n" +
-                "[metrics]\n" +
-                "Prometheus = \"[127.0.0.1]:30441\"\n" +
-                "\n" +
-                "[logging.file]\n" +
-                "Level = \"debug\"\n" +
-                "MaxAge = 3\n" +
-                "MaxBackups = 1\n" +
-                "Path = \"" + new File(logRoot, LOG_PATH).getAbsolutePath() + "\"\n"
-        );
-        w.close();
-        return conf;
+        log(R.string.servicestart);
+        setupLogUpdater(log).start();
+        int ret = ScionBinary.runDispatcher(
+                this, line -> log(R.string.servicestring, line), configFile.getAbsolutePath());
+        die(R.string.servicereturn, ret);
     }
 }

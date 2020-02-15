@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019  Vera Clemens, Tom Kranz
+ * Copyright (C) 2019-2020 Vera Clemens, Tom Kranz, Tom Heimbrodt, Elias Kuiter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,22 @@ import java.security.Security;
 import java.util.Date;
 
 public class ScmpService extends BackgroundService {
+    public ScmpService(String name) {
+        super(name);
+    }
 
-    public static final String PARAM_ARGS_QUERY = ScmpService.class.getCanonicalName() + ".CONFIG_PATH";
+    @Override
+    protected int getNotificationId() {
+        return 0;
+    }
+
+    @NonNull
+    @Override
+    protected String getTag() {
+        return null;
+    }
+
+    /*public static final String PARAM_ARGS_QUERY = ScmpService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 3;
     private static final String TAG = "scmp";
 
@@ -122,5 +136,5 @@ public class ScmpService extends BackgroundService {
         long ret = 0; // TODO
         // long ret = Scmp.main(arguments, "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
-    }
+    }*/
 }

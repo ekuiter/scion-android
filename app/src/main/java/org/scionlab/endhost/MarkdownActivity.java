@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019  Vera Clemens, Tom Kranz
+ * Copyright (C) 2019-2020 Vera Clemens, Tom Kranz, Tom Heimbrodt, Elias Kuiter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,9 @@ package org.scionlab.endhost;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 import io.noties.markwon.Markwon;
 
@@ -43,19 +38,9 @@ public abstract class MarkdownActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
         Markwon md = Markwon.create(this);
         TextView tv = findViewById(R.id.markdown);
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(getAssets().open(getString(getMarkdownResId()))))) {
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-                sb.append('\n');
-            }
-            md.setMarkdown(tv, sb.toString());
-            tv.setMovementMethod(LinkMovementMethod.getInstance());
-        } catch (IOException e) {
-            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-            finish();
-        }
+        String markdown = Storage.from(this).readAssetFile(getString(getMarkdownResId()));
+        md.setMarkdown(tv, markdown);
+        tv.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     abstract int getMarkdownResId();

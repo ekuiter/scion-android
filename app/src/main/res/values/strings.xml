@@ -26,6 +26,7 @@
     <string name="servicereturn" formatted="true">%1$S%2$s returned with value %3$d</string>
     <string name="servicefin" formatted="true">%1$S%2$s returned and didn\'t crash</string>
     <string name="servicestopped" formatted="true">%1$S%2$s service was stopped gracefully</string>
+    <string name="servicestring" formatted="true">%3$S</string>
     <string name="scmpbuttonstart">Start scmp tool</string>
     <string name="scmpbuttonstop">Stop scmp tool</string>
     <string name="scmpcreatekey" formatted="true">Created private key: %3$s</string>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019  Vera Clemens, Tom Kranz
+ * Copyright (C) 2019-2020 Vera Clemens, Tom Kranz, Tom Heimbrodt, Elias Kuiter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ public class SciondService extends BackgroundService {
         log(R.string.servicestart);
         setupLogUpdater(log).start();
 
-        int ret = ScionBinary.run(getApplicationContext(), "sciond", "-lib_env_config", confFile.get().getAbsolutePath(), "", getFilesDir().getAbsolutePath());
+        int ret = 0; // int ret = ScionBinary.run(getApplicationContext(), "sciond", "-lib_env_config", confFile.get().getAbsolutePath(), "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
     }
 

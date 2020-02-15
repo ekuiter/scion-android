@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019  Vera Clemens, Tom Kranz
+ * Copyright (C) 2019-2020 Vera Clemens, Tom Kranz, Tom Heimbrodt, Elias Kuiter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                             startService(
                                     new Intent(this, classes[2])
                                             .putExtra(
-                                                    ScmpService.PARAM_ARGS_QUERY,
+                                                    "", // ScmpService.PARAM_ARGS_QUERY,
                                                     BackgroundService.commandLine(true, cmdLine.split("\n"))
                                             )
                             );
