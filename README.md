@@ -26,7 +26,7 @@ This software uses the following libraries:
 - [Spongy Castle](https://rtyley.github.io/spongycastle/), used under the conditions of [their adaptation of the MIT X11 License](https://github.com/rtyley/spongycastle/blob/spongy-master/LICENSE.html)
 - [toml4j](https://github.com/mwanji/toml4j), used under the conditions of [The MIT License](https://github.com/mwanji/toml4j/blob/master/LICENSE)
 
-For more information on this project contact the [NetSys group](http://www.netsys.ovgu.de/).
+For more information on this project, contact the [NetSys group](http://www.netsys.ovgu.de/).
 
-© 2019 Vera Clemens, Tom Kranz
+© 2019 Vera Clemens, Tom Kranz<br>
 © 2020 Tom Heimbrodt, Elias Kuiter

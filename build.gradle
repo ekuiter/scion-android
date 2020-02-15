@@ -18,12 +18,6 @@ allprojects {
         google()
         jcenter()
         mavenCentral()
-        ivy {
-            url "https://android-scion.gitlab.io/gobind-scion"
-            patternLayout {
-                artifact "[artifact]-[revision](-[classifier]).[ext]"
-            }
-        }
     }
 }
 
