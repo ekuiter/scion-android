@@ -1,4 +1,9 @@
 # SCION Android app
+
+## Getting Started
+
+Clone with `git clone --recurse-submodules https://github.com/ekuiter/scion-android.git`.
+
 ## Purpose
 The [SCION](https://www.scion-architecture.net/) Android app enables you to run a [SCION endhost](https://netsec-ethz.github.io/scion-tutorials/general_scion_configuration/setup_endhost/) together with the [pingpong application](https://netsec-ethz.github.io/scion-tutorials/general_scion_configuration/verifying_scion_installation/#run-pingpong-client) on an Android smartphone.
 You can view its source code at <https://gitlab.com/android-scion/android-scion>.

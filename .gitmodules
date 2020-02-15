@@ -1,12 +1,4 @@
-[submodule "app/src/main/cpp/gobind-scion"]
-	path = app/src/main/cpp/gobind-scion
-	url = git@gitlab.com:android-scion/gobind-scion.git
-[submodule "app/src/main/cpp/uthash"]
-	path = app/src/main/cpp/uthash
-	url = https://github.com/troydhanson/uthash.git
-[submodule "app/src/main/cpp/zlog"]
-	path = app/src/main/cpp/zlog
-	url = https://github.com/HardySimpson/zlog.git
-[submodule "app/src/main/cpp/bionic"]
-	path = app/src/main/cpp/bionic
-	url = https://android.googlesource.com/platform/bionic
+[submodule "app/src/main/jniLibs"]
+	path = app/src/main/jniLibs
+	url = https://github.com/ekuiter/scion-android-binaries.git
+	branch = jniLibs
