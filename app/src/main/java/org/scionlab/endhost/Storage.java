@@ -19,8 +19,6 @@ package org.scionlab.endhost;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -37,21 +35,19 @@ import java.util.Objects;
  * In general, we try to store as much files externally as possible to facilitate debugging.
  */
 class Storage {
-    @NonNull
     private Context context;
     boolean useExternalFilesDir = false;
 
-    private Storage(@NonNull Context context) {
+    private Storage(Context context) {
         this.context = context;
     }
 
-    @NonNull
     static Storage from(Context context) {
         return new Storage(context);
     }
 
     static class External extends Storage {
-        private External(@NonNull Context context) {
+        private External(Context context) {
             super(context);
             this.useExternalFilesDir = true;
         }
@@ -61,19 +57,17 @@ class Storage {
         }
     }
 
-    @NonNull
-    String getAbsolutePath(@NonNull String path) {
+    String getAbsolutePath(String path) {
         return new File(getFilesDir(context), path).getAbsolutePath();
     }
 
-    private File getFilesDir(@NonNull Context context) {
+    private File getFilesDir(Context context) {
         return useExternalFilesDir
             ? context.getExternalFilesDir(null)
             : context.getFilesDir();
     }
 
-    @NonNull
-    String readAssetFile(@NonNull String path) {
+    String readAssetFile(String path) {
         try(BufferedReader br = new BufferedReader(new InputStreamReader(context.getAssets().open(path)))) {
             StringBuilder sb = new StringBuilder();
             for (String line = br.readLine(); line != null; line = br.readLine()) {
@@ -87,12 +81,12 @@ class Storage {
         }
     }
 
-    private void createApplicationDirectory(@NonNull String path) {
+    private void createApplicationDirectory(String path) {
         //noinspection ResultOfMethodCallIgnored
         new File(getFilesDir(context), path).mkdirs();
     }
 
-    private int countFilesInDirectory(@NonNull File file) {
+    private int countFilesInDirectory(File file) {
         int counted = Boolean.compare(file.exists(), false);
         if (file.isDirectory())
             for (File c : Objects.requireNonNull(file.listFiles()))
@@ -100,7 +94,7 @@ class Storage {
         return counted;
     }
 
-    private int deleteFileOrDirectory(@NonNull File file) {
+    private int deleteFileOrDirectory(File file) {
         int deleted = 0;
         if (file.isDirectory())
             for (File c : Objects.requireNonNull(file.listFiles()))
@@ -109,13 +103,12 @@ class Storage {
         return deleted;
     }
 
-    int deleteFileOrDirectory(@NonNull String path) {
+    int deleteFileOrDirectory(String path) {
         File f = new File(getFilesDir(context), path);
         return countFilesInDirectory(f) - deleteFileOrDirectory(f);
     }
 
-    @NonNull
-    File createFile(@NonNull String path) {
+    File createFile(String path) {
         File f = new File(getFilesDir(context), path);
         if (f.getParentFile() != null && !f.getParentFile().exists())
             createApplicationDirectory(Objects.requireNonNull(f.getParent()));
@@ -130,8 +123,7 @@ class Storage {
         return f;
     }
 
-    @NonNull
-    File writeFile(@NonNull String path, @NonNull String content) {
+    File writeFile(String path, String content) {
         deleteFileOrDirectory(path);
         File f = createFile(path);
         try {

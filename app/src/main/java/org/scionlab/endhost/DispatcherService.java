@@ -19,8 +19,6 @@ package org.scionlab.endhost;
 
 import android.content.Intent;
 
-import androidx.annotation.NonNull;
-
 public class DispatcherService extends BackgroundService {
     public DispatcherService(String name) {
         super(name);
@@ -35,7 +33,6 @@ public class DispatcherService extends BackgroundService {
         return 0;
     }
 
-    @NonNull
     @Override
     protected String getTag() {
         return null;

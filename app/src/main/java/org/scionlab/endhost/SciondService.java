@@ -19,9 +19,6 @@ package org.scionlab.endhost;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
 
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
@@ -154,7 +151,7 @@ public class SciondService extends BackgroundService {
         die(R.string.servicereturn, ret);
     }
 
-    static Optional<File> findSciondToml(@NonNull Context ctx) {
+    static Optional<File> findSciondToml(Context ctx) {
         final File dir = new File(ctx.getFilesDir(), "endhost");
         for (final File child : dir.listFiles()) {
             if (child.isFile() && child.getName().matches("^s.*d\\.toml$")) {
@@ -169,7 +166,6 @@ public class SciondService extends BackgroundService {
         return NID;
     }
 
-    @NonNull
     @Override
     protected String getTag() {
         return TAG;

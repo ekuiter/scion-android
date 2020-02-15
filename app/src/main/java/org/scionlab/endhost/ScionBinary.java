@@ -20,17 +20,12 @@ package org.scionlab.endhost;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 class ScionBinary {
@@ -40,7 +35,7 @@ class ScionBinary {
     private static final String DAEMON_FLAG = "sciond";
     private static final String CONFIG_FLAG = "-lib_env_config";
 
-    private static Process startProcess(@NonNull Context context, @NonNull Map<String, String> env, @NonNull String... args) {
+    private static Process startProcess(Context context, Map<String, String> env, String... args) {
         String nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
         Log.i(TAG, "starting native SCION binary located in " + nativeLibraryDir);
 
@@ -65,7 +60,7 @@ class ScionBinary {
         }
     }
 
-    private static int runProcess(@NonNull Context context, Utils.ConsumeOutputThread consumeOutputThread, @NonNull Map<String, String> env, @NonNull String... args) {
+    private static int runProcess(Context context, Utils.ConsumeOutputThread consumeOutputThread, Map<String, String> env, String... args) {
         Process process = startProcess(context, env, args);
         int ret;
 

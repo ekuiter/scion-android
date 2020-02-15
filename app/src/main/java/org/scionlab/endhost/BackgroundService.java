@@ -28,7 +28,6 @@ import android.os.Process;
 import android.util.Log;
 
 import androidx.annotation.CallSuper;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.app.NotificationCompat;
@@ -78,8 +77,7 @@ public abstract class BackgroundService extends IntentService {
         startForeground(getNotificationId(), notificationBuilder.build());
     }
 
-    @NonNull
-    public static String commandLine(boolean addSockets, @NonNull String... args) {
+    public static String commandLine(boolean addSockets, String... args) {
         List<String> additional = new LinkedList<>();
         if (addSockets && Arrays.stream(args).noneMatch("-sciond"::equals)) {
             additional.add("-sciond");
@@ -115,7 +113,6 @@ public abstract class BackgroundService extends IntentService {
 
     protected abstract int getNotificationId();
 
-    @NonNull
     protected abstract String getTag();
 
     protected void die(@StringRes int resID, Object... formatArgs) {
@@ -164,8 +161,7 @@ public abstract class BackgroundService extends IntentService {
         notificationManager.notify(getNotificationId(), notificationBuilder.build());
     }
 
-    @NonNull
-    protected File mkdir(@NonNull String path) {
+    protected File mkdir(String path) {
         File dir = new File(path.startsWith("/") ? null : getFilesDir(), path);
         boolean existed = dir.exists();
         boolean success = dir.mkdirs();
@@ -173,8 +169,7 @@ public abstract class BackgroundService extends IntentService {
         return dir;
     }
 
-    @NonNull
-    protected File mkfile(@NonNull String filePath) {
+    protected File mkfile(String filePath) {
         File f = new File(filePath.startsWith("/") ? null : getFilesDir(), filePath);
         boolean existed = f.exists();
         boolean success = false;
@@ -191,7 +186,7 @@ public abstract class BackgroundService extends IntentService {
         return f;
     }
 
-    protected int delete(@NonNull String path) {
+    protected int delete(String path) {
         File f = new File(path.startsWith("/") ? null : getFilesDir(), path);
         boolean existed = f.exists();
         int left = countRecursively(f) - deleteRecursively(f);
@@ -199,7 +194,7 @@ public abstract class BackgroundService extends IntentService {
         return left;
     }
 
-    protected int copy(@NonNull String source, @NonNull String target) {
+    protected int copy(String source, String target) {
         File src = new File(source.startsWith("/") ? null : getFilesDir(), source);
         File tgt = new File(target.startsWith("/") ? null : getFilesDir(), target);
         boolean existed = src.exists();
@@ -208,7 +203,7 @@ public abstract class BackgroundService extends IntentService {
         return left;
     }
 
-    private int countRecursively(@NonNull File file) {
+    private int countRecursively(File file) {
         int counted = Boolean.compare(file.exists(), false);
         if (file.isDirectory()) {
             for (File c : file.listFiles()) {
@@ -218,7 +213,7 @@ public abstract class BackgroundService extends IntentService {
         return counted;
     }
 
-    private int deleteRecursively(@NonNull File file) {
+    private int deleteRecursively(File file) {
         int deleted = 0;
         if (file.isDirectory()) {
             for (File c : file.listFiles()) {
@@ -229,7 +224,7 @@ public abstract class BackgroundService extends IntentService {
         return deleted;
     }
 
-    private int copyRecursively(@NonNull File src, @NonNull File tgt) {
+    private int copyRecursively(File src, File tgt) {
         int copied = 0;
         if (src.isDirectory()) {
             copied += Boolean.compare(tgt.mkdirs(), false);
