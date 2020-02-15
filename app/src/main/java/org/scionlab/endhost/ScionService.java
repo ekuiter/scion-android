@@ -22,11 +22,14 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
+
 import java.io.File;
 import java.util.function.Supplier;
 
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
+    private static final int NOTIFICATION_ID  = 1;
     private Thread dispatcherThread, daemonThread;
 
     public ScionService() {
@@ -36,6 +39,11 @@ public class ScionService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "starting SCION service");
+
+        // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, MainActivity.SERVICE_CHANNEL)
+                .setSmallIcon(R.drawable.ic_scion_logo);
+        startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
         dispatcherThread = new Thread(() -> {
             final String socketPath = ScionConfig.Dispatcher.SOCKET_PATH;
@@ -75,6 +83,7 @@ public class ScionService extends Service {
         Log.i(TAG, "stopping SCION service");
         dispatcherThread.interrupt();
         daemonThread.interrupt();
+        stopForeground(STOP_FOREGROUND_REMOVE);
     }
 
     @Override
