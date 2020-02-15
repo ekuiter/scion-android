@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class ScionProcess {
+public class ScionBinary {
     private static final String BINARY = "libscion-android.so";
-    private static final String TAG = "ScionProcess";
+    private static final String TAG = "ScionBinary";
 
     public static int run(Context applicationContext, String... args) {
         Log.i(TAG, "running SCION process");

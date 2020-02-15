@@ -46,8 +46,6 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
 
-import scmp.Scmp;
-
 public class ScmpService extends BackgroundService {
 
     public static final String PARAM_ARGS_QUERY = ScmpService.class.getCanonicalName() + ".CONFIG_PATH";
@@ -121,7 +119,8 @@ public class ScmpService extends BackgroundService {
             die(R.string.serviceexception, e.getLocalizedMessage());
             return;
         }
-        long ret = Scmp.main(arguments, "", getFilesDir().getAbsolutePath());
+        long ret = 0; // TODO
+        // long ret = Scmp.main(arguments, "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
     }
 }

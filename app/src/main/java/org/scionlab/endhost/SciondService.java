@@ -19,6 +19,7 @@ package org.scionlab.endhost;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -33,11 +34,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import sciond.Sciond;
-
 public class SciondService extends BackgroundService {
-    public static final String DEFAULT_SCIOND_SOCKET_PATH = "run/shm/sciond/default.sock";
-    public static final String DEFAULT_SCIOND_UNIX_PATH = DEFAULT_SCIOND_SOCKET_PATH.replaceFirst("^(.*\\.)sock$", "\1unix");
+    public static String DEFAULT_SCIOND_SOCKET_PATH;
+    public static String DEFAULT_SCIOND_UNIX_PATH;
     public static String SCIOND_SOCKET_PATH = DEFAULT_SCIOND_SOCKET_PATH;
     public static String SCIOND_UNIX_PATH = DEFAULT_SCIOND_UNIX_PATH;
     public static final String PARAM_CONFIG_PATH = SciondService.class.getCanonicalName() + ".CONFIG_PATH";
@@ -52,6 +51,8 @@ public class SciondService extends BackgroundService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        DEFAULT_SCIOND_SOCKET_PATH = getFilesDir() + "/sciond.sock";
+        DEFAULT_SCIOND_UNIX_PATH = DEFAULT_SCIOND_SOCKET_PATH.replaceFirst("^(.*\\.)sock$", "\1unix");
         if (intent == null) return;
         super.onHandleIntent(intent);
         String confPath = intent.getStringExtra(PARAM_CONFIG_PATH);
@@ -149,7 +150,7 @@ public class SciondService extends BackgroundService {
         log(R.string.servicestart);
         setupLogUpdater(log).start();
 
-        long ret = Sciond.main(commandLine(false, "-config", confFile.get().getAbsolutePath()), "", getFilesDir().getAbsolutePath());
+        int ret = ScionBinary.run(getApplicationContext(), "sciond", "-lib_env_config", confFile.get().getAbsolutePath(), "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
     }
 

@@ -18,14 +18,12 @@
 package org.scionlab.endhost;
 
 import android.content.Intent;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 public class DispatcherService extends BackgroundService {
     private static final int NID = 1;
@@ -69,7 +67,7 @@ public class DispatcherService extends BackgroundService {
 
             log(R.string.servicestart);
             setupLogUpdater(log).start();
-            int ret = ScionProcess.run(getApplicationContext(), "godispatcher", "-lib_env_config", conf.getAbsolutePath());
+            int ret = ScionBinary.run(getApplicationContext(), "godispatcher", "-lib_env_config", conf.getAbsolutePath());
             die(R.string.servicereturn, ret);
         } catch (Exception e) {
             die(R.string.serviceexception, e.getLocalizedMessage());
