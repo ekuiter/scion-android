@@ -27,6 +27,7 @@
             android:name=".ScmpService"
             android:exported="false"
             android:process=":ScmpService" />
+        <service android:name=".ScionService"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>

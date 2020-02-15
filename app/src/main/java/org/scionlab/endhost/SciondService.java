@@ -87,7 +87,7 @@ public class SciondService extends BackgroundService {
                 conf.put("general", general);
             }
             general.put("ConfigDir", confDir);
-            general.put("DispatcherPath", DispatcherService.SOCKET_PATH);
+            general.put("DispatcherPath", ScionConfig.Dispatcher.SOCKET_PATH);
             Map<String, Object> sd = (Map<String, Object>) conf.get("sd");
             if (sd == null) {
                 sd = new HashMap<>();
@@ -148,7 +148,7 @@ public class SciondService extends BackgroundService {
         File log = mkfile(logFile);
 
         log(R.string.servicestart);
-        setupLogUpdater(log).start();
+        // setupLogUpdater(log).start();
 
         int ret = 0; // int ret = ScionBinary.run(getApplicationContext(), "sciond", "-lib_env_config", confFile.get().getAbsolutePath(), "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
@@ -173,11 +173,5 @@ public class SciondService extends BackgroundService {
     @Override
     protected String getTag() {
         return TAG;
-    }
-
-    @NonNull
-    @Override
-    protected Pattern getLogDeleter() {
-        return LOG_DELETER_PATTERN;
     }
 }

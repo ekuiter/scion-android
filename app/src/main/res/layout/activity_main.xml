@@ -21,29 +21,37 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center">
-    <androidx.appcompat.widget.AppCompatButton
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/scionbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/scion2button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/dispbutton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-    <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/sciondbutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/scmpbutton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/scmpcmdline"
-            android:labelFor="@id/scmpcmdline">
-        <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/scmpcmdline"
+        <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/sciondbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/scmpbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:importantForAutofill="no"
-                android:inputType="textMultiLine|textVisiblePassword"/>
-    </com.google.android.material.textfield.TextInputLayout>
+                android:hint="@string/scmpcmdline"
+                android:labelFor="@id/scmpcmdline">
+            <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/scmpcmdline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textVisiblePassword"/>
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 </LinearLayout>

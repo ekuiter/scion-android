@@ -21,55 +21,23 @@ import android.content.Intent;
 
 import androidx.annotation.NonNull;
 
-import java.io.File;
-
 public class DispatcherService extends BackgroundService {
-    private static final int NID = 1;
-    private static final String TAG = "dispatcher";
-    private static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml";
-    private static final String CONFIG_PATH = "dispatcher.toml";
-    private static final String LOG_PATH = "dispatcher.log";
-    public static final String SOCKET_PATH = "dispatcher.sock";
+    public DispatcherService(String name) {
+        super(name);
+    }
 
-    public DispatcherService() {
-        super("DispatcherService");
+    protected void onHandleIntent(Intent intent) {
+        super.onHandleIntent(intent);
     }
 
     @Override
     protected int getNotificationId() {
-        return NID;
+        return 0;
     }
 
     @NonNull
     @Override
     protected String getTag() {
-        return TAG;
-    }
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        if (intent == null)
-            return;
-        super.onHandleIntent(intent);
-
-        log(R.string.servicesetup);
-
-        Storage internalStorage = Storage.from(this),
-                externalStorage = Storage.External.from(this);
-
-        internalStorage.deleteFileOrDirectory(SOCKET_PATH);
-        externalStorage.deleteFileOrDirectory(LOG_PATH);
-        File log = externalStorage.createFile(LOG_PATH);
-
-        File configFile = externalStorage.writeFile(CONFIG_PATH, String.format(
-                internalStorage.readAssetFile(CONFIG_TEMPLATE_PATH),
-                internalStorage.getAbsolutePath(SOCKET_PATH),
-                externalStorage.getAbsolutePath(LOG_PATH)));
-
-        log(R.string.servicestart);
-        setupLogUpdater(log).start();
-        int ret = ScionBinary.runDispatcher(
-                this, line -> log(R.string.servicestring, line), configFile.getAbsolutePath());
-        die(R.string.servicereturn, ret);
+        return null;
     }
 }

@@ -28,7 +28,6 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,10 +39,6 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.material.textfield.TextInputEditText;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -96,24 +91,45 @@ public class MainActivity extends AppCompatActivity {
         prefs = getPreferences(MODE_PRIVATE);
 
         buttons = new AppCompatButton[] {
+                findViewById(R.id.scionbutton),
+                findViewById(R.id.scion2button),
                 findViewById(R.id.sciondbutton),
                 findViewById(R.id.dispbutton),
                 findViewById(R.id.scmpbutton)
         };
 
         buttonTextResIds = new int[][] {
+                { R.string.scionbuttonstart, R.string.scionbuttonstart },
+                { R.string.scion2buttonstart, R.string.scion2buttonstart },
                 { R.string.sciondbuttonstart, R.string.sciondbuttonstop },
                 { R.string.dispbuttonstart, R.string.dispbuttonstop },
                 { R.string.scmpbuttonstart, R.string.scmpbuttonstop }
         };
 
         classes = new Class[] {
+                ScionService.class,
+                ScionService.class,
                 SciondService.class,
                 DispatcherService.class,
                 ScmpService.class
         };
 
         buttonClicks = new View.OnClickListener[][]{
+                {
+                        view -> {
+                            ensureWritePermissions();
+                            startService(new Intent(this, ScionService.class));
+                            activateButtons();
+                        },
+                        null
+                },
+                {
+                        view -> {
+                            stopService(new Intent(this, ScionService.class));
+                            activateButtons();
+                        },
+                        null
+                },
                 {
                         view ->
                                 new ChooserDialog(view.getContext())
@@ -123,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                                         .withChosenListener((path, pathFile) ->
                                                 (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {
                                                     ensureWritePermissions();
-                                                    startService(new Intent(this, classes[0])
+                                                    startService(new Intent(this, classes[2])
                                                             .putExtra(SciondService.PARAM_CONFIG_PATH, p));
                                                     putString(SCIOND_CFG_PATH, p);
                                                     activateButtons();
@@ -134,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 {
                         view -> {
                             ensureWritePermissions();
-                            startService(new Intent(this, classes[1]));
+                            startService(new Intent(this, classes[3]));
                             activateButtons();
                         },
                         null
@@ -146,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                                     .map(CharSequence::toString)
                                     .orElse("");
                             startService(
-                                    new Intent(this, classes[2])
+                                    new Intent(this, classes[4])
                                             .putExtra(
                                                     "", // ScmpService.PARAM_ARGS_QUERY,
                                                     BackgroundService.commandLine(true, cmdLine.split("\n"))
@@ -229,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
             buttons[i].setOnClickListener(buttonClicks[i][running[i] ? 1 : 0]);
             buttons[i].setText(buttonTextResIds[i][running[i] ? 1 : 0]);
         }
-        buttons[2].setEnabled((running[0] && running[1]) || running[2]);
+        buttons[4].setEnabled((running[2] && running[3]) || running[4]);
     }
 
     private void ensureWritePermissions() {

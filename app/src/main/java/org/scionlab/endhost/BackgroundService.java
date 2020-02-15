@@ -21,10 +21,8 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.IntentService;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Process;
 import android.util.Log;
@@ -35,11 +33,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.app.NotificationCompat;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,20 +43,17 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class BackgroundService extends IntentService {
-    private NotificationCompat.Builder notifB;
-    private NotificationManager notifM;
-    private StringBuffer notifLog;
-    private Resources res;
-    private boolean runLogUpdater;
+    private NotificationCompat.Builder notificationBuilder;
+    private NotificationManager notificationManager;
+    private StringBuffer notificationLog;
+    private Resources resources;
     private Intent activityResetIntent;
 
     private static final int MAX_NOTIFICATION_LENGTH = 5 * 1024;
-    private static final Pattern EMPTY_LOG_DELETER_PATTERN = Pattern.compile("");
 
     @Override
     @CallSuper
@@ -71,44 +64,18 @@ public abstract class BackgroundService extends IntentService {
         String tag = getTag();
         String tagHead = tag.isEmpty() ? tag : tag.substring(0, 1);
         String tagTail = tag.isEmpty() ? tag : tag.substring(1);
-        res = getResources();
-        notifB = new NotificationCompat.Builder(this, MainActivity.SERVICE_CHANNEL)
-                .setContentTitle(res.getString(R.string.servicetitle, tagHead, tagTail))
+        resources = getResources();
+        notificationBuilder = new NotificationCompat.Builder(this, MainActivity.SERVICE_CHANNEL)
+                .setContentTitle(resources.getString(R.string.servicetitle, tagHead, tagTail))
                 .setSmallIcon(R.drawable.ic_scion_logo);
-        notifM = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notifLog = new StringBuffer();
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationLog = new StringBuffer();
     }
 
     @Override
     @CallSuper
     protected void onHandleIntent(@Nullable Intent intent) {
-        startForeground(getNotificationId(), notifB.build());
-    }
-
-    @NonNull
-    protected Thread setupLogUpdater(@NonNull File log) {
-        runLogUpdater = true;
-        return new Thread(() -> {
-            try(BufferedReader logReader = new BufferedReader(new FileReader(log))) {
-                while(shouldLogUpdaterRun()) {
-                    boolean logChanged = false;
-                    for (String line = logReader.readLine(); line != null; line = logReader.readLine()) {
-                        // Mind the order; don't short-circuit the logging!
-                        logChanged = log(getLogDeleter().matcher(line).replaceAll("")) > 0 || logChanged;
-                    }
-                    if (logChanged) {
-                        updateNotification();
-                    }
-
-                    Thread.sleep(getLogUpdateWaitTime());
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                log(R.string.serviceexceptioninfo, e);
-            } catch (InterruptedException e) {
-                // Why not…
-            }
-        });
+        startForeground(getNotificationId(), notificationBuilder.build());
     }
 
     @NonNull
@@ -120,22 +87,11 @@ public abstract class BackgroundService extends IntentService {
         }
         if (addSockets && Arrays.stream(args).noneMatch("-dispatcher"::equals)) {
             additional.add("-dispatcher");
-            additional.add(DispatcherService.SOCKET_PATH);
+            additional.add(ScionConfig.Dispatcher.SOCKET_PATH);
         }
         //noinspection deprecation
         return Stream.concat(Arrays.stream(args), additional.stream())
                 .map(URLEncoder::encode)
-                .collect(Collectors.joining("&"));
-    }
-
-    @NonNull
-    public static String env(@NonNull String[]... env) {
-        //noinspection deprecation
-        return Arrays.stream(env)
-                .filter(kv -> kv.length >= 2)
-                .map(kv -> Arrays.stream(kv)
-                        .map(URLEncoder::encode)
-                        .collect(Collectors.joining("=")))
                 .collect(Collectors.joining("&"));
     }
 
@@ -162,21 +118,7 @@ public abstract class BackgroundService extends IntentService {
     @NonNull
     protected abstract String getTag();
 
-    @NonNull
-    protected Pattern getLogDeleter() {
-        return EMPTY_LOG_DELETER_PATTERN;
-    }
-
-    protected long getLogUpdateWaitTime() {
-        return 1000;
-    }
-
-    protected boolean shouldLogUpdaterRun() {
-        return runLogUpdater;
-    }
-
     protected void die(@StringRes int resID, Object... formatArgs) {
-        runLogUpdater = false;
         log(resID, formatArgs);
         stopForeground(STOP_FOREGROUND_DETACH);
     }
@@ -194,7 +136,7 @@ public abstract class BackgroundService extends IntentService {
         String tag = getTag();
         String tagHead = tag.isEmpty() ? tag : tag.substring(0, 1);
         String tagTail = tag.isEmpty() ? tag : tag.substring(1);
-        String line = res.getString(
+        String line = resources.getString(
                 resId,
                 Stream.concat(
                         Stream.of(tagHead, tagTail),
@@ -212,14 +154,14 @@ public abstract class BackgroundService extends IntentService {
 
         // write to android log
         Log.d(getTag(), line);
-        notifLog.insert(0, line + '\n');
+        notificationLog.insert(0, line + '\n');
         return line.length();
     }
 
     private void updateNotification() {
-        notifLog.setLength(Math.min(MAX_NOTIFICATION_LENGTH, notifLog.length()));
-        notifB.setStyle(new NotificationCompat.BigTextStyle().bigText(notifLog));
-        notifM.notify(getNotificationId(), notifB.build());
+        notificationLog.setLength(Math.min(MAX_NOTIFICATION_LENGTH, notificationLog.length()));
+        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(notificationLog));
+        notificationManager.notify(getNotificationId(), notificationBuilder.build());
     }
 
     @NonNull

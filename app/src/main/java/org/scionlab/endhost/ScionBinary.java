@@ -22,22 +22,22 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ScionBinary {
+class ScionBinary {
     private static final String TAG = "ScionBinary";
     private static final String BINARY_PATH = "libscion-android.so";
     private static final String DISPATCHER_FLAG = "godispatcher";
-    private static final String SCIOND_FLAG = "sciond";
+    private static final String DAEMON_FLAG = "sciond";
     private static final String CONFIG_FLAG = "-lib_env_config";
 
     private static Process startProcess(@NonNull Context context, @NonNull Map<String, String> env, @NonNull String... args) {
@@ -65,30 +65,32 @@ public class ScionBinary {
         }
     }
 
-    public static int runProcess(@NonNull Context context, Consumer<String> outputConsumer, @NonNull Map<String, String> env, @NonNull String... args) {
-        if (outputConsumer == null)
-            outputConsumer = line -> Log.i(TAG, line);
+    private static int runProcess(@NonNull Context context, Utils.ConsumeOutputThread consumeOutputThread, @NonNull Map<String, String> env, @NonNull String... args) {
         Process process = startProcess(context, env, args);
         int ret;
 
         if (process == null)
             ret = -1;
         else {
-            try(BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                for (String line = br.readLine(); line != null; line = br.readLine())
-                    outputConsumer.accept(line);
+            // this should create a separate thread that is only used to consume each line of the
+            // process' stdout/stderr stream (see Utils.outputConsumerThread)
+            consumeOutputThread.setInputStream(process.getInputStream()).start();
+
+            // block until the process dies or the current thread is interrupted, in which case we kill the process
+            try {
                 ret = process.waitFor();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
+            } catch (InterruptedException e) {
+                Log.i(TAG, "thread was interrupted, stopping SCION process");
+                process.destroy();
                 ret = -1;
             }
         }
 
-        Log.i(TAG, "SCION exited with " + ret);
+        Log.i(TAG, "SCION process exited with " + ret);
         return ret;
     }
 
-    public static int runDispatcher(Context context, Consumer<String> outputConsumer, String configPath) {
-        return runProcess(context, outputConsumer, new HashMap<>(), DISPATCHER_FLAG, ScionBinary.CONFIG_FLAG, configPath);
+    static int runDispatcher(Context context, Utils.ConsumeOutputThread consumeOutputThread, String configPath) {
+        return runProcess(context, consumeOutputThread, new HashMap<>(), DISPATCHER_FLAG, ScionBinary.CONFIG_FLAG, configPath);
     }
 }
