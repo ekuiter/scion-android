@@ -30,20 +30,24 @@ import java.util.stream.Collectors;
 
 class ScionBinary {
     private static final String TAG = "ScionBinary";
-    private static final String BINARY_PATH = "libscion-android.so";
-    private static final String DISPATCHER_FLAG = "godispatcher";
-    private static final String DAEMON_FLAG = "sciond";
-    private static final String CONFIG_FLAG = "-lib_env_config";
+    private static boolean initialized = false;
 
     private static Process startProcess(Context context, Map<String, String> env, String... args) {
         String nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
-        Log.i(TAG, "starting native SCION binary located in " + nativeLibraryDir);
+        if (!initialized) {
+            Log.i(TAG, "native SCION binary is located in " + nativeLibraryDir);
+            initialized = true;
+        }
 
         ArrayList<String> command = new ArrayList<>();
-        command.add("./" + BINARY_PATH);
+        command.add("./" + ScionConfig.Binary.PATH);
         command.addAll(Arrays.asList(args));
         //noinspection SimplifyStreamApiCallChains
-        Log.i(TAG, command.stream().collect(Collectors.joining(" ")));
+
+        Log.i(TAG, String.format("%s %s",
+                env.entrySet().stream().map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+                        .collect(Collectors.joining(" ")),
+                command.stream().collect(Collectors.joining(" "))).trim());
 
         ProcessBuilder processBuilder = new ProcessBuilder()
                 .directory(new File(nativeLibraryDir))
@@ -86,6 +90,14 @@ class ScionBinary {
     }
 
     static int runDispatcher(Context context, Utils.ConsumeOutputThread consumeOutputThread, String configPath) {
-        return runProcess(context, consumeOutputThread, new HashMap<>(), DISPATCHER_FLAG, ScionBinary.CONFIG_FLAG, configPath);
+        return runProcess(context, consumeOutputThread, new HashMap<>(),
+                ScionConfig.Binary.DISPATCHER_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
+    }
+
+    static int runDaemon(Context context, Utils.ConsumeOutputThread consumeOutputThread, String configPath, String dispatcherSocketPath) {
+        HashMap<String, String> env = new HashMap<>();
+        env.put(ScionConfig.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
+        return runProcess(context, consumeOutputThread, env,
+                ScionConfig.Binary.DAEMON_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
     }
 }

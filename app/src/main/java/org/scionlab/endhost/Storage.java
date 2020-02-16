@@ -21,10 +21,15 @@ import android.content.Context;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Utilities for handling files and directories.
@@ -57,14 +62,22 @@ class Storage {
         }
     }
 
-    String getAbsolutePath(String path) {
-        return new File(getFilesDir(context), path).getAbsolutePath();
-    }
-
     private File getFilesDir(Context context) {
         return useExternalFilesDir
             ? context.getExternalFilesDir(null)
             : context.getFilesDir();
+    }
+
+    File getFile(String path) {
+        return new File(getFilesDir(context), path);
+    }
+
+    private String getPath(File file) {
+        return getFilesDir(context).toURI().relativize(file.toURI()).getPath();
+    }
+
+    String getAbsolutePath(String path) {
+        return getFile(path).getAbsolutePath();
     }
 
     String readAssetFile(String path) {
@@ -83,7 +96,7 @@ class Storage {
 
     private void createApplicationDirectory(String path) {
         //noinspection ResultOfMethodCallIgnored
-        new File(getFilesDir(context), path).mkdirs();
+        getFile(path).mkdirs();
     }
 
     private int countFilesInDirectory(File file) {
@@ -103,13 +116,36 @@ class Storage {
         return deleted;
     }
 
+    private int copyFileOrDirectory(File src, File dst) {
+        int copied = 0;
+        if (src.isDirectory()) {
+            copied += Boolean.compare(dst.mkdirs(), false);
+            for (File c : Objects.requireNonNull(src.listFiles()))
+                copied += copyFileOrDirectory(c, new File(dst, c.getName()));
+        } else {
+            byte[] buffer = new byte[4096];
+            try (InputStream in = new FileInputStream(src); OutputStream out = new FileOutputStream(dst)) {
+                for (int len = in.read(buffer); len > 0; len = in.read(buffer))
+                    out.write(buffer, 0, len);
+                copied++;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return copied;
+    }
+
     int deleteFileOrDirectory(String path) {
-        File f = new File(getFilesDir(context), path);
+        File f = getFile(path);
         return countFilesInDirectory(f) - deleteFileOrDirectory(f);
     }
 
-    File createFile(String path) {
-        File f = new File(getFilesDir(context), path);
+    int copyFileOrDirectory(File src, String dstPath) {
+        return countFilesInDirectory(src) - copyFileOrDirectory(src, getFile(dstPath));
+    }
+
+    void createFile(String path) {
+        File f = getFile(path);
         if (f.getParentFile() != null && !f.getParentFile().exists())
             createApplicationDirectory(Objects.requireNonNull(f.getParent()));
 
@@ -119,21 +155,29 @@ class Storage {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return f;
     }
 
-    File writeFile(String path, String content) {
+    void writeFile(String path, String content) {
         deleteFileOrDirectory(path);
-        File f = createFile(path);
+        createFile(path);
         try {
-            FileWriter writer = new FileWriter(f);
+            FileWriter writer = new FileWriter(getFile(path));
             writer.write(content);
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
-        return f;
+    Optional<String> findFirstMatchingFileInDirectory(String path, String regex) {
+        final File dir = getFile(path);
+        if (!dir.isDirectory())
+            return Optional.empty();
+
+        for (final File child : Objects.requireNonNull(dir.listFiles()))
+            if (child.isFile() && child.getName().matches(regex))
+                return Optional.of(getPath(child));
+
+        return Optional.empty();
     }
 }

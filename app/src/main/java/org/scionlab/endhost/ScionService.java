@@ -42,8 +42,9 @@ public class ScionService extends Service {
                 .setSmallIcon(R.drawable.ic_scion_logo);
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
+        // start SCION dispatcher and daemon
         dispatcherThread = new DispatcherThread(this);
-        daemonThread = new DaemonThread(this);
+        daemonThread = new DaemonThread(this, "/storage/D2BE-66F2/endhost");
         dispatcherThread.start();
         daemonThread.start();
     }

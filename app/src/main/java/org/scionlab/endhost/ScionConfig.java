@@ -19,13 +19,31 @@ package org.scionlab.endhost;
 
 import java.util.regex.Pattern;
 
-public class ScionConfig {
+class ScionConfig {
+    static class Binary {
+        static final String PATH = "libscion-android.so"; // file name of SCION binary as located in jniLabs subdirectories
+        static final String DISPATCHER_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher
+        static final String DAEMON_FLAG = "sciond"; // value of binary's first argument to run the daemon
+        static final String CONFIG_FLAG = "-lib_env_config"; // flag that specifies a configuration file
+        static final String DISPATCHER_SOCKET_ENV = "DISPATCHER_SOCKET"; // environment variable that specifies the dispatcher socket
+    }
+
     static class Dispatcher {
         static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "dispatcher.toml"; // path to configuration file created in external storage
         static final String LOG_PATH = "dispatcher.log"; // path to log file created in external storage
         static final String SOCKET_PATH = "dispatcher.sock"; // path to socket created in internal storage
-        static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] ");
+        static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
+        static final long LOG_UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
+    }
+
+    static class Daemon {
+        static final String CONFIG_DIRECTORY_PATH = "endhost"; // path to configuration directory created in external storage
+        static final String CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for configuration file located in configuration directory
+        static final String LOG_PATH = "daemon.log"; // path to log file created in external storage
+        static final String RELIABLE_SOCKET_PATH = "daemon.reliable.sock"; // path to reliable socket created in internal storage
+        static final String UNIX_SOCKET_PATH = "daemon.unix.sock"; // path to UNIX socket created in internal storage
+        static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
         static final long LOG_UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
     }
 }

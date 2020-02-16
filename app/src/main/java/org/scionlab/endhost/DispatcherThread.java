@@ -20,29 +20,28 @@ package org.scionlab.endhost;
 import android.content.Context;
 import android.util.Log;
 
-import java.io.File;
 import java.util.function.Supplier;
 
 public class DispatcherThread extends Thread {
     private static final String TAG = "DispatcherThread";
     private Context context;
 
-    public DispatcherThread(Context context) {
+    DispatcherThread(Context context) {
         this.context = context;
     }
 
     @Override
     public void run() {
-        final String socketPath = ScionConfig.Dispatcher.SOCKET_PATH;
+        final String configPath = ScionConfig.Dispatcher.CONFIG_PATH;
         final String logPath = ScionConfig.Dispatcher.LOG_PATH;
+        final String socketPath = ScionConfig.Dispatcher.SOCKET_PATH;
         final Storage internalStorage = Storage.from(context),
                 externalStorage = Storage.External.from(context);
 
         internalStorage.deleteFileOrDirectory(socketPath);
         externalStorage.deleteFileOrDirectory(logPath);
-
-        File logFile = externalStorage.createFile(logPath);
-        File configFile = externalStorage.writeFile(ScionConfig.Dispatcher.CONFIG_PATH, String.format(
+        externalStorage.createFile(logPath);
+        externalStorage.writeFile(configPath, String.format(
                 internalStorage.readAssetFile(ScionConfig.Dispatcher.CONFIG_TEMPLATE_PATH),
                 internalStorage.getAbsolutePath(socketPath),
                 externalStorage.getAbsolutePath(logPath)));
@@ -53,7 +52,9 @@ public class DispatcherThread extends Thread {
                         ScionConfig.Dispatcher.LOG_DELETER_PATTERN,
                         ScionConfig.Dispatcher.LOG_UPDATE_INTERVAL);
 
-        consumeOutputThreadSupplier.get().setFile(logFile).start();
-        ScionBinary.runDispatcher(context, consumeOutputThreadSupplier.get(), configFile.getAbsolutePath());
+        consumeOutputThreadSupplier.get().setFile(externalStorage.getFile(logPath)).start();
+        ScionBinary.runDispatcher(context,
+                consumeOutputThreadSupplier.get(),
+                externalStorage.getAbsolutePath(configPath));
     }
 }
