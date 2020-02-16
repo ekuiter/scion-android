@@ -116,11 +116,20 @@ public class MainActivity extends AppCompatActivity {
 
         buttonClicks = new View.OnClickListener[][]{
                 {
-                        view -> {
-                            ensureWritePermissions();
-                            startService(new Intent(this, ScionService.class));
-                            activateButtons();
-                        },
+                        view ->
+                                new ChooserDialog(view.getContext())
+                                        .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
+                                        .withFilter(true, true)
+                                        .withStartFile(prefs.getString(SCIOND_CFG_PATH, null))
+                                        .withChosenListener((path, pathFile) ->
+                                                (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {
+                                                    ensureWritePermissions();
+                                                    startService(new Intent(this, ScionService.class)
+                                                            .putExtra(ScionService.CONFIG_DIRECTORY_SOURCE_PATH, p));
+                                                    putString(SCIOND_CFG_PATH, p);
+                                                    activateButtons();
+                                                })
+                                        ).build().show(),
                         null
                 },
                 {
@@ -131,28 +140,11 @@ public class MainActivity extends AppCompatActivity {
                         null
                 },
                 {
-                        view ->
-                                new ChooserDialog(view.getContext())
-                                        .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
-                                        .withFilter(true, true)
-                                        .withStartFile(prefs.getString(SCIOND_CFG_PATH, null))
-                                        .withChosenListener((path, pathFile) ->
-                                                (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {
-                                                    ensureWritePermissions();
-                                                    startService(new Intent(this, classes[2])
-                                                            .putExtra(SciondService.PARAM_CONFIG_PATH, p));
-                                                    putString(SCIOND_CFG_PATH, p);
-                                                    activateButtons();
-                                                })
-                                        ).build().show(),
+                        view -> {},
                         null
                 },
                 {
-                        view -> {
-                            ensureWritePermissions();
-                            startService(new Intent(this, classes[3]));
-                            activateButtons();
-                        },
+                        view -> {},
                         null
                 },
                 {

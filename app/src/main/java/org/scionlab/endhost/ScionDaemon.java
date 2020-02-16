@@ -29,11 +29,11 @@ import java.util.function.Supplier;
 public class ScionDaemon extends Thread {
     private static final String TAG = "ScionDaemon";
     private Context context;
-    private String endhostImportPath;
+    private String configDirectorySourcePath;
 
-    ScionDaemon(Context context, String endhostImportPath) {
+    ScionDaemon(Context context, String configDirectorySourcePath) {
         this.context = context;
-        this.endhostImportPath = endhostImportPath;
+        this.configDirectorySourcePath = configDirectorySourcePath;
     }
 
     @Override
@@ -46,14 +46,17 @@ public class ScionDaemon extends Thread {
 
         // copy configuration folder provided by the user and find daemon configuration file
         storage.deleteFileOrDirectory(configDirectoryPath);
-        storage.copyFileOrDirectory(new File(endhostImportPath), configDirectoryPath);
+        storage.copyFileOrDirectory(new File(configDirectorySourcePath), configDirectoryPath);
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
                 configDirectoryPath, ScionConfig.Daemon.CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
-            Log.e(TAG, "could not find SCION daemon configuration file in configuration directory");
+            Log.e(TAG, "could not find SCION daemon configuration file sciond.toml or sd.toml");
             return;
         }
         String configPath = _configPath.get();
+        Toml config = new Toml().read(storage.getInputStream(configPath));
+        String publicAddress = config.getString(ScionConfig.Daemon.CONFIG_PUBLIC_TOML_PATH);
+        // TODO: for now, we assume the topology file is present at the correct location and has the right values
 
         // prepare files
         storage.deleteFileOrDirectory(reliableSocketPath);
@@ -66,13 +69,11 @@ public class ScionDaemon extends Thread {
                 storage.readAssetFile(ScionConfig.Daemon.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(configDirectoryPath),
                 storage.getAbsolutePath(logPath),
-                new Toml().read(storage.getInputStream(configPath)).getString("sd.Public"),
+                publicAddress,
                 storage.getAbsolutePath(reliableSocketPath),
                 storage.getAbsolutePath(unixSocketPath),
                 storage.getAbsolutePath(ScionConfig.Daemon.PATH_DATABASE_PATH),
                 storage.getAbsolutePath(ScionConfig.Daemon.TRUST_DATABASE_PATH)));
-
-        Log.i(TAG, storage.readFile(configPath));
 
         // prepare logger for stdout, stderr and the log file
         Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =

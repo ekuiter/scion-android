@@ -27,34 +27,47 @@ import androidx.core.app.NotificationCompat;
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
     private static final int NOTIFICATION_ID  = 1;
+    public static final String CONFIG_DIRECTORY_SOURCE_PATH = ScionService.class.getCanonicalName() + ".CONFIG_DIRECTORY_SOURCE_PATH";
     private Thread scionDispatcher, scionDaemon;
-
-    public ScionService() {
-    }
+    private boolean running = false;
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(TAG, "starting SCION service");
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int ret = super.onStartCommand(intent, flags, startId);
+        if (intent == null || running)
+            return ret;
+        final String configDirectorySourcePath = intent.getStringExtra(CONFIG_DIRECTORY_SOURCE_PATH);
+        if (configDirectorySourcePath == null) {
+            Log.e(TAG, "no config directory source path given");
+            return ret;
+        }
 
-        // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
+        // TODO: make this a foreground service, decreasing the probability that Android arbitrarily kills this service
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, MainActivity.SERVICE_CHANNEL)
                 .setSmallIcon(R.drawable.ic_scion_logo);
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
         // start SCION dispatcher and daemon
+        Log.i(TAG, "starting SCION service");
         scionDispatcher = new ScionDispatcher(this);
-        scionDaemon = new ScionDaemon(this, "/storage/D2BE-66F2/endhost");
+        scionDaemon = new ScionDaemon(this, configDirectorySourcePath);
         scionDispatcher.start();
         scionDaemon.start();
+        running = true;
+
+        return ret;
     }
 
     @Override
     public void onDestroy() {
+        if (!running)
+            return;
+
         Log.i(TAG, "stopping SCION service");
         scionDispatcher.interrupt();
         scionDaemon.interrupt();
         stopForeground(STOP_FOREGROUND_REMOVE);
+        running = false;
     }
 
     @Override

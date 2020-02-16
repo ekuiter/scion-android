@@ -81,11 +81,11 @@ public abstract class BackgroundService extends IntentService {
         List<String> additional = new LinkedList<>();
         if (addSockets && Arrays.stream(args).noneMatch("-sciond"::equals)) {
             additional.add("-sciond");
-            additional.add(SciondService.SCIOND_SOCKET_PATH);
+            // TODO additional.add(SciondService.SCIOND_SOCKET_PATH);
         }
         if (addSockets && Arrays.stream(args).noneMatch("-dispatcher"::equals)) {
             additional.add("-dispatcher");
-            additional.add(ScionConfig.Dispatcher.SOCKET_PATH);
+            // TODO additional.add(ScionConfig.Dispatcher.SOCKET_PATH);
         }
         //noinspection deprecation
         return Stream.concat(Arrays.stream(args), additional.stream())
