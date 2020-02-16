@@ -43,6 +43,8 @@ class ScionConfig {
         static final String LOG_PATH = "daemon.log"; // path to log file created in external storage
         static final String RELIABLE_SOCKET_PATH = "daemon.reliable.sock"; // path to reliable socket created in internal storage
         static final String UNIX_SOCKET_PATH = "daemon.unix.sock"; // path to UNIX socket created in internal storage
+        static final String TRUST_DATABASE_PATH = "daemon.trust.db"; // path to trust SQLite database created in external storage
+        static final String PATH_DATABASE_PATH = "daemon.path.db"; // path to path SQLite database created in external storage
         static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
         static final long LOG_UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
     }

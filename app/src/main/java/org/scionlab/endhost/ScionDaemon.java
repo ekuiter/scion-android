@@ -24,19 +24,18 @@ import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class DaemonThread extends Thread {
-    private static final String TAG = "DaemonThread";
+public class ScionDaemon extends Thread {
+    private static final String TAG = "ScionDaemon";
     private Context context;
     private String endhostImportPath;
 
-    DaemonThread(Context context, String endhostImportPath) {
+    ScionDaemon(Context context, String endhostImportPath) {
         this.context = context;
         this.endhostImportPath = endhostImportPath;
     }
@@ -50,9 +49,9 @@ public class DaemonThread extends Thread {
         final Storage internalStorage = Storage.from(context),
                 externalStorage = Storage.External.from(context);
 
+        // copy configuration folder provided by the user and find daemon configuration file
         externalStorage.deleteFileOrDirectory(configDirectoryPath);
         externalStorage.copyFileOrDirectory(new File(endhostImportPath), configDirectoryPath);
-
         Optional<String> _configPath = externalStorage.findFirstMatchingFileInDirectory(
                 configDirectoryPath, ScionConfig.Daemon.CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
@@ -61,86 +60,74 @@ public class DaemonThread extends Thread {
         }
         String configPath = _configPath.get();
 
-        //String logFile = new File(getExternalFilesDir(null), LOG_PATH).getAbsolutePath();
-        // externalStorage.getAbsolutePath(logPath)
-        // internalStorage.getAbsolutePath(reliableSocketPath);
-        // internalStorage.getAbsolutePath(unixSocketPath);
+        // prepare files
+        internalStorage.deleteFileOrDirectory(reliableSocketPath);
+        internalStorage.deleteFileOrDirectory(unixSocketPath);
+        externalStorage.deleteFileOrDirectory(logPath);
+        externalStorage.createFile(logPath);
 
-        String trustDBConnection = "gen-cache/sciond.trust.db";
-        String pathDBConnection = "gen-cache/sciond.path.db";
+        // update configuration file
+        {
+            Map<String, Object> config = new Toml().read(externalStorage.getInputStream(configPath)).toMap();
 
-        /*try {
-            Map<String, Object> conf = new Toml().read(new FileInputStream(confFile.get())).toMap();
-            Map<String, Object> general = (Map<String, Object>) conf.get("general");
+            Map<String, Object> general = (Map<String, Object>) config.get("general");
             if (general == null) {
                 general = new HashMap<>();
-                conf.put("general", general);
+                config.put("general", general);
             }
-            general.put("ConfigDir", confDir);
-            general.put("DispatcherPath", ScionConfig.Dispatcher.SOCKET_PATH);
-            Map<String, Object> sd = (Map<String, Object>) conf.get("sd");
+            general.put("ConfigDir", externalStorage.getAbsolutePath(configDirectoryPath));
+
+            Map<String, Object> sd = (Map<String, Object>) config.get("sd");
             if (sd == null) {
                 sd = new HashMap<>();
-                conf.put("sd", sd);
+                config.put("sd", sd);
             }
+            sd.put("Reliable", internalStorage.getAbsolutePath(reliableSocketPath));
+            sd.put("Unix", internalStorage.getAbsolutePath(unixSocketPath));
+
             Map<String, Object> pathDB = (Map<String, Object>) sd.get("PathDB");
             if (pathDB == null) {
                 pathDB = new HashMap<>();
                 sd.put("PathDB", pathDB);
             }
-            pathDBConnection = Optional.ofNullable((String) pathDB.get("Connection")).orElse(pathDBConnection);
-            pathDB.put("Connection", pathDBConnection);
-            reliable = Optional.ofNullable((String) sd.get("Reliable")).orElse(reliable);
-            reliable = reliable.replaceFirst("^/+", "");
-            sd.put("Reliable", reliable);
-            SCIOND_SOCKET_PATH = reliable;
-            unix = Optional.ofNullable((String) sd.get("Unix")).orElse(unix);
-            unix = unix.replaceFirst("^/+", "");
-            sd.put("Unix", unix);
-            SCIOND_UNIX_PATH = unix;
-            Map<String, Object> logging = (Map<String, Object>) conf.get("logging");
+            pathDB.put("Connection", externalStorage.getAbsolutePath(ScionConfig.Daemon.PATH_DATABASE_PATH));
+
+            Map<String, Object> trustDB = (Map<String, Object>) config.get("TrustDB");
+            if (trustDB == null) {
+                trustDB = new HashMap<>();
+                config.put("TrustDB", trustDB);
+            }
+            trustDB.put("Connection", externalStorage.getAbsolutePath(ScionConfig.Daemon.TRUST_DATABASE_PATH));
+
+            Map<String, Object> logging = (Map<String, Object>) config.get("logging");
             if (logging == null) {
                 logging = new HashMap<>();
-                conf.put("logging", logging);
+                config.put("logging", logging);
             }
+
             Map<String, Object> file = (Map<String, Object>) logging.get("file");
             if (file == null) {
                 file = new HashMap<>();
                 logging.put("file", file);
             }
-            logFile = Optional.ofNullable((String) file.get("Path")).orElse(logFile);
-            file.put("Path", logFile);
-            Map<String, Object> trustDB = (Map<String, Object>) conf.get("TrustDB");
-            if (trustDB == null) {
-                trustDB = (Map<String, Object>) conf.get("trustDB");
-                if (trustDB == null) {
-                    trustDB = new HashMap<>();
-                    conf.put("TrustDB", trustDB);
-                }
+            file.put("Path", externalStorage.getAbsolutePath(logPath));
+
+            try {
+                new TomlWriter().write(config, externalStorage.getOutputStream(configPath));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            trustDBConnection = Optional.ofNullable((String) trustDB.get("Connection")).orElse(trustDBConnection);
-            trustDB.put("Connection", trustDBConnection);
-            new TomlWriter().write(conf, confFile.get());
-        } catch (IOException e) {
-            e.printStackTrace();
-            die(R.string.serviceexception, e.getLocalizedMessage());
-            return;
-        }*/
+        }
 
-        internalStorage.deleteFileOrDirectory(reliableSocketPath);
-        internalStorage.deleteFileOrDirectory(unixSocketPath);
-        externalStorage.deleteFileOrDirectory(logPath);
-        externalStorage.createFile(logPath);
-        //mkfile(trustDBConnection);
-        //mkfile(pathDBConnection);
-
+        // prepare logger for stdout, stderr and the log file
         Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =
                 () -> new Utils.ConsumeOutputThread(
                         line -> Log.i(TAG, line),
                         ScionConfig.Daemon.LOG_DELETER_PATTERN,
                         ScionConfig.Daemon.LOG_UPDATE_INTERVAL);
 
-        consumeOutputThreadSupplier.get().setFile(externalStorage.getFile(logPath)).start();
+        // tail log file and run daemon
+        consumeOutputThreadSupplier.get().setInputStream(externalStorage.getInputStream(logPath)).start();
         ScionBinary.runDaemon(context,
                 consumeOutputThreadSupplier.get(),
                 externalStorage.getAbsolutePath(configPath),

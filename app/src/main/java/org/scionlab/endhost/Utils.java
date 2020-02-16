@@ -46,15 +46,6 @@ class Utils {
             return this;
         }
 
-        ConsumeOutputThread setFile(File file) {
-            try {
-                this.inputStream = new FileInputStream(file);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            return this;
-        }
-
         @Override
         public void run() {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {

@@ -22,11 +22,11 @@ import android.util.Log;
 
 import java.util.function.Supplier;
 
-public class DispatcherThread extends Thread {
-    private static final String TAG = "DispatcherThread";
+public class ScionDispatcher extends Thread {
+    private static final String TAG = "ScionDispatcher";
     private Context context;
 
-    DispatcherThread(Context context) {
+    ScionDispatcher(Context context) {
         this.context = context;
     }
 
@@ -38,6 +38,7 @@ public class DispatcherThread extends Thread {
         final Storage internalStorage = Storage.from(context),
                 externalStorage = Storage.External.from(context);
 
+        // prepare files
         internalStorage.deleteFileOrDirectory(socketPath);
         externalStorage.deleteFileOrDirectory(logPath);
         externalStorage.createFile(logPath);
@@ -46,13 +47,15 @@ public class DispatcherThread extends Thread {
                 internalStorage.getAbsolutePath(socketPath),
                 externalStorage.getAbsolutePath(logPath)));
 
+        // prepare logger for stdout, stderr and the log file
         Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =
                 () -> new Utils.ConsumeOutputThread(
                         line -> Log.i(TAG, line),
                         ScionConfig.Dispatcher.LOG_DELETER_PATTERN,
                         ScionConfig.Dispatcher.LOG_UPDATE_INTERVAL);
 
-        consumeOutputThreadSupplier.get().setFile(externalStorage.getFile(logPath)).start();
+        // tail log file and run dispatcher
+        consumeOutputThreadSupplier.get().setInputStream(externalStorage.getInputStream(logPath)).start();
         ScionBinary.runDispatcher(context,
                 consumeOutputThreadSupplier.get(),
                 externalStorage.getAbsolutePath(configPath));

@@ -22,6 +22,7 @@ import android.content.Context;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -68,8 +69,26 @@ class Storage {
             : context.getFilesDir();
     }
 
-    File getFile(String path) {
+    private File getFile(String path) {
         return new File(getFilesDir(context), path);
+    }
+
+    InputStream getInputStream(String path) {
+        try {
+            return new FileInputStream(getFile(path));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    OutputStream getOutputStream(String path) {
+        try {
+            return new FileOutputStream(getFile(path));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private String getPath(File file) {
@@ -80,14 +99,27 @@ class Storage {
         return getFile(path).getAbsolutePath();
     }
 
-    String readAssetFile(String path) {
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(context.getAssets().open(path)))) {
+    private String readFile(InputStream inputStream) {
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             StringBuilder sb = new StringBuilder();
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
                 sb.append('\n');
             }
             return sb.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    String readFile(String path) {
+        return readFile(getInputStream(path));
+    }
+
+    String readAssetFile(String path) {
+        try {
+            return readFile(context.getAssets().open(path));
         } catch (IOException e) {
             e.printStackTrace();
             return "";

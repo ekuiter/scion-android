@@ -27,7 +27,7 @@ import androidx.core.app.NotificationCompat;
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
     private static final int NOTIFICATION_ID  = 1;
-    private Thread dispatcherThread, daemonThread;
+    private Thread scionDispatcher, scionDaemon;
 
     public ScionService() {
     }
@@ -43,17 +43,17 @@ public class ScionService extends Service {
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
         // start SCION dispatcher and daemon
-        dispatcherThread = new DispatcherThread(this);
-        daemonThread = new DaemonThread(this, "/storage/D2BE-66F2/endhost");
-        dispatcherThread.start();
-        daemonThread.start();
+        scionDispatcher = new ScionDispatcher(this);
+        scionDaemon = new ScionDaemon(this, "/storage/D2BE-66F2/endhost");
+        scionDispatcher.start();
+        scionDaemon.start();
     }
 
     @Override
     public void onDestroy() {
         Log.i(TAG, "stopping SCION service");
-        dispatcherThread.interrupt();
-        daemonThread.interrupt();
+        scionDispatcher.interrupt();
+        scionDaemon.interrupt();
         stopForeground(STOP_FOREGROUND_REMOVE);
     }
 
