@@ -24,9 +24,6 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
-import java.io.File;
-import java.util.function.Supplier;
-
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
     private static final int NOTIFICATION_ID  = 1;
@@ -45,35 +42,8 @@ public class ScionService extends Service {
                 .setSmallIcon(R.drawable.ic_scion_logo);
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
-        dispatcherThread = new Thread(() -> {
-            final String socketPath = ScionConfig.Dispatcher.SOCKET_PATH;
-            final String logPath = ScionConfig.Dispatcher.LOG_PATH;
-            final Storage internalStorage = Storage.from(ScionService.this),
-                    externalStorage = Storage.External.from(ScionService.this);
-
-            internalStorage.deleteFileOrDirectory(socketPath);
-            externalStorage.deleteFileOrDirectory(logPath);
-
-            File logFile = externalStorage.createFile(logPath);
-            File configFile = externalStorage.writeFile(ScionConfig.Dispatcher.CONFIG_PATH, String.format(
-                    internalStorage.readAssetFile(ScionConfig.Dispatcher.CONFIG_TEMPLATE_PATH),
-                    internalStorage.getAbsolutePath(socketPath),
-                    externalStorage.getAbsolutePath(logPath)));
-
-            Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =
-                    () -> new Utils.ConsumeOutputThread(
-                        line -> Log.i(TAG, line),
-                        ScionConfig.Dispatcher.LOG_DELETER_PATTERN,
-                        ScionConfig.Dispatcher.LOG_UPDATE_INTERVAL);
-
-            consumeOutputThreadSupplier.get().setFile(logFile).start();
-            ScionBinary.runDispatcher(this, consumeOutputThreadSupplier.get(), configFile.getAbsolutePath());
-        });
-
-        daemonThread = new Thread(() -> {
-            // TODO
-        });
-
+        dispatcherThread = new DispatcherThread(this);
+        daemonThread = new DaemonThread(this);
         dispatcherThread.start();
         daemonThread.start();
     }
