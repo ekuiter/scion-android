@@ -3,7 +3,7 @@
 # The structure of this file depends on the SCION version and is thus linked to the binary located in jniLibs.
 
 [general]
-ID = "sciond"
+ID = "daemon"
 ReconnectToDispatcher = true
 ConfigDir = "%s"
 

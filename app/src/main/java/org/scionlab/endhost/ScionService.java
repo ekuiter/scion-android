@@ -55,6 +55,8 @@ public class ScionService extends Service {
         scionDaemon.start();
         running = true;
 
+        new ScionScmp(this).start();
+
         return ret;
     }
 

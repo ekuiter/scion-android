@@ -17,22 +17,36 @@
 
 package org.scionlab.endhost;
 
+import android.content.Intent;
+
+import androidx.annotation.Nullable;
+
+import org.spongycastle.asn1.ASN1ObjectIdentifier;
+import org.spongycastle.asn1.x500.X500Name;
+import org.spongycastle.asn1.x509.BasicConstraints;
+import org.spongycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.spongycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.spongycastle.openssl.PEMKeyPair;
+import org.spongycastle.openssl.PEMParser;
+import org.spongycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.spongycastle.openssl.jcajce.JcaPEMWriter;
+import org.spongycastle.operator.ContentSigner;
+import org.spongycastle.operator.jcajce.JcaContentSignerBuilder;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Date;
+
 public class ScmpService extends BackgroundService {
-    public ScmpService(String name) {
-        super(name);
-    }
-
-    @Override
-    protected int getNotificationId() {
-        return 0;
-    }
-
-    @Override
-    protected String getTag() {
-        return null;
-    }
-
-    /*public static final String PARAM_ARGS_QUERY = ScmpService.class.getCanonicalName() + ".CONFIG_PATH";
+    public static final String PARAM_ARGS_QUERY = ScmpService.class.getCanonicalName() + ".CONFIG_PATH";
     private static final int NID = 3;
     private static final String TAG = "scmp";
 
@@ -43,7 +57,6 @@ public class ScmpService extends BackgroundService {
         return NID;
     }
 
-    @NonNull
     @Override
     protected String getTag() {
         return TAG;
@@ -106,5 +119,5 @@ public class ScmpService extends BackgroundService {
         long ret = 0; // TODO
         // long ret = Scmp.main(arguments, "", getFilesDir().getAbsolutePath());
         die(R.string.servicereturn, ret);
-    }*/
+    }
 }

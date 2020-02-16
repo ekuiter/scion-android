@@ -79,8 +79,8 @@ public class ScionDaemon extends Thread {
         Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =
                 () -> new Utils.ConsumeOutputThread(
                         line -> Log.i(TAG, line),
-                        ScionConfig.Daemon.LOG_DELETER_PATTERN,
-                        ScionConfig.Daemon.LOG_UPDATE_INTERVAL);
+                        ScionConfig.Log.DELETER_PATTERN,
+                        ScionConfig.Log.UPDATE_INTERVAL);
 
         // tail log file and run daemon
         consumeOutputThreadSupplier.get().setInputStream(storage.getInputStream(logPath)).start();

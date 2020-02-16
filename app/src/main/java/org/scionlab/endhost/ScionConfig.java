@@ -24,8 +24,14 @@ class ScionConfig {
         static final String PATH = "libscion-android.so"; // file name of SCION binary as located in jniLabs subdirectories
         static final String DISPATCHER_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher
         static final String DAEMON_FLAG = "sciond"; // value of binary's first argument to run the daemon
+        static final String SCMP_FLAG = "scmp"; // value of binary's first argument to run the scmp tool
         static final String CONFIG_FLAG = "-lib_env_config"; // flag that specifies a configuration file
         static final String DISPATCHER_SOCKET_ENV = "DISPATCHER_SOCKET"; // environment variable that specifies the dispatcher socket
+        static final String SCMP_ECHO_FLAG = "echo"; // value of scmp's first argument to run an echo request
+        static final String SCMP_LOCAL_FLAG = "-tools_scmp_cmn_local"; // flag that specifies the local address
+        static final String SCMP_REMOTE_FLAG = "-tools_scmp_cmn_remote"; // flag that specifies the remote address
+        static final String SCMP_DISPATCHER_SOCKET_FLAG = "-tools_scmp_dispatcher"; // flag that specifies the dispatcher socket
+        static final String SCMP_DAEMON_SOCKET_FLAG = "-tools_scmp_sciond"; // flag that specifies the daemon socket
     }
 
     static class Dispatcher {
@@ -33,8 +39,6 @@ class ScionConfig {
         static final String CONFIG_PATH = "EXTERNAL/dispatcher.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/dispatcher.log"; // path to log file
         static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
-        static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
-        static final long LOG_UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
     }
 
     static class Daemon {
@@ -47,7 +51,10 @@ class ScionConfig {
         static final String UNIX_SOCKET_PATH = "INTERNAL/daemon.unix.sock"; // path to UNIX socket created in internal storage
         static final String TRUST_DATABASE_PATH = "EXTERNAL/daemon.trust.db"; // path to trust SQLite database created in external storage
         static final String PATH_DATABASE_PATH = "EXTERNAL/daemon.path.db"; // path to path SQLite database created in external storage
-        static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
-        static final long LOG_UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
+    }
+
+    static class Log {
+        static final Pattern DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
+        static final long UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
     }
 }

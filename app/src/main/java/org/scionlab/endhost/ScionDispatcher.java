@@ -52,8 +52,8 @@ public class ScionDispatcher extends Thread {
         Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =
                 () -> new Utils.ConsumeOutputThread(
                         line -> Log.i(TAG, line),
-                        ScionConfig.Dispatcher.LOG_DELETER_PATTERN,
-                        ScionConfig.Dispatcher.LOG_UPDATE_INTERVAL);
+                        ScionConfig.Log.DELETER_PATTERN,
+                        ScionConfig.Log.UPDATE_INTERVAL);
 
         // tail log file and run dispatcher
         consumeOutputThreadSupplier.get().setInputStream(storage.getInputStream(logPath)).start();

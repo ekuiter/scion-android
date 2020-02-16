@@ -100,4 +100,18 @@ class ScionBinary {
         return runProcess(context, consumeOutputThread, env,
                 ScionConfig.Binary.DAEMON_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
     }
+
+    static int runScmp(Context context, Utils.ConsumeOutputThread consumeOutputThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
+        return runProcess(context, consumeOutputThread, new HashMap<>(),
+                ScionConfig.Binary.SCMP_FLAG,
+                ScionConfig.Binary.SCMP_ECHO_FLAG,
+                ScionConfig.Binary.SCMP_DISPATCHER_SOCKET_FLAG,
+                dispatcherSocketPath,
+                ScionConfig.Binary.SCMP_DAEMON_SOCKET_FLAG,
+                daemonSocketPath,
+                ScionConfig.Binary.SCMP_LOCAL_FLAG,
+                localAddress,
+                ScionConfig.Binary.SCMP_REMOTE_FLAG,
+                remoteAddress);
+    }
 }
