@@ -1,0 +1,29 @@
+# This is a configuration file template for the SCION daemon.
+# It is instantiated with concrete values in the ScionDaemon class.
+# The structure of this file depends on the SCION version and is thus linked to the binary located in jniLibs.
+
+[general]
+ID = "sciond"
+ReconnectToDispatcher = true
+ConfigDir = "%s"
+
+[metrics]
+Prometheus = "[127.0.0.1]:30455"
+
+[logging.file]
+Level = "debug"
+MaxAge = 3
+MaxBackups = 1
+Path = "%s"
+
+[sd]
+Public = "%s"
+SocketFileMode = "0777"
+Reliable = "%s"
+Unix = "%s"
+
+[sd.PathDB]
+Connection = "%s"
+
+[trustDB]
+Connection = "%s"

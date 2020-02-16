@@ -41,6 +41,8 @@ public class ScionDispatcher extends Thread {
         storage.deleteFileOrDirectory(socketPath);
         storage.deleteFileOrDirectory(logPath);
         storage.createFile(logPath);
+
+        // instantiate configuration file template
         storage.writeFile(configPath, String.format(
                 storage.readAssetFile(ScionConfig.Dispatcher.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(socketPath),

@@ -38,6 +38,7 @@ class ScionConfig {
     }
 
     static class Daemon {
+        static final String CONFIG_TEMPLATE_PATH = "daemon.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/endhost"; // path to configuration directory created in external storage
         static final String CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for configuration file located in configuration directory
         static final String LOG_PATH = "EXTERNAL/daemon.log"; // path to log file created in external storage

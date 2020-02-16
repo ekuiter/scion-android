@@ -21,12 +21,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.moandjiezana.toml.Toml;
-import com.moandjiezana.toml.TomlWriter;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -65,58 +61,18 @@ public class ScionDaemon extends Thread {
         storage.deleteFileOrDirectory(logPath);
         storage.createFile(logPath);
 
-        // update configuration file
-        {
-            Map<String, Object> config = new Toml().read(storage.getInputStream(configPath)).toMap();
+        // instantiate configuration file template
+        storage.writeFile(configPath, String.format(
+                storage.readAssetFile(ScionConfig.Daemon.CONFIG_TEMPLATE_PATH),
+                storage.getAbsolutePath(configDirectoryPath),
+                storage.getAbsolutePath(logPath),
+                new Toml().read(storage.getInputStream(configPath)).getString("sd.Public"),
+                storage.getAbsolutePath(reliableSocketPath),
+                storage.getAbsolutePath(unixSocketPath),
+                storage.getAbsolutePath(ScionConfig.Daemon.PATH_DATABASE_PATH),
+                storage.getAbsolutePath(ScionConfig.Daemon.TRUST_DATABASE_PATH)));
 
-            Map<String, Object> general = (Map<String, Object>) config.get("general");
-            if (general == null) {
-                general = new HashMap<>();
-                config.put("general", general);
-            }
-            general.put("ConfigDir", storage.getAbsolutePath(configDirectoryPath));
-
-            Map<String, Object> sd = (Map<String, Object>) config.get("sd");
-            if (sd == null) {
-                sd = new HashMap<>();
-                config.put("sd", sd);
-            }
-            sd.put("Reliable", storage.getAbsolutePath(reliableSocketPath));
-            sd.put("Unix", storage.getAbsolutePath(unixSocketPath));
-
-            Map<String, Object> pathDB = (Map<String, Object>) sd.get("PathDB");
-            if (pathDB == null) {
-                pathDB = new HashMap<>();
-                sd.put("PathDB", pathDB);
-            }
-            pathDB.put("Connection", storage.getAbsolutePath(ScionConfig.Daemon.PATH_DATABASE_PATH));
-
-            Map<String, Object> trustDB = (Map<String, Object>) config.get("TrustDB");
-            if (trustDB == null) {
-                trustDB = new HashMap<>();
-                config.put("TrustDB", trustDB);
-            }
-            trustDB.put("Connection", storage.getAbsolutePath(ScionConfig.Daemon.TRUST_DATABASE_PATH));
-
-            Map<String, Object> logging = (Map<String, Object>) config.get("logging");
-            if (logging == null) {
-                logging = new HashMap<>();
-                config.put("logging", logging);
-            }
-
-            Map<String, Object> file = (Map<String, Object>) logging.get("file");
-            if (file == null) {
-                file = new HashMap<>();
-                logging.put("file", file);
-            }
-            file.put("Path", storage.getAbsolutePath(logPath));
-
-            try {
-                new TomlWriter().write(config, storage.getOutputStream(configPath));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        Log.i(TAG, storage.readFile(configPath));
 
         // prepare logger for stdout, stderr and the log file
         Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =

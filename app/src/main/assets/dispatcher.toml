@@ -1,3 +1,7 @@
+# This is a configuration file template for the SCION dispatcher.
+# It is instantiated with concrete values in the ScionDispatcher class.
+# The structure of this file depends on the SCION version and is thus linked to the binary located in jniLibs.
+
 [dispatcher]
 ID = "dispatcher"
 SocketFileMode = "0777"
