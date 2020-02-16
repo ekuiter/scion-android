@@ -32,20 +32,19 @@ public class ScionDispatcher extends Thread {
 
     @Override
     public void run() {
+        final Storage storage = Storage.from(context);
         final String configPath = ScionConfig.Dispatcher.CONFIG_PATH;
         final String logPath = ScionConfig.Dispatcher.LOG_PATH;
         final String socketPath = ScionConfig.Dispatcher.SOCKET_PATH;
-        final Storage internalStorage = Storage.from(context),
-                externalStorage = Storage.External.from(context);
 
         // prepare files
-        internalStorage.deleteFileOrDirectory(socketPath);
-        externalStorage.deleteFileOrDirectory(logPath);
-        externalStorage.createFile(logPath);
-        externalStorage.writeFile(configPath, String.format(
-                internalStorage.readAssetFile(ScionConfig.Dispatcher.CONFIG_TEMPLATE_PATH),
-                internalStorage.getAbsolutePath(socketPath),
-                externalStorage.getAbsolutePath(logPath)));
+        storage.deleteFileOrDirectory(socketPath);
+        storage.deleteFileOrDirectory(logPath);
+        storage.createFile(logPath);
+        storage.writeFile(configPath, String.format(
+                storage.readAssetFile(ScionConfig.Dispatcher.CONFIG_TEMPLATE_PATH),
+                storage.getAbsolutePath(socketPath),
+                storage.getAbsolutePath(logPath)));
 
         // prepare logger for stdout, stderr and the log file
         Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =
@@ -55,9 +54,9 @@ public class ScionDispatcher extends Thread {
                         ScionConfig.Dispatcher.LOG_UPDATE_INTERVAL);
 
         // tail log file and run dispatcher
-        consumeOutputThreadSupplier.get().setInputStream(externalStorage.getInputStream(logPath)).start();
+        consumeOutputThreadSupplier.get().setInputStream(storage.getInputStream(logPath)).start();
         ScionBinary.runDispatcher(context,
                 consumeOutputThreadSupplier.get(),
-                externalStorage.getAbsolutePath(configPath));
+                storage.getAbsolutePath(configPath));
     }
 }

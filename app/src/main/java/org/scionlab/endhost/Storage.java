@@ -42,7 +42,6 @@ import java.util.Optional;
  */
 class Storage {
     private Context context;
-    boolean useExternalFilesDir = false;
 
     private Storage(Context context) {
         this.context = context;
@@ -52,25 +51,18 @@ class Storage {
         return new Storage(context);
     }
 
-    static class External extends Storage {
-        private External(Context context) {
-            super(context);
-            this.useExternalFilesDir = true;
-        }
-
-        static Storage from(Context context) {
-            return new External(context);
-        }
-    }
-
-    private File getFilesDir(Context context) {
-        return useExternalFilesDir
-            ? context.getExternalFilesDir(null)
-            : context.getFilesDir();
+    private File getFilesDir(Context context, String path) {
+        if (path.startsWith("EXTERNAL/"))
+            return context.getExternalFilesDir(null);
+        if (path.startsWith("INTERNAL/"))
+            return context.getFilesDir();
+        throw new RuntimeException("invalid path " + path + ", please specify storage");
     }
 
     private File getFile(String path) {
-        return new File(getFilesDir(context), path);
+        return new File(getFilesDir(context, path), path
+                .replaceFirst("^EXTERNAL/", "")
+                .replaceFirst("^INTERNAL/", ""));
     }
 
     InputStream getInputStream(String path) {
@@ -91,8 +83,9 @@ class Storage {
         }
     }
 
-    private String getPath(File file) {
-        return getFilesDir(context).toURI().relativize(file.toURI()).getPath();
+    private String getRelativePath(String path, File file) {
+        String storage = path.startsWith("INTERNAL/") ? "INTERNAL/" : "EXTERNAL/";
+        return storage + getFilesDir(context, path).toURI().relativize(file.toURI()).getPath();
     }
 
     String getAbsolutePath(String path) {
@@ -208,7 +201,7 @@ class Storage {
 
         for (final File child : Objects.requireNonNull(dir.listFiles()))
             if (child.isFile() && child.getName().matches(regex))
-                return Optional.of(getPath(child));
+                return Optional.of(getRelativePath(path, child));
 
         return Optional.empty();
     }

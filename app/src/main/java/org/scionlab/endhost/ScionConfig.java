@@ -30,21 +30,21 @@ class ScionConfig {
 
     static class Dispatcher {
         static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml"; // path to configuration file template, located in assets folder
-        static final String CONFIG_PATH = "dispatcher.toml"; // path to configuration file created in external storage
-        static final String LOG_PATH = "dispatcher.log"; // path to log file created in external storage
-        static final String SOCKET_PATH = "dispatcher.sock"; // path to socket created in internal storage
+        static final String CONFIG_PATH = "EXTERNAL/dispatcher.toml"; // path to configuration file
+        static final String LOG_PATH = "EXTERNAL/dispatcher.log"; // path to log file
+        static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
         static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
         static final long LOG_UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
     }
 
     static class Daemon {
-        static final String CONFIG_DIRECTORY_PATH = "endhost"; // path to configuration directory created in external storage
+        static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/endhost"; // path to configuration directory created in external storage
         static final String CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for configuration file located in configuration directory
-        static final String LOG_PATH = "daemon.log"; // path to log file created in external storage
-        static final String RELIABLE_SOCKET_PATH = "daemon.reliable.sock"; // path to reliable socket created in internal storage
-        static final String UNIX_SOCKET_PATH = "daemon.unix.sock"; // path to UNIX socket created in internal storage
-        static final String TRUST_DATABASE_PATH = "daemon.trust.db"; // path to trust SQLite database created in external storage
-        static final String PATH_DATABASE_PATH = "daemon.path.db"; // path to path SQLite database created in external storage
+        static final String LOG_PATH = "EXTERNAL/daemon.log"; // path to log file created in external storage
+        static final String RELIABLE_SOCKET_PATH = "INTERNAL/daemon.reliable.sock"; // path to reliable socket created in internal storage
+        static final String UNIX_SOCKET_PATH = "INTERNAL/daemon.unix.sock"; // path to UNIX socket created in internal storage
+        static final String TRUST_DATABASE_PATH = "EXTERNAL/daemon.trust.db"; // path to trust SQLite database created in external storage
+        static final String PATH_DATABASE_PATH = "EXTERNAL/daemon.path.db"; // path to path SQLite database created in external storage
         static final Pattern LOG_DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
         static final long LOG_UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
     }
