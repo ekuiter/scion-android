@@ -32,17 +32,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.app.NotificationCompat;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class BackgroundService extends IntentService {
@@ -75,22 +66,6 @@ public abstract class BackgroundService extends IntentService {
     @CallSuper
     protected void onHandleIntent(@Nullable Intent intent) {
         startForeground(getNotificationId(), notificationBuilder.build());
-    }
-
-    public static String commandLine(boolean addSockets, String... args) {
-        List<String> additional = new LinkedList<>();
-        if (addSockets && Arrays.stream(args).noneMatch("-sciond"::equals)) {
-            additional.add("-sciond");
-            // TODO additional.add(SciondService.SCIOND_SOCKET_PATH);
-        }
-        if (addSockets && Arrays.stream(args).noneMatch("-dispatcher"::equals)) {
-            additional.add("-dispatcher");
-            // TODO additional.add(ScionConfig.Dispatcher.SOCKET_PATH);
-        }
-        //noinspection deprecation
-        return Stream.concat(Arrays.stream(args), additional.stream())
-                .map(URLEncoder::encode)
-                .collect(Collectors.joining("&"));
     }
 
     public BackgroundService(String name) { super(name); }
@@ -160,90 +135,4 @@ public abstract class BackgroundService extends IntentService {
         notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(notificationLog));
         notificationManager.notify(getNotificationId(), notificationBuilder.build());
     }
-
-    protected File mkdir(String path) {
-        File dir = new File(path.startsWith("/") ? null : getFilesDir(), path);
-        boolean existed = dir.exists();
-        boolean success = dir.mkdirs();
-        log(R.string.servicemkdir, dir.toString(), existed, success, dir.exists());
-        return dir;
-    }
-
-    protected File mkfile(String filePath) {
-        File f = new File(filePath.startsWith("/") ? null : getFilesDir(), filePath);
-        boolean existed = f.exists();
-        boolean success = false;
-        if (!f.getParentFile().exists()) {
-            mkdir(f.getParent());
-        }
-        try {
-            success = f.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-            log(R.string.serviceexceptioninfo, e);
-        }
-        log(R.string.servicemkfile, f.toString(), existed, success, f.exists());
-        return f;
-    }
-
-    protected int delete(String path) {
-        File f = new File(path.startsWith("/") ? null : getFilesDir(), path);
-        boolean existed = f.exists();
-        int left = countRecursively(f) - deleteRecursively(f);
-        log(R.string.servicedelete, f.toString(), existed, left, f.exists());
-        return left;
-    }
-
-    protected int copy(String source, String target) {
-        File src = new File(source.startsWith("/") ? null : getFilesDir(), source);
-        File tgt = new File(target.startsWith("/") ? null : getFilesDir(), target);
-        boolean existed = src.exists();
-        int left = countRecursively(src) - copyRecursively(src, tgt);
-        log(R.string.servicecopydir, src.getAbsolutePath(), tgt.getAbsolutePath(), existed, left, tgt.exists());
-        return left;
-    }
-
-    private int countRecursively(File file) {
-        int counted = Boolean.compare(file.exists(), false);
-        if (file.isDirectory()) {
-            for (File c : file.listFiles()) {
-                counted += countRecursively(c);
-            }
-        }
-        return counted;
-    }
-
-    private int deleteRecursively(File file) {
-        int deleted = 0;
-        if (file.isDirectory()) {
-            for (File c : file.listFiles()) {
-                deleted += deleteRecursively(c);
-            }
-        }
-        deleted += Boolean.compare(file.delete(), false);
-        return deleted;
-    }
-
-    private int copyRecursively(File src, File tgt) {
-        int copied = 0;
-        if (src.isDirectory()) {
-            copied += Boolean.compare(tgt.mkdirs(), false);
-            for (File c : src.listFiles()) {
-                copied += copyRecursively(c, new File(tgt, c.getName()));
-            }
-        } else {
-            byte[] buffer = new byte[4096];
-            try (InputStream in = new FileInputStream(src); OutputStream out = new FileOutputStream(tgt)) {
-                for (int len = in.read(buffer); len > 0; len = in.read(buffer)) {
-                    out.write(buffer, 0, len);
-                }
-                copied++;
-            } catch (IOException e) {
-                e.printStackTrace();
-                log(R.string.serviceexceptioninfo, e);
-            }
-        }
-        return copied;
-    }
-
 }

@@ -36,7 +36,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.app.ActivityCompat;
 
-import com.google.android.material.textfield.TextInputEditText;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
 import java.util.Optional;
@@ -48,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static String getClassName() { return (new Object(){}).getClass().getEnclosingClass().getCanonicalName(); }
     private static final String SCIOND_CFG_PATH = getClassName() + ".SCIOND";
-    private static final String SCMP_CMD_LINE = getClassName() + ".SCMPCMDLINE";
     static final String SERVICE_CHANNEL = getClassName() + ".SERVICES";
     static final String ACTION_SERVICE = getClassName() + ".SERVICE";
     static final String EXTRA_SERVICE_PID = getClassName() + ".SERVICE_PID";
@@ -72,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     private Class<?>[] classes;
     private View.OnClickListener[][] buttonClicks;
     private int[][] buttonTextResIds;
-    private TextInputEditText scmpCmdLine;
     private SharedPreferences prefs;
 
     @Override
@@ -87,31 +84,21 @@ public class MainActivity extends AppCompatActivity {
 
         createNotificationChannel();
 
-        scmpCmdLine = findViewById(R.id.scmpcmdline);
         prefs = getPreferences(MODE_PRIVATE);
 
         buttons = new AppCompatButton[] {
                 findViewById(R.id.scionbutton),
-                findViewById(R.id.scion2button),
-                findViewById(R.id.sciondbutton),
-                findViewById(R.id.dispbutton),
-                findViewById(R.id.scmpbutton)
+                findViewById(R.id.scion2button)
         };
 
         buttonTextResIds = new int[][] {
                 { R.string.scionbuttonstart, R.string.scionbuttonstart },
-                { R.string.scion2buttonstart, R.string.scion2buttonstart },
-                { R.string.sciondbuttonstart, R.string.sciondbuttonstop },
-                { R.string.dispbuttonstart, R.string.dispbuttonstop },
-                { R.string.scmpbuttonstart, R.string.scmpbuttonstop }
+                { R.string.scion2buttonstart, R.string.scion2buttonstart }
         };
 
         classes = new Class[] {
                 ScionService.class,
-                ScionService.class,
-                SciondService.class,
-                DispatcherService.class,
-                ScmpService.class
+                ScionService.class
         };
 
         buttonClicks = new View.OnClickListener[][]{
@@ -138,34 +125,9 @@ public class MainActivity extends AppCompatActivity {
                             activateButtons();
                         },
                         null
-                },
-                {
-                        view -> {},
-                        null
-                },
-                {
-                        view -> {},
-                        null
-                },
-                {
-                        view -> {
-                            String cmdLine = Optional
-                                    .ofNullable(scmpCmdLine.getText())
-                                    .map(CharSequence::toString)
-                                    .orElse("");
-                            startService(
-                                    new Intent(this, classes[4])
-                                            .putExtra(
-                                                    "", // ScmpService.PARAM_ARGS_QUERY,
-                                                    BackgroundService.commandLine(true, cmdLine.split("\n"))
-                                            )
-                            );
-                            putString(SCMP_CMD_LINE, cmdLine);
-                            activateButtons();
-                        },
-                        null
                 }
         };
+
         for (int i = 0; i < classes.length; i++) {
             final Intent intent = new Intent(this, classes[i]);
             buttonClicks[i][1] = view -> { stopService(intent); activateButtons(); };
@@ -179,11 +141,6 @@ public class MainActivity extends AppCompatActivity {
         resetFilter.addAction(ACTION_SERVICE);
         registerReceiver(serviceReceiver, resetFilter);
         activateButtons();
-        scmpCmdLine.setText(
-                optionalState
-                        .map(i->i.getString(SCMP_CMD_LINE))
-                        .orElse(prefs.getString(SCMP_CMD_LINE, ""))
-        );
     }
 
     @Override
@@ -211,7 +168,6 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         Function<String,Consumer<CharSequence>> putter = key->cs->outState.putString(key, cs.toString());
         sciondCfgPath.ifPresent(putter.apply(SCIOND_CFG_PATH));
-        Optional.ofNullable(scmpCmdLine.getText()).ifPresent(putter.apply(SCMP_CMD_LINE));
     }
 
     private void putString(String key, String value) {
@@ -237,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
             buttons[i].setOnClickListener(buttonClicks[i][running[i] ? 1 : 0]);
             buttons[i].setText(buttonTextResIds[i][running[i] ? 1 : 0]);
         }
-        buttons[4].setEnabled((running[2] && running[3]) || running[4]);
     }
 
     private void ensureWritePermissions() {
