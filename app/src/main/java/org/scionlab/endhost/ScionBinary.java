@@ -64,7 +64,7 @@ class ScionBinary {
         }
     }
 
-    private static int runProcess(Context context, Utils.ConsumeOutputThread consumeOutputThread, Map<String, String> env, String... args) {
+    private static int runProcess(Context context, Logger.ConsumeOutputThread consumeOutputThread, Map<String, String> env, String... args) {
         Process process = startProcess(context, env, args);
         int ret;
 
@@ -72,7 +72,7 @@ class ScionBinary {
             ret = -1;
         else {
             // this should create a separate thread that is only used to consume each line of the
-            // process' stdout/stderr stream (see Utils.outputConsumerThread)
+            // process' stdout/stderr stream (see Logger.outputConsumerThread)
             consumeOutputThread.setInputStream(process.getInputStream()).start();
 
             // block until the process dies or the current thread is interrupted, in which case we kill the process
@@ -89,19 +89,19 @@ class ScionBinary {
         return ret;
     }
 
-    static int runDispatcher(Context context, Utils.ConsumeOutputThread consumeOutputThread, String configPath) {
+    static int runDispatcher(Context context, Logger.ConsumeOutputThread consumeOutputThread, String configPath) {
         return runProcess(context, consumeOutputThread, new HashMap<>(),
                 ScionConfig.Binary.DISPATCHER_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
     }
 
-    static int runDaemon(Context context, Utils.ConsumeOutputThread consumeOutputThread, String configPath, String dispatcherSocketPath) {
+    static int runDaemon(Context context, Logger.ConsumeOutputThread consumeOutputThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
         env.put(ScionConfig.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
         return runProcess(context, consumeOutputThread, env,
                 ScionConfig.Binary.DAEMON_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
     }
 
-    static int runScmp(Context context, Utils.ConsumeOutputThread consumeOutputThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
+    static int runScmp(Context context, Logger.ConsumeOutputThread consumeOutputThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
         return runProcess(context, consumeOutputThread, new HashMap<>(),
                 ScionConfig.Binary.SCMP_FLAG,
                 ScionConfig.Binary.SCMP_ECHO_FLAG,

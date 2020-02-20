@@ -78,8 +78,8 @@ public class ScionDaemon extends Thread {
                 storage.getAbsolutePath(ScionConfig.Daemon.TRUST_DATABASE_PATH)));
 
         // prepare logger for stdout, stderr and the log file
-        Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =
-                () -> new Utils.ConsumeOutputThread(
+        Supplier<Logger.ConsumeOutputThread> consumeOutputThreadSupplier =
+                () -> new Logger.ConsumeOutputThread(
                         line -> Log.i(TAG, line),
                         ScionConfig.Log.DELETER_PATTERN,
                         ScionConfig.Log.UPDATE_INTERVAL);

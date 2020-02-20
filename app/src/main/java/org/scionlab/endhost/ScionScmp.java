@@ -20,31 +20,6 @@ package org.scionlab.endhost;
 import android.content.Context;
 import android.util.Log;
 
-import org.spongycastle.asn1.ASN1ObjectIdentifier;
-import org.spongycastle.asn1.x500.X500Name;
-import org.spongycastle.asn1.x509.BasicConstraints;
-import org.spongycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.spongycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.spongycastle.jce.provider.BouncyCastleProvider;
-import org.spongycastle.openssl.PEMKeyPair;
-import org.spongycastle.openssl.PEMParser;
-import org.spongycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.spongycastle.openssl.jcajce.JcaPEMWriter;
-import org.spongycastle.operator.ContentSigner;
-import org.spongycastle.operator.jcajce.JcaContentSignerBuilder;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.Provider;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.util.Date;
-import java.util.function.Supplier;
-
 public class ScionScmp extends Thread {
     private static final String TAG = "ScionScmp";
     private Context context;
@@ -106,7 +81,7 @@ public class ScionScmp extends Thread {
 
         // long ret = Scmp.main(arguments, "", getFilesDir().getAbsolutePath());
         ScionBinary.runScmp(context,
-                new Utils.ConsumeOutputThread(
+                new Logger.ConsumeOutputThread(
                         line -> Log.i(TAG, line),
                         ScionConfig.Log.DELETER_PATTERN,
                         ScionConfig.Log.UPDATE_INTERVAL),

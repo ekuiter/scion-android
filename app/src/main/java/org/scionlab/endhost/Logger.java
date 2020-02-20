@@ -25,7 +25,7 @@ import java.io.InterruptedIOException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-class Utils {
+class Logger {
     static class ConsumeOutputThread extends Thread {
         private Consumer<String> outputConsumer;
         private Pattern deleterPattern;
