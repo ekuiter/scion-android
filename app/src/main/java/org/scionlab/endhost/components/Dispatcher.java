@@ -53,7 +53,9 @@ public class Dispatcher extends ScionComponent {
                 ScionConfig.Dispatcher.LOG_LEVEL));
 
         // tail log file
-        Logger.createLogThread(TAG, storage.getInputStream(logPath)).start();
+        Logger.createLogThread(TAG, storage.getInputStream(logPath))
+                .watchFor(ScionConfig.Dispatcher.WATCH_PATTERN, this::setReady)
+                .start();
     }
 
     @Override

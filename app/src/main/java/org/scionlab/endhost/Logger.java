@@ -30,13 +30,14 @@ import java.util.regex.Pattern;
 public class Logger {
     public static class LogThread extends Thread {
         private Consumer<String> outputConsumer;
-        private Pattern deleterPattern;
+        private Runnable watchCallback;
+        private Pattern watchPattern, deletePattern;
         private long interval;
         InputStream inputStream;
 
-        LogThread(Consumer<String> outputConsumer, Pattern deleterPattern, long interval) {
+        LogThread(Consumer<String> outputConsumer, Pattern deletePattern, long interval) {
             this.outputConsumer = outputConsumer;
-            this.deleterPattern = deleterPattern;
+            this.deletePattern = deletePattern;
             this.interval = interval;
         }
 
@@ -45,13 +46,23 @@ public class Logger {
             return this;
         }
 
+        public LogThread watchFor(Pattern watchPattern, Runnable watchCallback) {
+            this.watchPattern = watchPattern;
+            this.watchCallback = watchCallback;
+            return this;
+        }
+
         @Override
         public void run() {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
                 //noinspection InfiniteLoopStatement
                 while (true) {
-                    for (String line = br.readLine(); line != null; line = br.readLine())
-                        outputConsumer.accept(deleterPattern.matcher(line).replaceAll(""));
+                    for (String line = br.readLine(); line != null; line = br.readLine()) {
+                        line = deletePattern.matcher(line).replaceAll("");
+                        if (watchPattern != null && watchPattern.matcher(line).matches())
+                            watchCallback.run();
+                        outputConsumer.accept(line);
+                    }
                     Thread.sleep(interval);
                 }
             } catch (InterruptedIOException | InterruptedException ignored) {
@@ -64,7 +75,7 @@ public class Logger {
     public static LogThread createLogThread(String tag) {
         return new Logger.LogThread(
                 line -> Log.i(tag, line),
-                ScionConfig.Log.DELETER_PATTERN,
+                ScionConfig.Log.DELETE_PATTERN,
                 ScionConfig.Log.UPDATE_INTERVAL);
     }
 

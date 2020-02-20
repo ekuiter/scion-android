@@ -74,7 +74,7 @@ public class ScionBinary {
             ret = -1;
         else {
             // this should create a separate thread that is only used to consume each line of the
-            // process' stdout/stderr stream (see Logger.outputConsumerThread)
+            // process' stdout/stderr stream (see Logger.LogThread)
             logThread.setInputStream(process.getInputStream()).start();
 
             // block until the process dies or the current thread is interrupted, in which case we kill the process

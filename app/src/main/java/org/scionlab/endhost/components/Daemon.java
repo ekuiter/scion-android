@@ -30,6 +30,9 @@ import org.scionlab.endhost.ScionConfig;
 import java.io.File;
 import java.util.Optional;
 
+/**
+ * Performs requests to the SCION network and acts as an endhost.
+ */
 public class Daemon extends ScionComponent {
     private static final String TAG = "Daemon";
     private String configDirectorySourcePath;
@@ -81,7 +84,9 @@ public class Daemon extends ScionComponent {
                 storage.getAbsolutePath(ScionConfig.Daemon.TRUST_DATABASE_PATH)));
 
         // tail log file and run daemon
-        Logger.createLogThread(TAG, storage.getInputStream(logPath)).start();
+        Logger.createLogThread(TAG, storage.getInputStream(logPath))
+                .watchFor(ScionConfig.Daemon.WATCH_PATTERN, this::setReady)
+                .start();
     }
 
     @Override

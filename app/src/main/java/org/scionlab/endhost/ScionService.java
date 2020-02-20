@@ -26,19 +26,20 @@ import androidx.core.app.NotificationCompat;
 
 import org.scionlab.endhost.components.Daemon;
 import org.scionlab.endhost.components.Dispatcher;
+import org.scionlab.endhost.components.Scmp;
 
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
     private static final int NOTIFICATION_ID  = 1;
     public static final String CONFIG_DIRECTORY_SOURCE_PATH = ScionService.class.getCanonicalName() + ".CONFIG_DIRECTORY_SOURCE_PATH";
     private boolean running = false;
-    private ScionComponent dispatcher, daemon;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int ret = super.onStartCommand(intent, flags, startId);
         if (intent == null || running)
             return ret;
+
         final String configDirectorySourcePath = intent.getStringExtra(CONFIG_DIRECTORY_SOURCE_PATH);
         if (configDirectorySourcePath == null) {
             Log.e(TAG, "no config directory source path given");
@@ -50,16 +51,13 @@ public class ScionService extends Service {
                 .setSmallIcon(R.drawable.ic_scion_logo);
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
-        // start SCION components
         Log.i(TAG, "starting SCION components");
-        dispatcher = new Dispatcher(this);
-        daemon = new Daemon(this, configDirectorySourcePath);
-        dispatcher.start();
-        daemon.start();
+        ScionComponentRegistry.getInstance()
+                .start(new Dispatcher(this))
+                .start(new Daemon(this, configDirectorySourcePath))
+                .start(new Scmp(this));
+
         running = true;
-
-        new ScionScmp(this).start();
-
         return ret;
     }
 
@@ -69,8 +67,7 @@ public class ScionService extends Service {
             return;
 
         Log.i(TAG, "stopping SCION components");
-        dispatcher.stop();
-        daemon.stop();
+        ScionComponentRegistry.getInstance().stopAll();
         stopForeground(STOP_FOREGROUND_REMOVE);
         running = false;
     }

@@ -34,12 +34,18 @@ public class ScionConfig {
         static final String SCMP_DAEMON_SOCKET_FLAG = "-tools_scmp_sciond"; // flag that specifies the daemon socket
     }
 
+    static class Component {
+        static final int READY_INTERVAL = 250; // how frequently (in ms) to check whether required components are ready
+        static final int READY_RETRIES = 60; // when to give up and stop the component
+    }
+
     public static class Dispatcher {
         public static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml"; // path to configuration file template, located in assets folder
         public static final String CONFIG_PATH = "EXTERNAL/dispatcher.toml"; // path to configuration file
         public static final String LOG_PATH = "EXTERNAL/dispatcher.log"; // path to log file
         public static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
-        public static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit)
+        public static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit), at least info!
+        public static final Pattern WATCH_PATTERN = Pattern.compile(".*Accepted new client.*$"); // when encountered, consider dispatcher ready
     }
 
     public static class Daemon {
@@ -52,11 +58,12 @@ public class ScionConfig {
         public static final String UNIX_SOCKET_PATH = "INTERNAL/daemon.unix.sock"; // path to UNIX socket created in internal storage
         public static final String TRUST_DATABASE_PATH = "EXTERNAL/daemon.trust.db"; // path to trust SQLite database created in external storage
         public static final String PATH_DATABASE_PATH = "EXTERNAL/daemon.path.db"; // path to path SQLite database created in external storage
-        public static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit)
+        public static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit), at least info!
+        public static final Pattern WATCH_PATTERN = Pattern.compile(".*Registered with dispatcher.*$"); // when encountered, consider daemon ready
     }
 
     static class Log {
-        static final Pattern DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} "); // trims information from log output
-        static final long UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
+        static final Pattern DELETE_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} "); // trims information from log output
+        static final long UPDATE_INTERVAL = 1000; // how often (in ms) to poll the log file for updates
     }
 }

@@ -15,28 +15,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.endhost.components;
 
 import android.content.Context;
-import android.util.Log;
 
-public class ScionScmp extends Thread {
-    private static final String TAG = "ScionScmp";
-    private Context context;
+import org.scionlab.endhost.Logger;
+import org.scionlab.endhost.ScionBinary;
+import org.scionlab.endhost.ScionComponent;
+import org.scionlab.endhost.ScionComponentRegistry;
+import org.scionlab.endhost.ScionConfig;
 
-    ScionScmp(Context context) {
-        this.context = context;
+public class Scmp extends ScionComponent {
+    private static final String TAG = "Scmp";
+
+    public Scmp(Context context) {
+        super(context);
     }
 
     @Override
-    public void run() {
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        String[] args = {"-tools_scmp_cmn_local", "19-ffaa:1:cf4,[192.168.0.6]",  "-tools_scmp_cmn_remote", "19-ffaa:1:cf4,[192.168.0.3]"};// tools_scmp_sciond tools_scmp_dispatcher
-
+    public void prepare() {
         /*File gencert = mkdir("gen-certs");
         Provider bcProvider = new BouncyCastleProvider();
         Security.addProvider(bcProvider);
@@ -76,19 +73,20 @@ public class ScionScmp extends Thread {
             pWriter.close();
             log(R.string.scmpcreatecert, cert.getAbsolutePath());
         }*/
+    }
 
-        final Storage storage = Storage.from(context);
+    @Override
+    public boolean mayRun() {
+        return ScionComponentRegistry.getInstance().isReady(Dispatcher.class, Daemon.class);
+    }
 
-        // long ret = Scmp.main(arguments, "", getFilesDir().getAbsolutePath());
+    @Override
+    public void run() {
         ScionBinary.runScmp(context,
-                new Logger.LogThread(
-                        line -> Log.i(TAG, line),
-                        ScionConfig.Log.DELETER_PATTERN,
-                        ScionConfig.Log.UPDATE_INTERVAL),
+                Logger.createLogThread(TAG),
                 storage.getAbsolutePath(ScionConfig.Dispatcher.SOCKET_PATH),
                 storage.getAbsolutePath(ScionConfig.Daemon.RELIABLE_SOCKET_PATH),
                 "17-ffaa:1:cf9,[192.168.0.123]",
-                //"17-ffaa:1:cf9,[192.168.0.8]");
-                              "19-ffaa:0:1301,[0.0.0.0]");
+                "19-ffaa:0:1301,[0.0.0.0]"); // 17-ffaa:1:cf9,[192.168.0.8]
     }
 }
