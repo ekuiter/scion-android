@@ -36,7 +36,7 @@ public class Dispatcher extends ScionComponent {
     }
 
     @Override
-    public void prepare() {
+    public boolean prepare() {
         final String socketPath = Config.Dispatcher.SOCKET_PATH;
         final String logPath = Config.Dispatcher.LOG_PATH;
 
@@ -56,6 +56,7 @@ public class Dispatcher extends ScionComponent {
         Logger.createLogThread(TAG, storage.getInputStream(logPath))
                 .watchFor(Config.Dispatcher.WATCH_PATTERN, this::setReady)
                 .start();
+        return true;
     }
 
     @Override

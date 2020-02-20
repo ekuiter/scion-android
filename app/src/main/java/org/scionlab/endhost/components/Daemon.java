@@ -44,20 +44,24 @@ public class Daemon extends ScionComponent {
     }
 
     @Override
-    public void prepare() {
+    public boolean prepare() {
         final String configDirectoryPath = Config.Daemon.CONFIG_DIRECTORY_PATH;
         final String reliableSocketPath = Config.Daemon.RELIABLE_SOCKET_PATH;
         final String unixSocketPath = Config.Daemon.UNIX_SOCKET_PATH;
         final String logPath = Config.Daemon.LOG_PATH;
 
         // copy configuration folder provided by the user and find daemon configuration file
+        if (storage.countFilesInDirectory(new File(configDirectorySourcePath)) > Config.Daemon.CONFIG_DIRECTORY_FILE_LIMIT) {
+            Log.e(TAG, "too many files in configuration directory, did you choose the right directory?");
+            return false;
+        }
         storage.deleteFileOrDirectory(configDirectoryPath);
         storage.copyFileOrDirectory(new File(configDirectorySourcePath), configDirectoryPath);
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
                 configDirectoryPath, Config.Daemon.CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
             Log.e(TAG, "could not find SCION daemon configuration file sciond.toml or sd.toml");
-            return;
+            return false;
         }
         configPath = _configPath.get();
         Toml config = new Toml().read(storage.getInputStream(configPath));
@@ -87,6 +91,7 @@ public class Daemon extends ScionComponent {
         Logger.createLogThread(TAG, storage.getInputStream(logPath))
                 .watchFor(Config.Daemon.WATCH_PATTERN, this::setReady)
                 .start();
+        return true;
     }
 
     @Override

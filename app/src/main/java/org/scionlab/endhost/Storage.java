@@ -124,7 +124,7 @@ public class Storage {
         getFile(path).mkdirs();
     }
 
-    private int countFilesInDirectory(File file) {
+    public int countFilesInDirectory(File file) {
         int counted = Boolean.compare(file.exists(), false);
         if (file.isDirectory())
             for (File c : Objects.requireNonNull(file.listFiles()))

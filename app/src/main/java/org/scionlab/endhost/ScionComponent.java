@@ -64,7 +64,12 @@ public abstract class ScionComponent {
 
         String className = this.getClass().getSimpleName();
         Log.i(TAG, "starting component " + className);
-        prepare();
+
+        if (!prepare()) {
+            Log.e(TAG, "failed to prepare component " + className);
+            return;
+        }
+
         thread = new Thread(() -> {
             try {
                 int retries = 0;
@@ -98,7 +103,7 @@ public abstract class ScionComponent {
     // Override this to implement initialization procedures for a SCION component
     // (such as writing configuration files). This is run in the main thread and
     // as such, will not be interrupted. This will be called right before mayRun().
-    public abstract void prepare();
+    public abstract boolean prepare();
 
     // Called before run() to make sure this component may actually be started.
     // Override this to check to check whether other required components are ready.

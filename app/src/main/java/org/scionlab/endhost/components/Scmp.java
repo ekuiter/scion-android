@@ -33,7 +33,7 @@ public class Scmp extends ScionComponent {
     }
 
     @Override
-    public void prepare() {
+    public boolean prepare() {
         /*File gencert = mkdir("gen-certs");
         Provider bcProvider = new BouncyCastleProvider();
         Security.addProvider(bcProvider);
@@ -73,6 +73,8 @@ public class Scmp extends ScionComponent {
             pWriter.close();
             log(R.string.scmpcreatecert, cert.getAbsolutePath());
         }*/
+
+        return true;
     }
 
     @Override

@@ -41,7 +41,7 @@ public class Logger {
             this.interval = interval;
         }
 
-        public LogThread setInputStream(InputStream inputStream) {
+        LogThread setInputStream(InputStream inputStream) {
             this.inputStream = inputStream;
             return this;
         }
