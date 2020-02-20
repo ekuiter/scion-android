@@ -23,7 +23,7 @@ import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.ScionBinary;
 import org.scionlab.endhost.ScionComponent;
 import org.scionlab.endhost.ScionComponentRegistry;
-import org.scionlab.endhost.ScionConfig;
+import org.scionlab.endhost.Config;
 
 public class Scmp extends ScionComponent {
     private static final String TAG = "Scmp";
@@ -84,8 +84,8 @@ public class Scmp extends ScionComponent {
     public void run() {
         ScionBinary.runScmp(context,
                 Logger.createLogThread(TAG),
-                storage.getAbsolutePath(ScionConfig.Dispatcher.SOCKET_PATH),
-                storage.getAbsolutePath(ScionConfig.Daemon.RELIABLE_SOCKET_PATH),
+                storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH),
+                storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH),
                 "17-ffaa:1:cf9,[192.168.0.123]",
                 "19-ffaa:0:1301,[0.0.0.0]"); // 17-ffaa:1:cf9,[192.168.0.8]
     }

@@ -75,8 +75,8 @@ public class Logger {
     public static LogThread createLogThread(String tag) {
         return new Logger.LogThread(
                 line -> Log.i(tag, line),
-                ScionConfig.Log.DELETE_PATTERN,
-                ScionConfig.Log.UPDATE_INTERVAL);
+                Config.Log.DELETE_PATTERN,
+                Config.Log.UPDATE_INTERVAL);
     }
 
     public static LogThread createLogThread(String tag, InputStream inputStream) {

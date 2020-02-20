@@ -22,14 +22,14 @@ import android.content.Context;
 import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.ScionBinary;
 import org.scionlab.endhost.ScionComponent;
-import org.scionlab.endhost.ScionConfig;
+import org.scionlab.endhost.Config;
 
 /**
  * Dispatches requests/responses from other SCION components to the outside world and vice-versa.
  */
 public class Dispatcher extends ScionComponent {
     private static final String TAG = "Dispatcher";
-    private final String configPath = ScionConfig.Dispatcher.CONFIG_PATH;
+    private final String configPath = Config.Dispatcher.CONFIG_PATH;
 
     public Dispatcher(Context context) {
         super(context);
@@ -37,8 +37,8 @@ public class Dispatcher extends ScionComponent {
 
     @Override
     public void prepare() {
-        final String socketPath = ScionConfig.Dispatcher.SOCKET_PATH;
-        final String logPath = ScionConfig.Dispatcher.LOG_PATH;
+        final String socketPath = Config.Dispatcher.SOCKET_PATH;
+        final String logPath = Config.Dispatcher.LOG_PATH;
 
         // prepare files
         storage.deleteFileOrDirectory(socketPath);
@@ -47,14 +47,14 @@ public class Dispatcher extends ScionComponent {
 
         // instantiate configuration file template
         storage.writeFile(configPath, String.format(
-                storage.readAssetFile(ScionConfig.Dispatcher.CONFIG_TEMPLATE_PATH),
+                storage.readAssetFile(Config.Dispatcher.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(socketPath),
                 storage.getAbsolutePath(logPath),
-                ScionConfig.Dispatcher.LOG_LEVEL));
+                Config.Dispatcher.LOG_LEVEL));
 
         // tail log file
         Logger.createLogThread(TAG, storage.getInputStream(logPath))
-                .watchFor(ScionConfig.Dispatcher.WATCH_PATTERN, this::setReady)
+                .watchFor(Config.Dispatcher.WATCH_PATTERN, this::setReady)
                 .start();
     }
 

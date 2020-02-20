@@ -40,7 +40,7 @@ public class ScionBinary {
         }
 
         ArrayList<String> command = new ArrayList<>();
-        command.add("./" + ScionConfig.Binary.PATH);
+        command.add("./" + Config.Binary.PATH);
         command.addAll(Arrays.asList(args));
         //noinspection SimplifyStreamApiCallChains
 
@@ -93,27 +93,27 @@ public class ScionBinary {
 
     public static int runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
         return runProcess(context, logThread, new HashMap<>(),
-                ScionConfig.Binary.DISPATCHER_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
+                Config.Binary.DISPATCHER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
     public static int runDaemon(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
-        env.put(ScionConfig.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
+        env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
         return runProcess(context, logThread, env,
-                ScionConfig.Binary.DAEMON_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
+                Config.Binary.DAEMON_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
     public static int runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
         return runProcess(context, logThread, new HashMap<>(),
-                ScionConfig.Binary.SCMP_FLAG,
-                ScionConfig.Binary.SCMP_ECHO_FLAG,
-                ScionConfig.Binary.SCMP_DISPATCHER_SOCKET_FLAG,
+                Config.Binary.SCMP_FLAG,
+                Config.Binary.SCMP_ECHO_FLAG,
+                Config.Binary.SCMP_DISPATCHER_SOCKET_FLAG,
                 dispatcherSocketPath,
-                ScionConfig.Binary.SCMP_DAEMON_SOCKET_FLAG,
+                Config.Binary.SCMP_DAEMON_SOCKET_FLAG,
                 daemonSocketPath,
-                ScionConfig.Binary.SCMP_LOCAL_FLAG,
+                Config.Binary.SCMP_LOCAL_FLAG,
                 localAddress,
-                ScionConfig.Binary.SCMP_REMOTE_FLAG,
+                Config.Binary.SCMP_REMOTE_FLAG,
                 remoteAddress);
     }
 }

@@ -19,7 +19,7 @@ package org.scionlab.endhost;
 
 import java.util.regex.Pattern;
 
-public class ScionConfig {
+public class Config {
     static class Binary {
         static final String PATH = "libscion-android.so"; // file name of SCION binary as located in jniLabs subdirectories
         static final String DISPATCHER_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher

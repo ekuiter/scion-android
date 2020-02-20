@@ -68,10 +68,10 @@ public abstract class ScionComponent {
         thread = new Thread(() -> {
             try {
                 int retries = 0;
-                for (; retries < ScionConfig.Component.READY_RETRIES && !mayRun(); retries++) {
+                for (; retries < Config.Component.READY_RETRIES && !mayRun(); retries++) {
                     if (retries == 0)
                         Log.i(TAG, "waiting until component " + className + " may run");
-                    Thread.sleep(ScionConfig.Component.READY_INTERVAL);
+                    Thread.sleep(Config.Component.READY_INTERVAL);
                 }
                 if (retries > 0)
                     Log.i(TAG, "done waiting for component " + className);

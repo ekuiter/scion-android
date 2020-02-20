@@ -25,7 +25,7 @@ import com.moandjiezana.toml.Toml;
 import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.ScionBinary;
 import org.scionlab.endhost.ScionComponent;
-import org.scionlab.endhost.ScionConfig;
+import org.scionlab.endhost.Config;
 
 import java.io.File;
 import java.util.Optional;
@@ -45,23 +45,23 @@ public class Daemon extends ScionComponent {
 
     @Override
     public void prepare() {
-        final String configDirectoryPath = ScionConfig.Daemon.CONFIG_DIRECTORY_PATH;
-        final String reliableSocketPath = ScionConfig.Daemon.RELIABLE_SOCKET_PATH;
-        final String unixSocketPath = ScionConfig.Daemon.UNIX_SOCKET_PATH;
-        final String logPath = ScionConfig.Daemon.LOG_PATH;
+        final String configDirectoryPath = Config.Daemon.CONFIG_DIRECTORY_PATH;
+        final String reliableSocketPath = Config.Daemon.RELIABLE_SOCKET_PATH;
+        final String unixSocketPath = Config.Daemon.UNIX_SOCKET_PATH;
+        final String logPath = Config.Daemon.LOG_PATH;
 
         // copy configuration folder provided by the user and find daemon configuration file
         storage.deleteFileOrDirectory(configDirectoryPath);
         storage.copyFileOrDirectory(new File(configDirectorySourcePath), configDirectoryPath);
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
-                configDirectoryPath, ScionConfig.Daemon.CONFIG_PATH_REGEX);
+                configDirectoryPath, Config.Daemon.CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
             Log.e(TAG, "could not find SCION daemon configuration file sciond.toml or sd.toml");
             return;
         }
         configPath = _configPath.get();
         Toml config = new Toml().read(storage.getInputStream(configPath));
-        String publicAddress = config.getString(ScionConfig.Daemon.CONFIG_PUBLIC_TOML_PATH);
+        String publicAddress = config.getString(Config.Daemon.CONFIG_PUBLIC_TOML_PATH);
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
         // TODO: import certs
 
@@ -73,19 +73,19 @@ public class Daemon extends ScionComponent {
 
         // instantiate configuration file template
         storage.writeFile(configPath, String.format(
-                storage.readAssetFile(ScionConfig.Daemon.CONFIG_TEMPLATE_PATH),
+                storage.readAssetFile(Config.Daemon.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(configDirectoryPath),
                 storage.getAbsolutePath(logPath),
-                ScionConfig.Daemon.LOG_LEVEL,
+                Config.Daemon.LOG_LEVEL,
                 publicAddress,
                 storage.getAbsolutePath(reliableSocketPath),
                 storage.getAbsolutePath(unixSocketPath),
-                storage.getAbsolutePath(ScionConfig.Daemon.PATH_DATABASE_PATH),
-                storage.getAbsolutePath(ScionConfig.Daemon.TRUST_DATABASE_PATH)));
+                storage.getAbsolutePath(Config.Daemon.PATH_DATABASE_PATH),
+                storage.getAbsolutePath(Config.Daemon.TRUST_DATABASE_PATH)));
 
         // tail log file and run daemon
         Logger.createLogThread(TAG, storage.getInputStream(logPath))
-                .watchFor(ScionConfig.Daemon.WATCH_PATTERN, this::setReady)
+                .watchFor(Config.Daemon.WATCH_PATTERN, this::setReady)
                 .start();
     }
 
@@ -94,6 +94,6 @@ public class Daemon extends ScionComponent {
         ScionBinary.runDaemon(context,
                 Logger.createLogThread(TAG),
                 storage.getAbsolutePath(configPath),
-                storage.getAbsolutePath(ScionConfig.Dispatcher.SOCKET_PATH));
+                storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
     }
 }
