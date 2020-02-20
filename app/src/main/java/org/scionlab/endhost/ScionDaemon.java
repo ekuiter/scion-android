@@ -57,6 +57,7 @@ public class ScionDaemon extends Thread {
         Toml config = new Toml().read(storage.getInputStream(configPath));
         String publicAddress = config.getString(ScionConfig.Daemon.CONFIG_PUBLIC_TOML_PATH);
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
+        // TODO: import certs
 
         // prepare files
         storage.deleteFileOrDirectory(reliableSocketPath);
@@ -69,6 +70,7 @@ public class ScionDaemon extends Thread {
                 storage.readAssetFile(ScionConfig.Daemon.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(configDirectoryPath),
                 storage.getAbsolutePath(logPath),
+                ScionConfig.Daemon.LOG_LEVEL,
                 publicAddress,
                 storage.getAbsolutePath(reliableSocketPath),
                 storage.getAbsolutePath(unixSocketPath),

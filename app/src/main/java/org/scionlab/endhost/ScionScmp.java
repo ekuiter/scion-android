@@ -112,7 +112,8 @@ public class ScionScmp extends Thread {
                         ScionConfig.Log.UPDATE_INTERVAL),
                 storage.getAbsolutePath(ScionConfig.Dispatcher.SOCKET_PATH),
                 storage.getAbsolutePath(ScionConfig.Daemon.RELIABLE_SOCKET_PATH),
-                "19-ffaa:1:cf4,[192.168.0.6]",
-                "19-ffaa:1:cf4,[192.168.0.3]");
+                "17-ffaa:1:cf9,[192.168.0.123]",
+                //"17-ffaa:1:cf9,[192.168.0.8]");
+                              "19-ffaa:0:1301,[0.0.0.0]");
     }
 }

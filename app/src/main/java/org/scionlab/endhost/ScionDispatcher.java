@@ -46,7 +46,8 @@ public class ScionDispatcher extends Thread {
         storage.writeFile(configPath, String.format(
                 storage.readAssetFile(ScionConfig.Dispatcher.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(socketPath),
-                storage.getAbsolutePath(logPath)));
+                storage.getAbsolutePath(logPath),
+                ScionConfig.Dispatcher.LOG_LEVEL));
 
         // prepare logger for stdout, stderr and the log file
         Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =

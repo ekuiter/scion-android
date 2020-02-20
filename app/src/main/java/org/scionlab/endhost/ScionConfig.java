@@ -39,6 +39,7 @@ class ScionConfig {
         static final String CONFIG_PATH = "EXTERNAL/dispatcher.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/dispatcher.log"; // path to log file
         static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
+        static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit)
     }
 
     static class Daemon {
@@ -51,10 +52,11 @@ class ScionConfig {
         static final String UNIX_SOCKET_PATH = "INTERNAL/daemon.unix.sock"; // path to UNIX socket created in internal storage
         static final String TRUST_DATABASE_PATH = "EXTERNAL/daemon.trust.db"; // path to trust SQLite database created in external storage
         static final String PATH_DATABASE_PATH = "EXTERNAL/daemon.path.db"; // path to path SQLite database created in external storage
+        static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit)
     }
 
     static class Log {
-        static final Pattern DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} \\[[A-Z]{4}] "); // trims information from log output
+        static final Pattern DELETER_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} "); // trims information from log output
         static final long UPDATE_INTERVAL = 1000; // how often to poll the log file for updates
     }
 }

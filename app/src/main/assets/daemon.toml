@@ -11,10 +11,10 @@ ConfigDir = "%s"
 Prometheus = "[127.0.0.1]:30455"
 
 [logging.file]
-Level = "debug"
+Path = "%s"
+Level = "%s"
 MaxAge = 3
 MaxBackups = 1
-Path = "%s"
 
 [sd]
 Public = "%s"

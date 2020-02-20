@@ -11,7 +11,7 @@ ApplicationSocket = "%s"
 Prometheus = "[127.0.0.1]:30441"
 
 [logging.file]
-Level = "debug"
+Path = "%s"
+Level = "%s"
 MaxAge = 3
 MaxBackups = 1
-Path = "%s"
