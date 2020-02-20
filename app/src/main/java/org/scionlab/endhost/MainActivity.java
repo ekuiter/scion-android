@@ -27,10 +27,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Process;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -38,38 +36,29 @@ import androidx.core.app.ActivityCompat;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 
 public class MainActivity extends AppCompatActivity {
-
     private static String getClassName() { return (new Object(){}).getClass().getEnclosingClass().getCanonicalName(); }
-    private static final String SCIOND_CFG_PATH = getClassName() + ".SCIOND";
+    private static final String DAEMON_CONFIG_DIRECTORY = getClassName() + ".DAEMON_CONFIG_DIRECTORY";
     static final String SERVICE_CHANNEL = getClassName() + ".SERVICES";
-    static final String ACTION_SERVICE = getClassName() + ".SERVICE";
-    static final String EXTRA_SERVICE_PID = getClassName() + ".SERVICE_PID";
-
-    Optional<Bundle> optionalState;
+    static final String UPDATE_USER_INTERFACE = getClassName() + ".UPDATE_USER_INTERFACE";
 
     private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent != null) {
-                int pid = intent.getIntExtra(EXTRA_SERVICE_PID, -1);
-                if (pid != -1) {
-                    Process.killProcess(pid);
-                }
-                activateButtons();
-            }
+            if (Objects.equals(intent.getAction(), UPDATE_USER_INTERFACE))
+                updateUserInterface();
         }
     };
-    private Optional<String> sciondCfgPath;
-    private AppCompatButton[] buttons;
-    private Class<?>[] classes;
-    private View.OnClickListener[][] buttonClicks;
-    private int[][] buttonTextResIds;
+
+    Optional<Bundle> optionalState;
+    private Optional<String> daemonConfigDirectory;
+    private AppCompatButton scionButton;
     private SharedPreferences prefs;
 
     @Override
@@ -77,70 +66,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
-
         optionalState = Optional.ofNullable(savedInstanceState);
-
-        sciondCfgPath = optionalState.map(i->i.getString(SCIOND_CFG_PATH));
-
+        daemonConfigDirectory = optionalState.map(i->i.getString(DAEMON_CONFIG_DIRECTORY));
         createNotificationChannel();
-
         prefs = getPreferences(MODE_PRIVATE);
-
-        buttons = new AppCompatButton[] {
-                findViewById(R.id.scionbutton),
-                findViewById(R.id.scion2button)
-        };
-
-        buttonTextResIds = new int[][] {
-                { R.string.scionbuttonstart, R.string.scionbuttonstart },
-                { R.string.scion2buttonstart, R.string.scion2buttonstart }
-        };
-
-        classes = new Class[] {
-                ScionService.class,
-                ScionService.class
-        };
-
-        buttonClicks = new View.OnClickListener[][]{
-                {
-                        view ->
-                                new ChooserDialog(view.getContext())
-                                        .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
-                                        .withFilter(true, true)
-                                        .withStartFile(prefs.getString(SCIOND_CFG_PATH, null))
-                                        .withChosenListener((path, pathFile) ->
-                                                (sciondCfgPath = Optional.ofNullable(path)).ifPresent(p -> {
-                                                    ensureWritePermissions();
-                                                    startService(new Intent(this, ScionService.class)
-                                                            .putExtra(ScionService.CONFIG_DIRECTORY_SOURCE_PATH, p));
-                                                    putString(SCIOND_CFG_PATH, p);
-                                                    activateButtons();
-                                                })
-                                        ).build().show(),
-                        null
-                },
-                {
-                        view -> {
-                            stopService(new Intent(this, ScionService.class));
-                            activateButtons();
-                        },
-                        null
-                }
-        };
-
-        for (int i = 0; i < classes.length; i++) {
-            final Intent intent = new Intent(this, classes[i]);
-            buttonClicks[i][1] = view -> { stopService(intent); activateButtons(); };
-        }
+        scionButton = findViewById(R.id.scionbutton);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         IntentFilter resetFilter = new IntentFilter();
-        resetFilter.addAction(ACTION_SERVICE);
+        resetFilter.addAction(UPDATE_USER_INTERFACE);
         registerReceiver(serviceReceiver, resetFilter);
-        activateButtons();
+        updateUserInterface();
     }
 
     @Override
@@ -151,23 +90,22 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_help:
-                startActivity(new Intent(this, HelpActivity.class));
-                return true;
-            case R.id.action_about:
-                startActivity(new Intent(this, AboutActivity.class));
-                return true;
-            default:
-                return false;
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_help) {
+            startActivity(new Intent(this, MarkdownActivity.Help.class));
+            return true;
+        } else if (itemId == R.id.action_about) {
+            startActivity(new Intent(this, MarkdownActivity.About.class));
+            return true;
         }
+        return false;
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Function<String,Consumer<CharSequence>> putter = key->cs->outState.putString(key, cs.toString());
-        sciondCfgPath.ifPresent(putter.apply(SCIOND_CFG_PATH));
+        daemonConfigDirectory.ifPresent(putter.apply(DAEMON_CONFIG_DIRECTORY));
     }
 
     private void putString(String key, String value) {
@@ -186,12 +124,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void activateButtons() {
-        boolean[] running = new boolean[classes.length];
-        for (int i = 0; i < running.length; i++) {
-            running[i] = BackgroundService.amIRunning(this, classes[i]);
-            buttons[i].setOnClickListener(buttonClicks[i][running[i] ? 1 : 0]);
-            buttons[i].setText(buttonTextResIds[i][running[i] ? 1 : 0]);
+    private void updateUserInterface() {
+        if (!ScionService.isRunning()) {
+            scionButton.setText(R.string.scionbuttonstart);
+            scionButton.setOnClickListener(view ->
+                    new ChooserDialog(view.getContext())
+                            .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
+                            .withFilter(true, true)
+                            .withStartFile(prefs.getString(DAEMON_CONFIG_DIRECTORY, null))
+                            .withChosenListener((path, pathFile) ->
+                                    (daemonConfigDirectory = Optional.ofNullable(path)).ifPresent(p -> {
+                                        ensureWritePermissions();
+                                        startService(new Intent(this, ScionService.class)
+                                                .putExtra(ScionService.DAEMON_CONFIG_DIRECTORY, p));
+                                        putString(DAEMON_CONFIG_DIRECTORY, p);
+                                        updateUserInterface();
+                                    })
+                            ).build().show());
+        } else {
+            scionButton.setText(R.string.scionbuttonstop);
+            scionButton.setOnClickListener(view -> {
+                stopService(new Intent(this, ScionService.class));
+                updateUserInterface();
+            });
         }
     }
 

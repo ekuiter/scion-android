@@ -17,7 +17,9 @@
 
 package org.scionlab.endhost;
 
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
@@ -31,49 +33,67 @@ import org.scionlab.endhost.components.Scmp;
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
     private static final int NOTIFICATION_ID  = 1;
-    public static final String CONFIG_DIRECTORY_SOURCE_PATH = ScionService.class.getCanonicalName() + ".CONFIG_DIRECTORY_SOURCE_PATH";
-    private boolean running = false;
+    public static final String DAEMON_CONFIG_DIRECTORY = ScionService.class.getCanonicalName() + ".DAEMON_CONFIG_DIRECTORY";
+    private static boolean isRunning = false;
+    private NotificationManager notificationManager;
+    private NotificationCompat.Builder notificationBuilder;
+
+    public static boolean isRunning() {
+        return isRunning;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int ret = super.onStartCommand(intent, flags, startId);
-        if (intent == null || running)
+        if (intent == null || isRunning)
             return ret;
 
-        final String configDirectorySourcePath = intent.getStringExtra(CONFIG_DIRECTORY_SOURCE_PATH);
-        if (configDirectorySourcePath == null) {
-            Log.e(TAG, "no config directory source path given");
+        final String daemonConfigDirectory = intent.getStringExtra(DAEMON_CONFIG_DIRECTORY);
+        if (daemonConfigDirectory == null) {
+            Log.e(TAG, "no daemon configuration directory given");
             return ret;
         }
 
-        // TODO: make this a foreground service, decreasing the probability that Android arbitrarily kills this service
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, MainActivity.SERVICE_CHANNEL)
+        // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationBuilder = new NotificationCompat.Builder(this, MainActivity.SERVICE_CHANNEL)
                 .setSmallIcon(R.drawable.ic_scion_logo);
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
         Log.i(TAG, "starting SCION components");
         ScionComponentRegistry.getInstance()
                 .start(new Dispatcher(this))
-                .start(new Daemon(this, configDirectorySourcePath))
+                .start(new Daemon(this, daemonConfigDirectory))
                 .start(new Scmp(this));
 
-        running = true;
+        isRunning = true;
+        updateUserInterface();
         return ret;
     }
 
     @Override
     public void onDestroy() {
-        if (!running)
+        if (!isRunning)
             return;
 
         Log.i(TAG, "stopping SCION components");
         ScionComponentRegistry.getInstance().stopAll();
         stopForeground(STOP_FOREGROUND_REMOVE);
-        running = false;
+        isRunning = false;
+        updateUserInterface();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private void updateUserInterface() {
+        sendBroadcast(new Intent(MainActivity.UPDATE_USER_INTERFACE));
+    }
+
+    private void notify(String text) {
+        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 }

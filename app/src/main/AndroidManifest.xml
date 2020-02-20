@@ -15,18 +15,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         android:extractNativeLibs="true">
-        <service
-            android:name=".DispatcherService"
-            android:exported="false"
-            android:process=":DispatcherService" />
-        <service
-            android:name=".SciondService"
-            android:exported="false"
-            android:process=":SciondService" />
-        <service
-            android:name=".ScmpService"
-            android:exported="false"
-            android:process=":ScmpService" />
         <service android:name=".ScionService"/>
 
         <activity android:name=".MainActivity">

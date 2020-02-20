@@ -44,4 +44,18 @@ public abstract class MarkdownActivity extends AppCompatActivity {
     }
 
     abstract int getMarkdownResId();
+
+    static class About extends MarkdownActivity {
+        @Override
+        int getMarkdownResId() {
+            return R.string.about_asset_name;
+        }
+    }
+
+    static class Help extends MarkdownActivity {
+        @Override
+        int getMarkdownResId() {
+            return R.string.help_asset_name;
+        }
+    }
 }
