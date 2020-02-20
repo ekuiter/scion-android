@@ -19,7 +19,7 @@ package org.scionlab.endhost;
 
 import java.util.regex.Pattern;
 
-class ScionConfig {
+public class ScionConfig {
     static class Binary {
         static final String PATH = "libscion-android.so"; // file name of SCION binary as located in jniLabs subdirectories
         static final String DISPATCHER_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher
@@ -34,25 +34,25 @@ class ScionConfig {
         static final String SCMP_DAEMON_SOCKET_FLAG = "-tools_scmp_sciond"; // flag that specifies the daemon socket
     }
 
-    static class Dispatcher {
-        static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml"; // path to configuration file template, located in assets folder
-        static final String CONFIG_PATH = "EXTERNAL/dispatcher.toml"; // path to configuration file
-        static final String LOG_PATH = "EXTERNAL/dispatcher.log"; // path to log file
-        static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
-        static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit)
+    public static class Dispatcher {
+        public static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml"; // path to configuration file template, located in assets folder
+        public static final String CONFIG_PATH = "EXTERNAL/dispatcher.toml"; // path to configuration file
+        public static final String LOG_PATH = "EXTERNAL/dispatcher.log"; // path to log file
+        public static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
+        public static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit)
     }
 
-    static class Daemon {
-        static final String CONFIG_TEMPLATE_PATH = "daemon.toml"; // path to configuration file template, located in assets folder
-        static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/endhost"; // path to configuration directory created in external storage
-        static final String CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for configuration file located in configuration directory
-        static final String CONFIG_PUBLIC_TOML_PATH = "sd.Public"; // TOML path for public address read from configuration file
-        static final String LOG_PATH = "EXTERNAL/daemon.log"; // path to log file created in external storage
-        static final String RELIABLE_SOCKET_PATH = "INTERNAL/daemon.reliable.sock"; // path to reliable socket created in internal storage
-        static final String UNIX_SOCKET_PATH = "INTERNAL/daemon.unix.sock"; // path to UNIX socket created in internal storage
-        static final String TRUST_DATABASE_PATH = "EXTERNAL/daemon.trust.db"; // path to trust SQLite database created in external storage
-        static final String PATH_DATABASE_PATH = "EXTERNAL/daemon.path.db"; // path to path SQLite database created in external storage
-        static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit)
+    public static class Daemon {
+        public static final String CONFIG_TEMPLATE_PATH = "daemon.toml"; // path to configuration file template, located in assets folder
+        public static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/endhost"; // path to configuration directory created in external storage
+        public static final String CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for configuration file located in configuration directory
+        public static final String CONFIG_PUBLIC_TOML_PATH = "sd.Public"; // TOML path for public address read from configuration file
+        public static final String LOG_PATH = "EXTERNAL/daemon.log"; // path to log file created in external storage
+        public static final String RELIABLE_SOCKET_PATH = "INTERNAL/daemon.reliable.sock"; // path to reliable socket created in internal storage
+        public static final String UNIX_SOCKET_PATH = "INTERNAL/daemon.unix.sock"; // path to UNIX socket created in internal storage
+        public static final String TRUST_DATABASE_PATH = "EXTERNAL/daemon.trust.db"; // path to trust SQLite database created in external storage
+        public static final String PATH_DATABASE_PATH = "EXTERNAL/daemon.path.db"; // path to path SQLite database created in external storage
+        public static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit)
     }
 
     static class Log {

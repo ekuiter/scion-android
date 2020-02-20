@@ -40,7 +40,7 @@ import java.util.Optional;
  * however, some security restrictions apply (e.g., Unix sockets must be stored internally).
  * In general, we try to store as much files externally as possible to facilitate debugging.
  */
-class Storage {
+public class Storage {
     private Context context;
 
     private Storage(Context context) {
@@ -65,7 +65,7 @@ class Storage {
                 .replaceFirst("^INTERNAL/", ""));
     }
 
-    InputStream getInputStream(String path) {
+    public InputStream getInputStream(String path) {
         try {
             return new FileInputStream(getFile(path));
         } catch (FileNotFoundException e) {
@@ -74,7 +74,7 @@ class Storage {
         }
     }
 
-    OutputStream getOutputStream(String path) {
+    public OutputStream getOutputStream(String path) {
         try {
             return new FileOutputStream(getFile(path));
         } catch (FileNotFoundException e) {
@@ -88,7 +88,7 @@ class Storage {
         return storage + getFilesDir(context, path).toURI().relativize(file.toURI()).getPath();
     }
 
-    String getAbsolutePath(String path) {
+    public String getAbsolutePath(String path) {
         return getFile(path).getAbsolutePath();
     }
 
@@ -106,11 +106,11 @@ class Storage {
         }
     }
 
-    String readFile(String path) {
+    public String readFile(String path) {
         return readFile(getInputStream(path));
     }
 
-    String readAssetFile(String path) {
+    public String readAssetFile(String path) {
         try {
             return readFile(context.getAssets().open(path));
         } catch (IOException e) {
@@ -160,16 +160,16 @@ class Storage {
         return copied;
     }
 
-    int deleteFileOrDirectory(String path) {
+    public int deleteFileOrDirectory(String path) {
         File f = getFile(path);
         return countFilesInDirectory(f) - deleteFileOrDirectory(f);
     }
 
-    int copyFileOrDirectory(File src, String dstPath) {
+    public int copyFileOrDirectory(File src, String dstPath) {
         return countFilesInDirectory(src) - copyFileOrDirectory(src, getFile(dstPath));
     }
 
-    void createFile(String path) {
+    public void createFile(String path) {
         File f = getFile(path);
         if (f.getParentFile() != null && !f.getParentFile().exists())
             createApplicationDirectory(Objects.requireNonNull(f.getParent()));
@@ -182,7 +182,7 @@ class Storage {
         }
     }
 
-    void writeFile(String path, String content) {
+    public void writeFile(String path, String content) {
         deleteFileOrDirectory(path);
         createFile(path);
         try {
@@ -194,7 +194,7 @@ class Storage {
         }
     }
 
-    Optional<String> findFirstMatchingFileInDirectory(String path, String regex) {
+    public Optional<String> findFirstMatchingFileInDirectory(String path, String regex) {
         final File dir = getFile(path);
         if (!dir.isDirectory())
             return Optional.empty();

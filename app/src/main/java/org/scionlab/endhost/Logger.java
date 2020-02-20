@@ -17,6 +17,8 @@
 
 package org.scionlab.endhost;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,20 +27,20 @@ import java.io.InterruptedIOException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-class Logger {
-    static class ConsumeOutputThread extends Thread {
+public class Logger {
+    public static class LogThread extends Thread {
         private Consumer<String> outputConsumer;
         private Pattern deleterPattern;
         private long interval;
         InputStream inputStream;
 
-        ConsumeOutputThread(Consumer<String> outputConsumer, Pattern deleterPattern, long interval) {
+        LogThread(Consumer<String> outputConsumer, Pattern deleterPattern, long interval) {
             this.outputConsumer = outputConsumer;
             this.deleterPattern = deleterPattern;
             this.interval = interval;
         }
 
-        ConsumeOutputThread setInputStream(InputStream inputStream) {
+        public LogThread setInputStream(InputStream inputStream) {
             this.inputStream = inputStream;
             return this;
         }
@@ -57,5 +59,16 @@ class Logger {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static LogThread createLogThread(String tag) {
+        return new Logger.LogThread(
+                line -> Log.i(tag, line),
+                ScionConfig.Log.DELETER_PATTERN,
+                ScionConfig.Log.UPDATE_INTERVAL);
+    }
+
+    public static LogThread createLogThread(String tag, InputStream inputStream) {
+        return createLogThread(tag).setInputStream(inputStream);
     }
 }

@@ -81,7 +81,7 @@ public class ScionScmp extends Thread {
 
         // long ret = Scmp.main(arguments, "", getFilesDir().getAbsolutePath());
         ScionBinary.runScmp(context,
-                new Logger.ConsumeOutputThread(
+                new Logger.LogThread(
                         line -> Log.i(TAG, line),
                         ScionConfig.Log.DELETER_PATTERN,
                         ScionConfig.Log.UPDATE_INTERVAL),

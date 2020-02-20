@@ -15,27 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.endhost.components;
 
 import android.content.Context;
-import android.util.Log;
 
-import java.util.function.Supplier;
+import org.scionlab.endhost.Logger;
+import org.scionlab.endhost.ScionBinary;
+import org.scionlab.endhost.ScionComponent;
+import org.scionlab.endhost.ScionConfig;
 
-public class ScionDispatcher extends Thread {
-    private static final String TAG = "ScionDispatcher";
-    private Context context;
+/**
+ * Dispatches requests/responses from other SCION components to the outside world and vice-versa.
+ */
+public class Dispatcher extends ScionComponent {
+    private static final String TAG = "Dispatcher";
+    private final String configPath = ScionConfig.Dispatcher.CONFIG_PATH;
 
-    ScionDispatcher(Context context) {
-        this.context = context;
+    public Dispatcher(Context context) {
+        super(context);
     }
 
     @Override
-    public void run() {
-        final Storage storage = Storage.from(context);
-        final String configPath = ScionConfig.Dispatcher.CONFIG_PATH;
-        final String logPath = ScionConfig.Dispatcher.LOG_PATH;
+    public void prepare() {
         final String socketPath = ScionConfig.Dispatcher.SOCKET_PATH;
+        final String logPath = ScionConfig.Dispatcher.LOG_PATH;
 
         // prepare files
         storage.deleteFileOrDirectory(socketPath);
@@ -49,17 +52,14 @@ public class ScionDispatcher extends Thread {
                 storage.getAbsolutePath(logPath),
                 ScionConfig.Dispatcher.LOG_LEVEL));
 
-        // prepare logger for stdout, stderr and the log file
-        Supplier<Utils.ConsumeOutputThread> consumeOutputThreadSupplier =
-                () -> new Utils.ConsumeOutputThread(
-                        line -> Log.i(TAG, line),
-                        ScionConfig.Log.DELETER_PATTERN,
-                        ScionConfig.Log.UPDATE_INTERVAL);
+        // tail log file
+        Logger.createLogThread(TAG, storage.getInputStream(logPath)).start();
+    }
 
-        // tail log file and run dispatcher
-        consumeOutputThreadSupplier.get().setInputStream(storage.getInputStream(logPath)).start();
+    @Override
+    public void run() {
         ScionBinary.runDispatcher(context,
-                consumeOutputThreadSupplier.get(),
+                Logger.createLogThread(TAG),
                 storage.getAbsolutePath(configPath));
     }
 }

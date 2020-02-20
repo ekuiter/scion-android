@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class ScionBinary {
+public class ScionBinary {
     private static final String TAG = "ScionBinary";
     private static boolean initialized = false;
 
@@ -64,7 +64,9 @@ class ScionBinary {
         }
     }
 
-    private static int runProcess(Context context, Logger.ConsumeOutputThread consumeOutputThread, Map<String, String> env, String... args) {
+    // Runs the SCION binary and blocks until the process exits or the thread is interrupted.
+    // Thus, this should only be called from inside a (dedicated) thread.
+    private static int runProcess(Context context, Logger.LogThread logThread, Map<String, String> env, String... args) {
         Process process = startProcess(context, env, args);
         int ret;
 
@@ -73,7 +75,7 @@ class ScionBinary {
         else {
             // this should create a separate thread that is only used to consume each line of the
             // process' stdout/stderr stream (see Logger.outputConsumerThread)
-            consumeOutputThread.setInputStream(process.getInputStream()).start();
+            logThread.setInputStream(process.getInputStream()).start();
 
             // block until the process dies or the current thread is interrupted, in which case we kill the process
             try {
@@ -89,20 +91,20 @@ class ScionBinary {
         return ret;
     }
 
-    static int runDispatcher(Context context, Logger.ConsumeOutputThread consumeOutputThread, String configPath) {
-        return runProcess(context, consumeOutputThread, new HashMap<>(),
+    public static int runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
+        return runProcess(context, logThread, new HashMap<>(),
                 ScionConfig.Binary.DISPATCHER_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
     }
 
-    static int runDaemon(Context context, Logger.ConsumeOutputThread consumeOutputThread, String configPath, String dispatcherSocketPath) {
+    public static int runDaemon(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
         env.put(ScionConfig.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
-        return runProcess(context, consumeOutputThread, env,
+        return runProcess(context, logThread, env,
                 ScionConfig.Binary.DAEMON_FLAG, ScionConfig.Binary.CONFIG_FLAG, configPath);
     }
 
-    static int runScmp(Context context, Logger.ConsumeOutputThread consumeOutputThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
-        return runProcess(context, consumeOutputThread, new HashMap<>(),
+    public static int runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
+        return runProcess(context, logThread, new HashMap<>(),
                 ScionConfig.Binary.SCMP_FLAG,
                 ScionConfig.Binary.SCMP_ECHO_FLAG,
                 ScionConfig.Binary.SCMP_DISPATCHER_SOCKET_FLAG,

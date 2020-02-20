@@ -24,12 +24,15 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import org.scionlab.endhost.components.Daemon;
+import org.scionlab.endhost.components.Dispatcher;
+
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
     private static final int NOTIFICATION_ID  = 1;
     public static final String CONFIG_DIRECTORY_SOURCE_PATH = ScionService.class.getCanonicalName() + ".CONFIG_DIRECTORY_SOURCE_PATH";
-    private Thread scionDispatcher, scionDaemon;
     private boolean running = false;
+    private ScionComponent dispatcher, daemon;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -47,12 +50,12 @@ public class ScionService extends Service {
                 .setSmallIcon(R.drawable.ic_scion_logo);
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
-        // start SCION dispatcher and daemon
-        Log.i(TAG, "starting SCION service");
-        scionDispatcher = new ScionDispatcher(this);
-        scionDaemon = new ScionDaemon(this, configDirectorySourcePath);
-        scionDispatcher.start();
-        scionDaemon.start();
+        // start SCION components
+        Log.i(TAG, "starting SCION components");
+        dispatcher = new Dispatcher(this);
+        daemon = new Daemon(this, configDirectorySourcePath);
+        dispatcher.start();
+        daemon.start();
         running = true;
 
         new ScionScmp(this).start();
@@ -65,9 +68,9 @@ public class ScionService extends Service {
         if (!running)
             return;
 
-        Log.i(TAG, "stopping SCION service");
-        scionDispatcher.interrupt();
-        scionDaemon.interrupt();
+        Log.i(TAG, "stopping SCION components");
+        dispatcher.stop();
+        daemon.stop();
         stopForeground(STOP_FOREGROUND_REMOVE);
         running = false;
     }

@@ -15,30 +15,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.endhost.components;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.moandjiezana.toml.Toml;
 
+import org.scionlab.endhost.Logger;
+import org.scionlab.endhost.ScionBinary;
+import org.scionlab.endhost.ScionComponent;
+import org.scionlab.endhost.ScionConfig;
+
 import java.io.File;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-public class ScionDaemon extends Thread {
-    private static final String TAG = "ScionDaemon";
-    private Context context;
+public class Daemon extends ScionComponent {
+    private static final String TAG = "Daemon";
     private String configDirectorySourcePath;
+    private String configPath;
 
-    ScionDaemon(Context context, String configDirectorySourcePath) {
-        this.context = context;
+    public Daemon(Context context, String configDirectorySourcePath) {
+        super(context);
         this.configDirectorySourcePath = configDirectorySourcePath;
     }
 
     @Override
-    public void run() {
-        final Storage storage = Storage.from(context);
+    public void prepare() {
         final String configDirectoryPath = ScionConfig.Daemon.CONFIG_DIRECTORY_PATH;
         final String reliableSocketPath = ScionConfig.Daemon.RELIABLE_SOCKET_PATH;
         final String unixSocketPath = ScionConfig.Daemon.UNIX_SOCKET_PATH;
@@ -53,7 +56,7 @@ public class ScionDaemon extends Thread {
             Log.e(TAG, "could not find SCION daemon configuration file sciond.toml or sd.toml");
             return;
         }
-        String configPath = _configPath.get();
+        configPath = _configPath.get();
         Toml config = new Toml().read(storage.getInputStream(configPath));
         String publicAddress = config.getString(ScionConfig.Daemon.CONFIG_PUBLIC_TOML_PATH);
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
@@ -77,17 +80,14 @@ public class ScionDaemon extends Thread {
                 storage.getAbsolutePath(ScionConfig.Daemon.PATH_DATABASE_PATH),
                 storage.getAbsolutePath(ScionConfig.Daemon.TRUST_DATABASE_PATH)));
 
-        // prepare logger for stdout, stderr and the log file
-        Supplier<Logger.ConsumeOutputThread> consumeOutputThreadSupplier =
-                () -> new Logger.ConsumeOutputThread(
-                        line -> Log.i(TAG, line),
-                        ScionConfig.Log.DELETER_PATTERN,
-                        ScionConfig.Log.UPDATE_INTERVAL);
-
         // tail log file and run daemon
-        consumeOutputThreadSupplier.get().setInputStream(storage.getInputStream(logPath)).start();
+        Logger.createLogThread(TAG, storage.getInputStream(logPath)).start();
+    }
+
+    @Override
+    public void run() {
         ScionBinary.runDaemon(context,
-                consumeOutputThreadSupplier.get(),
+                Logger.createLogThread(TAG),
                 storage.getAbsolutePath(configPath),
                 storage.getAbsolutePath(ScionConfig.Dispatcher.SOCKET_PATH));
     }
