@@ -24,7 +24,7 @@ import com.moandjiezana.toml.Toml;
 
 import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.ScionBinary;
-import org.scionlab.endhost.ScionComponent;
+import org.scionlab.endhost.Component;
 import org.scionlab.endhost.Config;
 
 import java.io.File;
@@ -33,13 +33,12 @@ import java.util.Optional;
 /**
  * Performs requests to the SCION network and acts as an endhost.
  */
-public class Daemon extends ScionComponent {
+public class Daemon extends Component {
     private static final String TAG = "Daemon";
     private String configDirectorySourcePath;
     private String configPath;
 
-    public Daemon(Context context, String configDirectorySourcePath) {
-        super(context);
+    public Daemon(String configDirectorySourcePath) {
         this.configDirectorySourcePath = configDirectorySourcePath;
     }
 
@@ -96,7 +95,7 @@ public class Daemon extends ScionComponent {
 
     @Override
     public void run() {
-        ScionBinary.runDaemon(context,
+        ScionBinary.runDaemon(getContext(),
                 Logger.createLogThread(TAG),
                 storage.getAbsolutePath(configPath),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));

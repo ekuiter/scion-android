@@ -17,6 +17,8 @@
 
 package org.scionlab.endhost;
 
+import android.content.Context;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -24,49 +26,55 @@ import java.util.stream.Stream;
  * Acts as a central registry for all SCION components (daemon, dispatcher etc.)
  * For each component, exactly one instance may be registered (see ScionService).
  */
-public class ScionComponentRegistry {
-    private static ScionComponentRegistry instance = new ScionComponentRegistry();
-    private ConcurrentHashMap<Class<? extends ScionComponent>, ScionComponent> scionComponents = new ConcurrentHashMap<>();
+public class ComponentRegistry {
+    private Context context;
+    private ConcurrentHashMap<Class<? extends Component>, Component> components = new ConcurrentHashMap<>();
 
-    public static ScionComponentRegistry getInstance() {
-        return instance;
+    ComponentRegistry(Context context) {
+        this.context = context;
     }
 
-    private void register(ScionComponent scionComponent) {
-        Class<? extends ScionComponent> cls = scionComponent.getClass();
-        if (scionComponents.containsKey(cls))
+    public Context getContext() {
+        return context;
+    }
+
+    private void register(Component component) {
+        Class<? extends Component> cls = component.getClass();
+        if (components.containsKey(cls))
             throw new RuntimeException("SCION component for " + cls + " already registered");
-        scionComponents.put(cls, scionComponent);
+        components.put(cls, component);
     }
 
-    private void unregister(ScionComponent scionComponent) {
-        Class<? extends ScionComponent> cls = scionComponent.getClass();
-        if (get(cls) != scionComponent)
+    private void unregister(Component component) {
+        Class<? extends Component> cls = component.getClass();
+        if (get(cls) != component)
             throw new RuntimeException("other SCION component registered for " + cls);
-        scionComponents.remove(cls);
+        components.remove(cls);
     }
 
-    ScionComponentRegistry start(ScionComponent scionComponent) {
-        scionComponent.start();
-        register(scionComponent);
+    ComponentRegistry start(Component component) {
+        component.setComponentRegistry(this);
+        component.start();
+        register(component);
         return this;
     }
 
-    private void stop(ScionComponent scionComponent) {
-        unregister(scionComponent);
-        scionComponent.stop();
+    private void stop(Component component) {
+        unregister(component);
+        component.stop();
+        component.setComponentRegistry(null);
     }
 
     void stopAll() {
-        scionComponents.values().forEach(this::stop);
+        components.values().forEach(this::stop);
     }
 
-    private ScionComponent get(Class<? extends ScionComponent> cls) {
-        return scionComponents.get(cls);
+    private Component get(Class<? extends Component> cls) {
+        return components.get(cls);
     }
 
-    private boolean isReady(Class<? extends ScionComponent> cls) {
-        return get(cls) != null && get(cls).getState() == ScionComponent.State.READY;
+    private boolean isReady(Class<? extends Component> cls) {
+        return get(cls) != null && get(cls).getState() == Component.State.READY;
     }
 
     public boolean isReady(Class... classes) {

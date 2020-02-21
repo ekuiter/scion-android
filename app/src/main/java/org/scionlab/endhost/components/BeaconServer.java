@@ -19,19 +19,14 @@ package org.scionlab.endhost.components;
 
 import android.content.Context;
 
+import org.scionlab.endhost.Component;
 import org.scionlab.endhost.Config;
 import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.ScionBinary;
-import org.scionlab.endhost.ScionComponent;
-import org.scionlab.endhost.ScionComponentRegistry;
 
-public class BeaconServer extends ScionComponent {
+public class BeaconServer extends Component {
     private static final String TAG = "BeaconServer";
     private final String configPath = Config.BeaconServer.CONFIG_PATH;
-
-    public BeaconServer(Context context) {
-        super(context);
-    }
 
     @Override
     public boolean prepare() {
@@ -57,12 +52,12 @@ public class BeaconServer extends ScionComponent {
 
     @Override
     public boolean mayRun() {
-        return ScionComponentRegistry.getInstance().isReady(Daemon.class);
+        return componentRegistry.isReady(Daemon.class);
     }
 
     @Override
     public void run() {
-        ScionBinary.runBeaconServer(context,
+        ScionBinary.runBeaconServer(getContext(),
                 Logger.createLogThread(TAG),
                 storage.getAbsolutePath(configPath));
     }

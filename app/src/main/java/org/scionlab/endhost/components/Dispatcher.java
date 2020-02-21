@@ -17,23 +17,17 @@
 
 package org.scionlab.endhost.components;
 
-import android.content.Context;
-
+import org.scionlab.endhost.Component;
 import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.ScionBinary;
-import org.scionlab.endhost.ScionComponent;
 import org.scionlab.endhost.Config;
 
 /**
  * Dispatches requests/responses from other SCION components to the outside world and vice-versa.
  */
-public class Dispatcher extends ScionComponent {
+public class Dispatcher extends Component {
     private static final String TAG = "Dispatcher";
     private final String configPath = Config.Dispatcher.CONFIG_PATH;
-
-    public Dispatcher(Context context) {
-        super(context);
-    }
 
     @Override
     public boolean prepare() {
@@ -61,7 +55,7 @@ public class Dispatcher extends ScionComponent {
 
     @Override
     public void run() {
-        ScionBinary.runDispatcher(context,
+        ScionBinary.runDispatcher(getContext(),
                 Logger.createLogThread(TAG),
                 storage.getAbsolutePath(configPath));
     }

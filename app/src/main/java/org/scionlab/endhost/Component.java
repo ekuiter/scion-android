@@ -23,21 +23,25 @@ import android.util.Log;
 /**
  * Think of SCION components as "Docker containers": They can be started, stopped,
  * and have a state that usually transitions from STOPPED to STARTING and then READY.
+ * This serves the same purpose as the SCION services in /lib/systemd/system on Linux.
  */
-public abstract class ScionComponent {
-    protected Context context;
+public abstract class Component {
+    protected ComponentRegistry componentRegistry;
     protected Storage storage;
     private Thread thread;
     private boolean isReady = false;
-    private String TAG = "ScionComponent";
+    private String TAG = "Component";
 
     enum State {
         STOPPED, STARTING, READY
     }
 
-    public ScionComponent(Context context) {
-        this.context = context;
-        storage = Storage.from(context);
+    void setComponentRegistry(ComponentRegistry componentRegistry) {
+        this.componentRegistry = componentRegistry;
+    }
+
+    protected Context getContext() {
+        return componentRegistry.getContext();
     }
 
     boolean isRunning() {
@@ -62,8 +66,14 @@ public abstract class ScionComponent {
         if (thread != null)
             return;
 
+        if (componentRegistry == null) {
+            Log.e(TAG, "not registered with any component registry");
+            return;
+        }
+
         String className = this.getClass().getSimpleName();
         Log.i(TAG, "starting component " + className);
+        storage = Storage.from(getContext());
 
         if (!prepare()) {
             Log.e(TAG, "failed to prepare component " + className);

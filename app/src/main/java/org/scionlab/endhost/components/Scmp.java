@@ -21,16 +21,11 @@ import android.content.Context;
 
 import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.ScionBinary;
-import org.scionlab.endhost.ScionComponent;
-import org.scionlab.endhost.ScionComponentRegistry;
+import org.scionlab.endhost.Component;
 import org.scionlab.endhost.Config;
 
-public class Scmp extends ScionComponent {
+public class Scmp extends Component {
     private static final String TAG = "Scmp";
-
-    public Scmp(Context context) {
-        super(context);
-    }
 
     @Override
     public boolean prepare() {
@@ -79,12 +74,12 @@ public class Scmp extends ScionComponent {
 
     @Override
     public boolean mayRun() {
-        return ScionComponentRegistry.getInstance().isReady(Dispatcher.class, Daemon.class);
+        return componentRegistry.isReady(Dispatcher.class, Daemon.class);
     }
 
     @Override
     public void run() {
-        ScionBinary.runScmp(context,
+        ScionBinary.runScmp(getContext(),
                 Logger.createLogThread(TAG),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH),
                 storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH),

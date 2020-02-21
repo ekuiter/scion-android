@@ -31,7 +31,6 @@ import androidx.core.app.NotificationCompat;
 import org.scionlab.endhost.components.BeaconServer;
 import org.scionlab.endhost.components.Daemon;
 import org.scionlab.endhost.components.Dispatcher;
-import org.scionlab.endhost.components.Scmp;
 
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
@@ -41,6 +40,7 @@ public class ScionService extends Service {
     private static boolean isRunning = false;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
+    private ComponentRegistry componentRegistry = new ComponentRegistry(this);
 
     public static boolean isRunning() {
         return isRunning;
@@ -63,12 +63,11 @@ public class ScionService extends Service {
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
         Log.i(TAG, "starting SCION components");
-        ScionComponentRegistry.getInstance()
-                .start(new Dispatcher(this))
-                .start(new Daemon(this, daemonConfigDirectory))
-                //.start(new Scmp(this)
-                .start(new BeaconServer(this)
-                );
+        componentRegistry
+                .start(new Dispatcher())
+                .start(new Daemon(daemonConfigDirectory))
+                //.start(new Scmp(this));
+                .start(new BeaconServer());
 
         isRunning = true;
         updateUserInterface();
@@ -81,7 +80,7 @@ public class ScionService extends Service {
             return;
 
         Log.i(TAG, "stopping SCION components");
-        ScionComponentRegistry.getInstance().stopAll();
+        componentRegistry.stopAll();
         stopForeground(STOP_FOREGROUND_REMOVE);
         isRunning = false;
         updateUserInterface();
