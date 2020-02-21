@@ -20,7 +20,10 @@ package org.scionlab.endhost.scion;
 import android.content.Context;
 import android.util.Log;
 
+import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.Storage;
+
+import java.util.regex.Pattern;
 
 /**
  * Think of SCION components as "Docker containers": They can be started, stopped,
@@ -28,7 +31,6 @@ import org.scionlab.endhost.Storage;
  * This serves the same purpose as the SCION services in /lib/systemd/system on Linux.
  */
 public abstract class Component {
-    private static final String TAG = "Component";
     ComponentRegistry componentRegistry;
     Storage storage;
     private Thread thread;
@@ -54,11 +56,12 @@ public abstract class Component {
     // be called from within run(). Note that a crash of the component should cause
     // run() to exit instead of setting isReady = false;
     void setReady() {
-        Log.i(TAG, "component " + this.getClass().getSimpleName() + " is ready");
+        Log.i(getTag(), "component is ready");
         isReady = true;
         if (componentRegistry != null)
             componentRegistry.notifyStateChange();
     }
+
 
     State getState() {
         if (!isRunning())
@@ -66,21 +69,27 @@ public abstract class Component {
         return isReady ? State.READY : State.STARTING;
     }
 
+    void setupLogThread(String logPath, Pattern watchPattern) {
+        storage.prepareFile(logPath);
+        Logger.createLogThread(getTag(), storage.getEmptyInputStream(logPath))
+                .watchFor(watchPattern, this::setReady)
+                .start();
+    }
+
     void start() {
         if (thread != null)
             return;
 
         if (componentRegistry == null) {
-            Log.e(TAG, "not registered with any component registry");
+            Log.e(getTag(), "not registered with any component registry");
             return;
         }
 
-        String className = this.getClass().getSimpleName();
-        Log.i(TAG, "starting component " + className);
+        Log.i(getTag(), "starting component");
         storage = Storage.from(getContext());
 
         if (!prepare()) {
-            Log.e(TAG, "failed to prepare component " + className);
+            Log.e(getTag(), "failed to prepare component");
             return;
         }
 
@@ -89,16 +98,16 @@ public abstract class Component {
                 int retries = 0;
                 for (; retries < Config.Component.READY_RETRIES && !mayRun(); retries++) {
                     if (retries == 0)
-                        Log.i(TAG, "waiting until component " + className + " may run");
+                        Log.i(getTag(), "waiting until component may run");
                     Thread.sleep(Config.Component.READY_INTERVAL);
                 }
                 if (retries > 0)
-                    Log.i(TAG, "done waiting for component " + className);
+                    Log.i(getTag(), "done waiting for component");
                 if (mayRun())
                     run();
             } catch (InterruptedException ignored) {
             } finally {
-                Log.i(TAG, "component " + className + " has stopped");
+                Log.i(getTag(), "component has stopped");
                 thread = null;
                 if (componentRegistry != null)
                     componentRegistry.notifyStateChange();
@@ -112,9 +121,11 @@ public abstract class Component {
         if (thread == null)
             return;
 
-        Log.i(TAG, "stopping component " + this.getClass().getSimpleName());
+        Log.i(getTag(), "stopping component");
         thread.interrupt();
     }
+
+    protected abstract String getTag();
 
     // Override this to implement initialization procedures for a SCION component
     // (such as writing configuration files). This is run in the main thread and

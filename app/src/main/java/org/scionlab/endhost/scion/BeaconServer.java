@@ -20,8 +20,12 @@ package org.scionlab.endhost.scion;
 import org.scionlab.endhost.Logger;
 
 public class BeaconServer extends Component {
-    private static final String TAG = "BeaconServer";
     private final String configPath = Config.BeaconServer.CONFIG_PATH;
+
+    @Override
+    protected String getTag() {
+        return "BeaconServer";
+    }
 
     @Override
     boolean prepare() {
@@ -29,7 +33,7 @@ public class BeaconServer extends Component {
         final String beaconDatabasePath = Config.BeaconServer.BEACON_DATABASE_PATH;
         final String trustDatabasePath = Config.BeaconServer.TRUST_DATABASE_PATH;
 
-        storage.prepareFiles(configPath, logPath, beaconDatabasePath, trustDatabasePath);
+        storage.prepareFiles(beaconDatabasePath, trustDatabasePath);
         storage.writeFile(configPath, String.format(
                 storage.readAssetFile(Config.BeaconServer.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(Config.Daemon.CONFIG_DIRECTORY_PATH),
@@ -37,9 +41,7 @@ public class BeaconServer extends Component {
                 Config.BeaconServer.LOG_LEVEL,
                 storage.getAbsolutePath(beaconDatabasePath),
                 storage.getAbsolutePath(trustDatabasePath)));
-        Logger.createLogThread(TAG, storage.getEmptyInputStream(logPath))
-                .watchFor(Config.BeaconServer.WATCH_PATTERN, this::setReady)
-                .start();
+        setupLogThread(logPath, Config.BeaconServer.WATCH_PATTERN);
 
         return true;
     }
@@ -52,7 +54,7 @@ public class BeaconServer extends Component {
     @Override
     void run() {
         Binary.runBeaconServer(getContext(),
-                Logger.createLogThread(TAG),
+                Logger.createLogThread(getTag()),
                 storage.getAbsolutePath(configPath),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
     }

@@ -30,12 +30,16 @@ import java.util.Optional;
  * Performs requests to the SCION network and acts as an endhost.
  */
 public class Daemon extends Component {
-    private static final String TAG = "Daemon";
     private String configDirectorySourcePath;
     private String configPath;
 
     public Daemon(String configDirectorySourcePath) {
         this.configDirectorySourcePath = configDirectorySourcePath;
+    }
+
+    @Override
+    protected String getTag() {
+        return "Daemon";
     }
 
     @Override
@@ -49,7 +53,7 @@ public class Daemon extends Component {
 
         // copy configuration folder provided by the user and find daemon configuration file
         if (storage.countFilesInDirectory(new File(configDirectorySourcePath)) > Config.Daemon.CONFIG_DIRECTORY_FILE_LIMIT) {
-            Log.e(TAG, "too many files in configuration directory, did you choose the right directory?");
+            Log.e(getTag(), "too many files in configuration directory, did you choose the right directory?");
             return false;
         }
         storage.deleteFileOrDirectory(configDirectoryPath);
@@ -57,7 +61,7 @@ public class Daemon extends Component {
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
                 configDirectoryPath, Config.Daemon.CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
-            Log.e(TAG, "could not find SCION daemon configuration file sciond.toml or sd.toml");
+            Log.e(getTag(), "could not find SCION daemon configuration file sciond.toml or sd.toml");
             return false;
         }
         configPath = _configPath.get();
@@ -66,7 +70,7 @@ public class Daemon extends Component {
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
         // TODO: import certs and keys directories
 
-        storage.prepareFiles(configPath, logPath, reliableSocketPath, unixSocketPath, pathDatabasePath, trustDatabasePath);
+        storage.prepareFiles(reliableSocketPath, unixSocketPath, pathDatabasePath, trustDatabasePath);
         storage.writeFile(configPath, String.format(
                 storage.readAssetFile(Config.Daemon.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(configDirectoryPath),
@@ -77,9 +81,7 @@ public class Daemon extends Component {
                 storage.getAbsolutePath(unixSocketPath),
                 storage.getAbsolutePath(pathDatabasePath),
                 storage.getAbsolutePath(trustDatabasePath)));
-        Logger.createLogThread(TAG, storage.getEmptyInputStream(logPath))
-                .watchFor(Config.Daemon.WATCH_PATTERN, this::setReady)
-                .start();
+        setupLogThread(logPath, Config.Daemon.WATCH_PATTERN);
 
         return true;
     }
@@ -87,7 +89,7 @@ public class Daemon extends Component {
     @Override
     void run() {
         Binary.runDaemon(getContext(),
-                Logger.createLogThread(TAG),
+                Logger.createLogThread(getTag()),
                 storage.getAbsolutePath(configPath),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
     }

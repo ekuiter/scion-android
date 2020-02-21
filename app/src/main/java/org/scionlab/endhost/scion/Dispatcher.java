@@ -23,23 +23,25 @@ import org.scionlab.endhost.Logger;
  * Dispatches requests/responses from other SCION components to the outside world and vice-versa.
  */
 public class Dispatcher extends Component {
-    private static final String TAG = "Dispatcher";
     private final String configPath = Config.Dispatcher.CONFIG_PATH;
+
+    @Override
+    protected String getTag() {
+        return "Dispatcher";
+    }
 
     @Override
     boolean prepare() {
         final String socketPath = Config.Dispatcher.SOCKET_PATH;
         final String logPath = Config.Dispatcher.LOG_PATH;
 
-        storage.prepareFiles(configPath, logPath, socketPath);
+        storage.prepareFile(socketPath);
         storage.writeFile(configPath, String.format(
                 storage.readAssetFile(Config.Dispatcher.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(socketPath),
                 storage.getAbsolutePath(logPath),
                 Config.Dispatcher.LOG_LEVEL));
-        Logger.createLogThread(TAG, storage.getEmptyInputStream(logPath))
-                .watchFor(Config.Dispatcher.WATCH_PATTERN, this::setReady)
-                .start();
+        setupLogThread(logPath, Config.Dispatcher.WATCH_PATTERN);
 
         return true;
     }
@@ -47,7 +49,7 @@ public class Dispatcher extends Component {
     @Override
     void run() {
         Binary.runDispatcher(getContext(),
-                Logger.createLogThread(TAG),
+                Logger.createLogThread(getTag()),
                 storage.getAbsolutePath(configPath));
     }
 }

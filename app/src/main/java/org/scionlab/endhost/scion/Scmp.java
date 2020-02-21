@@ -20,7 +20,10 @@ package org.scionlab.endhost.scion;
 import org.scionlab.endhost.Logger;
 
 public class Scmp extends Component {
-    private static final String TAG = "Scmp";
+    @Override
+    protected String getTag() {
+        return "Scmp";
+    }
 
     @Override
     boolean prepare() {
@@ -75,7 +78,7 @@ public class Scmp extends Component {
     @Override
     void run() {
         Binary.runScmp(getContext(),
-                Logger.createLogThread(TAG),
+                Logger.createLogThread(getTag()),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH),
                 storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH),
                 "17-ffaa:1:cf9,[192.168.0.123]",
