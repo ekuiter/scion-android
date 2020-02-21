@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.endhost.scion;
 
 import android.content.Context;
 
@@ -24,17 +24,17 @@ import java.util.stream.Stream;
 
 /**
  * Acts as a central registry for all SCION components (daemon, dispatcher etc.)
- * For each component, exactly one instance may be registered (see ScionService).
+ * For each component, exactly one instance may be registered (see MainService).
  */
 public class ComponentRegistry {
     private Context context;
     private ConcurrentHashMap<Class<? extends Component>, Component> components = new ConcurrentHashMap<>();
 
-    ComponentRegistry(Context context) {
+    public ComponentRegistry(Context context) {
         this.context = context;
     }
 
-    public Context getContext() {
+    Context getContext() {
         return context;
     }
 
@@ -52,7 +52,7 @@ public class ComponentRegistry {
         components.remove(cls);
     }
 
-    ComponentRegistry start(Component component) {
+    public ComponentRegistry start(Component component) {
         component.setComponentRegistry(this);
         component.start();
         register(component);
@@ -65,7 +65,7 @@ public class ComponentRegistry {
         component.setComponentRegistry(null);
     }
 
-    void stopAll() {
+    public void stopAll() {
         components.values().forEach(this::stop);
     }
 
@@ -77,7 +77,7 @@ public class ComponentRegistry {
         return get(cls) != null && get(cls).getState() == Component.State.READY;
     }
 
-    public boolean isReady(Class... classes) {
+    boolean isReady(Class... classes) {
         return Stream.of(classes).allMatch(this::isReady);
     }
 }

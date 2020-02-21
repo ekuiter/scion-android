@@ -15,49 +15,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.components;
+package org.scionlab.endhost.scion;
 
-import android.content.Context;
-
-import org.scionlab.endhost.Component;
-import org.scionlab.endhost.Config;
 import org.scionlab.endhost.Logger;
-import org.scionlab.endhost.ScionBinary;
 
-public class BeaconServer extends Component {
-    private static final String TAG = "BeaconServer";
-    private final String configPath = Config.BeaconServer.CONFIG_PATH;
+/**
+ * Dispatches requests/responses from other SCION components to the outside world and vice-versa.
+ */
+public class Dispatcher extends Component {
+    private static final String TAG = "Dispatcher";
+    private final String configPath = Config.Dispatcher.CONFIG_PATH;
 
     @Override
-    public boolean prepare() {
-        final String logPath = Config.BeaconServer.LOG_PATH;
+    boolean prepare() {
+        final String socketPath = Config.Dispatcher.SOCKET_PATH;
+        final String logPath = Config.Dispatcher.LOG_PATH;
 
         // prepare files
+        storage.deleteFileOrDirectory(socketPath);
         storage.deleteFileOrDirectory(logPath);
         storage.createFile(logPath);
 
         // instantiate configuration file template
         storage.writeFile(configPath, String.format(
-                storage.readAssetFile(Config.BeaconServer.CONFIG_TEMPLATE_PATH),
-                storage.getAbsolutePath(Config.Daemon.CONFIG_DIRECTORY_PATH),
+                storage.readAssetFile(Config.Dispatcher.CONFIG_TEMPLATE_PATH),
+                storage.getAbsolutePath(socketPath),
                 storage.getAbsolutePath(logPath),
-                Config.BeaconServer.LOG_LEVEL,
-                storage.getAbsolutePath(Config.BeaconServer.BEACON_DATABASE_PATH),
-                storage.getAbsolutePath(Config.BeaconServer.TRUST_DATABASE_PATH)));
+                Config.Dispatcher.LOG_LEVEL));
 
         // tail log file
-        Logger.createLogThread(TAG, storage.getInputStream(logPath)).start();
+        Logger.createLogThread(TAG, storage.getInputStream(logPath))
+                .watchFor(Config.Dispatcher.WATCH_PATTERN, this::setReady)
+                .start();
         return true;
     }
 
     @Override
-    public boolean mayRun() {
-        return componentRegistry.isReady(Daemon.class);
-    }
-
-    @Override
-    public void run() {
-        ScionBinary.runBeaconServer(getContext(),
+    void run() {
+        Binary.runDispatcher(getContext(),
                 Logger.createLogThread(TAG),
                 storage.getAbsolutePath(configPath));
     }

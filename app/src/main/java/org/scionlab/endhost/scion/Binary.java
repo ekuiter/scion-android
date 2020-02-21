@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.endhost.scion;
 
 import android.content.Context;
 import android.util.Log;
+
+import org.scionlab.endhost.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ScionBinary {
-    private static final String TAG = "ScionBinary";
+class Binary {
+    private static final String TAG = "Binary";
     private static boolean initialized = false;
 
     private static Process startProcess(Context context, Map<String, String> env, String... args) {
@@ -90,24 +92,24 @@ public class ScionBinary {
         Log.i(TAG, "SCION process exited with " + ret);
     }
 
-    public static void runBeaconServer(Context context, Logger.LogThread logThread, String configPath) {
+    static void runBeaconServer(Context context, Logger.LogThread logThread, String configPath) {
         runProcess(context, logThread, new HashMap<>(),
                 Config.Binary.BEACON_SERVER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
-    public static void runDaemon(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
+    static void runDaemon(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
         env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
         runProcess(context, logThread, env,
                 Config.Binary.DAEMON_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
-    public static void runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
+    static void runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
         runProcess(context, logThread, new HashMap<>(),
                 Config.Binary.DISPATCHER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
-    public static void runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
+    static void runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
         runProcess(context, logThread, new HashMap<>(),
                 Config.Binary.SCMP_FLAG,
                 Config.Binary.SCMP_ECHO_FLAG,

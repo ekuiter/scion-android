@@ -47,7 +47,7 @@ public class Storage {
         this.context = context;
     }
 
-    static Storage from(Context context) {
+    public static Storage from(Context context) {
         return new Storage(context);
     }
 

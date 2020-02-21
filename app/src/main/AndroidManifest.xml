@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         android:extractNativeLibs="true">
-        <service android:name=".ScionService"/>
+        <service android:name=".MainService"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>

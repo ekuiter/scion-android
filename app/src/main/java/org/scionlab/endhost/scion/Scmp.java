@@ -15,20 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.components;
-
-import android.content.Context;
+package org.scionlab.endhost.scion;
 
 import org.scionlab.endhost.Logger;
-import org.scionlab.endhost.ScionBinary;
-import org.scionlab.endhost.Component;
-import org.scionlab.endhost.Config;
 
 public class Scmp extends Component {
     private static final String TAG = "Scmp";
 
     @Override
-    public boolean prepare() {
+    boolean prepare() {
         /*File gencert = mkdir("gen-certs");
         Provider bcProvider = new BouncyCastleProvider();
         Security.addProvider(bcProvider);
@@ -73,13 +68,13 @@ public class Scmp extends Component {
     }
 
     @Override
-    public boolean mayRun() {
+    boolean mayRun() {
         return componentRegistry.isReady(Dispatcher.class, Daemon.class);
     }
 
     @Override
-    public void run() {
-        ScionBinary.runScmp(getContext(),
+    void run() {
+        Binary.runScmp(getContext(),
                 Logger.createLogThread(TAG),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH),
                 storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH),

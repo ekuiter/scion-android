@@ -15,17 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.components;
+package org.scionlab.endhost.scion;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.moandjiezana.toml.Toml;
 
 import org.scionlab.endhost.Logger;
-import org.scionlab.endhost.ScionBinary;
-import org.scionlab.endhost.Component;
-import org.scionlab.endhost.Config;
 
 import java.io.File;
 import java.util.Optional;
@@ -43,7 +39,7 @@ public class Daemon extends Component {
     }
 
     @Override
-    public boolean prepare() {
+    boolean prepare() {
         final String configDirectoryPath = Config.Daemon.CONFIG_DIRECTORY_PATH;
         final String reliableSocketPath = Config.Daemon.RELIABLE_SOCKET_PATH;
         final String unixSocketPath = Config.Daemon.UNIX_SOCKET_PATH;
@@ -94,8 +90,8 @@ public class Daemon extends Component {
     }
 
     @Override
-    public void run() {
-        ScionBinary.runDaemon(getContext(),
+    void run() {
+        Binary.runDaemon(getContext(),
                 Logger.createLogThread(TAG),
                 storage.getAbsolutePath(configPath),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));

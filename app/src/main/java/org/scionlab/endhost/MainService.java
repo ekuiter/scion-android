@@ -28,15 +28,16 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
-import org.scionlab.endhost.components.BeaconServer;
-import org.scionlab.endhost.components.Daemon;
-import org.scionlab.endhost.components.Dispatcher;
+import org.scionlab.endhost.scion.BeaconServer;
+import org.scionlab.endhost.scion.ComponentRegistry;
+import org.scionlab.endhost.scion.Daemon;
+import org.scionlab.endhost.scion.Dispatcher;
 
-public class ScionService extends Service {
-    private static final String TAG = "ScionService";
+public class MainService extends Service {
+    private static final String TAG = "MainService";
     private static final int NOTIFICATION_ID  = 1;
-    private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
-    public static final String DAEMON_CONFIG_DIRECTORY = ScionService.class.getCanonicalName() + ".DAEMON_CONFIG_DIRECTORY";
+    private static final String NOTIFICATION_CHANNEL = MainService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
+    public static final String DAEMON_CONFIG_DIRECTORY = MainService.class.getCanonicalName() + ".DAEMON_CONFIG_DIRECTORY";
     private static boolean isRunning = false;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;

@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.endhost.scion;
 
 import android.content.Context;
 import android.util.Log;
+
+import org.scionlab.endhost.Storage;
 
 /**
  * Think of SCION components as "Docker containers": They can be started, stopped,
@@ -26,8 +28,8 @@ import android.util.Log;
  * This serves the same purpose as the SCION services in /lib/systemd/system on Linux.
  */
 public abstract class Component {
-    protected ComponentRegistry componentRegistry;
-    protected Storage storage;
+    ComponentRegistry componentRegistry;
+    Storage storage;
     private Thread thread;
     private boolean isReady = false;
     private String TAG = "Component";
@@ -40,7 +42,7 @@ public abstract class Component {
         this.componentRegistry = componentRegistry;
     }
 
-    protected Context getContext() {
+    Context getContext() {
         return componentRegistry.getContext();
     }
 
@@ -51,7 +53,7 @@ public abstract class Component {
     // Is called when the component transitions from STARTING to READY. Should only
     // be called from within run(). Note that a crash of the component should cause
     // run() to exit instead of setting isReady = false;
-    protected void setReady() {
+    void setReady() {
         Log.i(TAG, "component " + this.getClass().getSimpleName() + " is ready");
         isReady = true;
     }
@@ -113,16 +115,16 @@ public abstract class Component {
     // Override this to implement initialization procedures for a SCION component
     // (such as writing configuration files). This is run in the main thread and
     // as such, will not be interrupted. This will be called right before mayRun().
-    public abstract boolean prepare();
+    abstract boolean prepare();
 
     // Called before run() to make sure this component may actually be started.
     // Override this to check to check whether other required components are ready.
-    public boolean mayRun() {
+    boolean mayRun() {
         return true;
     }
 
     // Rverride this to run the actual (long-running) SCION process - everything
     // implemented here should be interruptible (i.e., handles InterruptedException)
     // so we can stop the process any time. This will be called right after mayRun().
-    public abstract void run();
+    abstract void run();
 }

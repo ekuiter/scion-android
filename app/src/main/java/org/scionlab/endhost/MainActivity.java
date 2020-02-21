@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUserInterface() {
-        if (!ScionService.isRunning()) {
+        if (!MainService.isRunning()) {
             scionButton.setText(R.string.scionbuttonstart);
             scionButton.setOnClickListener(view ->
                     new ChooserDialog(view.getContext())
@@ -94,15 +94,15 @@ public class MainActivity extends AppCompatActivity {
                                             new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                             0
                                     );
-                                    startService(new Intent(this, ScionService.class)
-                                            .putExtra(ScionService.DAEMON_CONFIG_DIRECTORY, path));
+                                    startService(new Intent(this, MainService.class)
+                                            .putExtra(MainService.DAEMON_CONFIG_DIRECTORY, path));
                                     getPreferences.edit().putString(DAEMON_CONFIG_DIRECTORY, path).apply();
                                 }
                             }).build().show());
         } else {
             scionButton.setText(R.string.scionbuttonstop);
             scionButton.setOnClickListener(view ->
-                    stopService(new Intent(this, ScionService.class)));
+                    stopService(new Intent(this, MainService.class)));
         }
     }
 }
