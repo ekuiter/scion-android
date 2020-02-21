@@ -17,10 +17,12 @@
 
 package org.scionlab.endhost;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -33,6 +35,7 @@ import org.scionlab.endhost.components.Scmp;
 public class ScionService extends Service {
     private static final String TAG = "ScionService";
     private static final int NOTIFICATION_ID  = 1;
+    private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
     public static final String DAEMON_CONFIG_DIRECTORY = ScionService.class.getCanonicalName() + ".DAEMON_CONFIG_DIRECTORY";
     private static boolean isRunning = false;
     private NotificationManager notificationManager;
@@ -55,9 +58,7 @@ public class ScionService extends Service {
         }
 
         // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationBuilder = new NotificationCompat.Builder(this, MainActivity.SERVICE_CHANNEL)
-                .setSmallIcon(R.drawable.ic_scion_logo);
+        setupNotification();
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
         Log.i(TAG, "starting SCION components");
@@ -90,6 +91,18 @@ public class ScionService extends Service {
 
     private void updateUserInterface() {
         sendBroadcast(new Intent(MainActivity.UPDATE_USER_INTERFACE));
+    }
+
+    private void setupNotification() {
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    NOTIFICATION_CHANNEL, getString(R.string.servicechannel_name), NotificationManager.IMPORTANCE_LOW);
+            channel.setDescription(getString(R.string.servicechannel_description));
+            notificationManager.createNotificationChannel(channel);
+        }
+        notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
+                .setSmallIcon(R.drawable.ic_scion_logo);
     }
 
     private void notify(String text) {

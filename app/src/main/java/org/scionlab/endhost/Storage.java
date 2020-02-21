@@ -160,13 +160,13 @@ public class Storage {
         return copied;
     }
 
-    public int deleteFileOrDirectory(String path) {
+    public void deleteFileOrDirectory(String path) {
         File f = getFile(path);
-        return countFilesInDirectory(f) - deleteFileOrDirectory(f);
+        deleteFileOrDirectory(f);
     }
 
-    public int copyFileOrDirectory(File src, String dstPath) {
-        return countFilesInDirectory(src) - copyFileOrDirectory(src, getFile(dstPath));
+    public void copyFileOrDirectory(File src, String dstPath) {
+        copyFileOrDirectory(src, getFile(dstPath));
     }
 
     public void createFile(String path) {

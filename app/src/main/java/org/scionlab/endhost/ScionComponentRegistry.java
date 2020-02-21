@@ -32,20 +32,18 @@ public class ScionComponentRegistry {
         return instance;
     }
 
-    ScionComponentRegistry register(ScionComponent scionComponent) {
+    private void register(ScionComponent scionComponent) {
         Class<? extends ScionComponent> cls = scionComponent.getClass();
         if (scionComponents.containsKey(cls))
             throw new RuntimeException("SCION component for " + cls + " already registered");
         scionComponents.put(cls, scionComponent);
-        return this;
     }
 
-    ScionComponentRegistry unregister(ScionComponent scionComponent) {
+    private void unregister(ScionComponent scionComponent) {
         Class<? extends ScionComponent> cls = scionComponent.getClass();
         if (get(cls) != scionComponent)
             throw new RuntimeException("other SCION component registered for " + cls);
         scionComponents.remove(cls);
-        return this;
     }
 
     ScionComponentRegistry start(ScionComponent scionComponent) {
@@ -54,17 +52,16 @@ public class ScionComponentRegistry {
         return this;
     }
 
-    ScionComponentRegistry stop(ScionComponent scionComponent) {
+    private void stop(ScionComponent scionComponent) {
         unregister(scionComponent);
         scionComponent.stop();
-        return this;
     }
 
     void stopAll() {
         scionComponents.values().forEach(this::stop);
     }
 
-    ScionComponent get(Class<? extends ScionComponent> cls) {
+    private ScionComponent get(Class<? extends ScionComponent> cls) {
         return scionComponents.get(cls);
     }
 

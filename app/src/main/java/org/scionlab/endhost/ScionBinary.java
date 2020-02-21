@@ -66,7 +66,7 @@ public class ScionBinary {
 
     // Runs the SCION binary and blocks until the process exits or the thread is interrupted.
     // Thus, this should only be called from inside a (dedicated) thread.
-    private static int runProcess(Context context, Logger.LogThread logThread, Map<String, String> env, String... args) {
+    private static void runProcess(Context context, Logger.LogThread logThread, Map<String, String> env, String... args) {
         Process process = startProcess(context, env, args);
         int ret;
 
@@ -88,23 +88,22 @@ public class ScionBinary {
         }
 
         Log.i(TAG, "SCION process exited with " + ret);
-        return ret;
     }
 
-    public static int runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
-        return runProcess(context, logThread, new HashMap<>(),
+    public static void runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
+        runProcess(context, logThread, new HashMap<>(),
                 Config.Binary.DISPATCHER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
-    public static int runDaemon(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
+    public static void runDaemon(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
         env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
-        return runProcess(context, logThread, env,
+        runProcess(context, logThread, env,
                 Config.Binary.DAEMON_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
-    public static int runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
-        return runProcess(context, logThread, new HashMap<>(),
+    public static void runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
+        runProcess(context, logThread, new HashMap<>(),
                 Config.Binary.SCMP_FLAG,
                 Config.Binary.SCMP_ECHO_FLAG,
                 Config.Binary.SCMP_DISPATCHER_SOCKET_FLAG,
