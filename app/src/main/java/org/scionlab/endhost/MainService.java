@@ -19,6 +19,7 @@ package org.scionlab.endhost;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -115,8 +116,12 @@ public class MainService extends Service {
             channel.setDescription(getString(R.string.servicechannel_description));
             notificationManager.createNotificationChannel(channel);
         }
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
         notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.ic_scion_logo);
+                .setSmallIcon(R.drawable.ic_scion_logo)
+                .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
     }
 
     private void notify(String text) {
