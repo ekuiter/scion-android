@@ -11,9 +11,4 @@
     <string name="scmpreadkey" formatted="true">Read private key: %3$s</string>
     <string name="scmpcreatecert" formatted="true">Created self-signed certificate: %3$s</string>
     <string name="scmpcertexists" formatted="true">Key and certificate already exist: %3$s %4$s</string>
-    <string name="action_help">How to use</string>
-    <string name="help_asset_name">USAGE.md</string>
-    <string name="action_about">About this app</string>
-    <string name="about_asset_name">README.md</string>
-    <string name="serviceactionstop">Stop</string>
 </resources>

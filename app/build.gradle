@@ -17,12 +17,6 @@ android {
         targetSdkVersion 29
         versionCode 11
         versionName "0.0.9"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                arguments "-DCMAKE_VERBOSE_MAKEFILE=ON"
-            }
-        }
     }
     buildTypes {
         release {
@@ -70,8 +64,8 @@ dependencies {
     implementation 'com.obsez.android.lib.filechooser:filechooser:1.2.0'
     implementation 'com.madgag.spongycastle:core:1.58.0.0'
     implementation 'com.madgag.spongycastle:pkix:1.54.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.core:core:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.core:core:1.2.0'
     // If symbols have changed and are unavailable for you, either pull the newest version of this
     // repo or consider gradle's --refresh-dependencies option to get the freshest library
     implementation 'com.moandjiezana.toml:toml4j:0.7.2'

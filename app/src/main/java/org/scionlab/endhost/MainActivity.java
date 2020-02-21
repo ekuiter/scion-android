@@ -24,8 +24,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -78,25 +76,6 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         if (daemonConfigDirectory != null)
             outState.putString(DAEMON_CONFIG_DIRECTORY, daemonConfigDirectory);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.action_help) {
-            startActivity(new Intent(this, MarkdownActivity.Help.class));
-            return true;
-        } else if (itemId == R.id.action_about) {
-            startActivity(new Intent(this, MarkdownActivity.About.class));
-            return true;
-        }
-        return false;
     }
 
     private void updateUserInterface() {
