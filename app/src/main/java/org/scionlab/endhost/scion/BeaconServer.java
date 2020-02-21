@@ -18,10 +18,9 @@
 package org.scionlab.endhost.scion;
 
 import org.scionlab.endhost.Logger;
+import static org.scionlab.endhost.scion.Config.BeaconServer.*;
 
 public class BeaconServer extends Component {
-    private final String configPath = Config.BeaconServer.CONFIG_PATH;
-
     @Override
     protected String getTag() {
         return "BeaconServer";
@@ -29,20 +28,15 @@ public class BeaconServer extends Component {
 
     @Override
     boolean prepare() {
-        final String logPath = Config.BeaconServer.LOG_PATH;
-        final String beaconDatabasePath = Config.BeaconServer.BEACON_DATABASE_PATH;
-        final String trustDatabasePath = Config.BeaconServer.TRUST_DATABASE_PATH;
-
-        storage.prepareFiles(beaconDatabasePath, trustDatabasePath);
-        storage.writeFile(configPath, String.format(
-                storage.readAssetFile(Config.BeaconServer.CONFIG_TEMPLATE_PATH),
+        storage.prepareFiles(BEACON_DATABASE_PATH, TRUST_DATABASE_PATH);
+        storage.writeFile(CONFIG_PATH, String.format(
+                storage.readAssetFile(CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(Config.Daemon.CONFIG_DIRECTORY_PATH),
-                storage.getAbsolutePath(logPath),
-                Config.BeaconServer.LOG_LEVEL,
-                storage.getAbsolutePath(beaconDatabasePath),
-                storage.getAbsolutePath(trustDatabasePath)));
-        setupLogThread(logPath, Config.BeaconServer.WATCH_PATTERN);
-
+                storage.getAbsolutePath(LOG_PATH),
+                LOG_LEVEL,
+                storage.getAbsolutePath(BEACON_DATABASE_PATH),
+                storage.getAbsolutePath(TRUST_DATABASE_PATH)));
+        setupLogThread(LOG_PATH, WATCH_PATTERN);
         return true;
     }
 
@@ -55,7 +49,7 @@ public class BeaconServer extends Component {
     void run() {
         Binary.runBeaconServer(getContext(),
                 Logger.createLogThread(getTag()),
-                storage.getAbsolutePath(configPath),
+                storage.getAbsolutePath(CONFIG_PATH),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
     }
 }

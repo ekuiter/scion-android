@@ -25,6 +25,7 @@ import org.scionlab.endhost.Logger;
 
 import java.io.File;
 import java.util.Optional;
+import static org.scionlab.endhost.scion.Config.Daemon.*;
 
 /**
  * Performs requests to the SCION network and acts as an endhost.
@@ -44,44 +45,37 @@ public class Daemon extends Component {
 
     @Override
     boolean prepare() {
-        final String configDirectoryPath = Config.Daemon.CONFIG_DIRECTORY_PATH;
-        final String reliableSocketPath = Config.Daemon.RELIABLE_SOCKET_PATH;
-        final String unixSocketPath = Config.Daemon.UNIX_SOCKET_PATH;
-        final String logPath = Config.Daemon.LOG_PATH;
-        final String pathDatabasePath = Config.Daemon.PATH_DATABASE_PATH;
-        final String trustDatabasePath = Config.Daemon.TRUST_DATABASE_PATH;
-
         // copy configuration folder provided by the user and find daemon configuration file
-        if (storage.countFilesInDirectory(new File(configDirectorySourcePath)) > Config.Daemon.CONFIG_DIRECTORY_FILE_LIMIT) {
+        if (storage.countFilesInDirectory(new File(configDirectorySourcePath)) > CONFIG_DIRECTORY_FILE_LIMIT) {
             Log.e(getTag(), "too many files in configuration directory, did you choose the right directory?");
             return false;
         }
-        storage.deleteFileOrDirectory(configDirectoryPath);
-        storage.copyFileOrDirectory(new File(configDirectorySourcePath), configDirectoryPath);
+        storage.deleteFileOrDirectory(CONFIG_DIRECTORY_PATH);
+        storage.copyFileOrDirectory(new File(configDirectorySourcePath), CONFIG_DIRECTORY_PATH);
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
-                configDirectoryPath, Config.Daemon.CONFIG_PATH_REGEX);
+                CONFIG_DIRECTORY_PATH, CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
             Log.e(getTag(), "could not find SCION daemon configuration file sciond.toml or sd.toml");
             return false;
         }
         configPath = _configPath.get();
         Toml config = new Toml().read(storage.getInputStream(configPath));
-        String publicAddress = config.getString(Config.Daemon.CONFIG_PUBLIC_TOML_PATH);
+        String publicAddress = config.getString(CONFIG_PUBLIC_TOML_PATH);
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
         // TODO: import certs and keys directories
 
-        storage.prepareFiles(reliableSocketPath, unixSocketPath, pathDatabasePath, trustDatabasePath);
+        storage.prepareFiles(RELIABLE_SOCKET_PATH, UNIX_SOCKET_PATH, PATH_DATABASE_PATH, TRUST_DATABASE_PATH);
         storage.writeFile(configPath, String.format(
-                storage.readAssetFile(Config.Daemon.CONFIG_TEMPLATE_PATH),
-                storage.getAbsolutePath(configDirectoryPath),
-                storage.getAbsolutePath(logPath),
-                Config.Daemon.LOG_LEVEL,
+                storage.readAssetFile(CONFIG_TEMPLATE_PATH),
+                storage.getAbsolutePath(CONFIG_DIRECTORY_PATH),
+                storage.getAbsolutePath(LOG_PATH),
+                LOG_LEVEL,
                 publicAddress,
-                storage.getAbsolutePath(reliableSocketPath),
-                storage.getAbsolutePath(unixSocketPath),
-                storage.getAbsolutePath(pathDatabasePath),
-                storage.getAbsolutePath(trustDatabasePath)));
-        setupLogThread(logPath, Config.Daemon.WATCH_PATTERN);
+                storage.getAbsolutePath(RELIABLE_SOCKET_PATH),
+                storage.getAbsolutePath(UNIX_SOCKET_PATH),
+                storage.getAbsolutePath(PATH_DATABASE_PATH),
+                storage.getAbsolutePath(TRUST_DATABASE_PATH)));
+        setupLogThread(LOG_PATH, WATCH_PATTERN);
 
         return true;
     }
