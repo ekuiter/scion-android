@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Utilities for handling files and directories.
@@ -72,6 +73,11 @@ public class Storage {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public InputStream getEmptyInputStream(String path) {
+        createFile(path);
+        return getInputStream(path);
     }
 
     public OutputStream getOutputStream(String path) {
@@ -119,7 +125,7 @@ public class Storage {
         }
     }
 
-    private void createApplicationDirectory(String path) {
+    public void createDirectory(String path) {
         //noinspection ResultOfMethodCallIgnored
         getFile(path).mkdirs();
     }
@@ -172,7 +178,7 @@ public class Storage {
     public void createFile(String path) {
         File f = getFile(path);
         if (f.getParentFile() != null && !f.getParentFile().exists())
-            createApplicationDirectory(Objects.requireNonNull(f.getParent()));
+            createDirectory(new File(path).getParent());
 
         try {
             //noinspection ResultOfMethodCallIgnored
@@ -180,6 +186,15 @@ public class Storage {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void prepareFile(String path) {
+        createFile(path);
+        deleteFileOrDirectory(path);
+    }
+
+    public void prepareFiles(String... paths) {
+        Stream.of(paths).forEach(this::prepareFile);
     }
 
     public void writeFile(String path, String content) {

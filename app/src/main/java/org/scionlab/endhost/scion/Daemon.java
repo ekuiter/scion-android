@@ -44,6 +44,8 @@ public class Daemon extends Component {
         final String reliableSocketPath = Config.Daemon.RELIABLE_SOCKET_PATH;
         final String unixSocketPath = Config.Daemon.UNIX_SOCKET_PATH;
         final String logPath = Config.Daemon.LOG_PATH;
+        final String pathDatabasePath = Config.Daemon.PATH_DATABASE_PATH;
+        final String trustDatabasePath = Config.Daemon.TRUST_DATABASE_PATH;
 
         // copy configuration folder provided by the user and find daemon configuration file
         if (storage.countFilesInDirectory(new File(configDirectorySourcePath)) > Config.Daemon.CONFIG_DIRECTORY_FILE_LIMIT) {
@@ -64,13 +66,7 @@ public class Daemon extends Component {
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
         // TODO: import certs and keys directories
 
-        // prepare files
-        storage.deleteFileOrDirectory(reliableSocketPath);
-        storage.deleteFileOrDirectory(unixSocketPath);
-        storage.deleteFileOrDirectory(logPath);
-        storage.createFile(logPath);
-
-        // instantiate configuration file template
+        storage.prepareFiles(configPath, logPath, reliableSocketPath, unixSocketPath, pathDatabasePath, trustDatabasePath);
         storage.writeFile(configPath, String.format(
                 storage.readAssetFile(Config.Daemon.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(configDirectoryPath),
@@ -79,13 +75,12 @@ public class Daemon extends Component {
                 publicAddress,
                 storage.getAbsolutePath(reliableSocketPath),
                 storage.getAbsolutePath(unixSocketPath),
-                storage.getAbsolutePath(Config.Daemon.PATH_DATABASE_PATH),
-                storage.getAbsolutePath(Config.Daemon.TRUST_DATABASE_PATH)));
-
-        // tail log file
-        Logger.createLogThread(TAG, storage.getInputStream(logPath))
+                storage.getAbsolutePath(pathDatabasePath),
+                storage.getAbsolutePath(trustDatabasePath)));
+        Logger.createLogThread(TAG, storage.getEmptyInputStream(logPath))
                 .watchFor(Config.Daemon.WATCH_PATTERN, this::setReady)
                 .start();
+
         return true;
     }
 

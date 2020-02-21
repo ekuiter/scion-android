@@ -26,24 +26,21 @@ public class BeaconServer extends Component {
     @Override
     boolean prepare() {
         final String logPath = Config.BeaconServer.LOG_PATH;
+        final String beaconDatabasePath = Config.BeaconServer.BEACON_DATABASE_PATH;
+        final String trustDatabasePath = Config.BeaconServer.TRUST_DATABASE_PATH;
 
-        // prepare files
-        storage.deleteFileOrDirectory(logPath);
-        storage.createFile(logPath);
-
-        // instantiate configuration file template
+        storage.prepareFiles(configPath, logPath, beaconDatabasePath, trustDatabasePath);
         storage.writeFile(configPath, String.format(
                 storage.readAssetFile(Config.BeaconServer.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(Config.Daemon.CONFIG_DIRECTORY_PATH),
                 storage.getAbsolutePath(logPath),
                 Config.BeaconServer.LOG_LEVEL,
-                storage.getAbsolutePath(Config.BeaconServer.BEACON_DATABASE_PATH),
-                storage.getAbsolutePath(Config.BeaconServer.TRUST_DATABASE_PATH)));
-
-        // tail log file
-        Logger.createLogThread(TAG, storage.getInputStream(logPath))
+                storage.getAbsolutePath(beaconDatabasePath),
+                storage.getAbsolutePath(trustDatabasePath)));
+        Logger.createLogThread(TAG, storage.getEmptyInputStream(logPath))
                 .watchFor(Config.BeaconServer.WATCH_PATTERN, this::setReady)
                 .start();
+
         return true;
     }
 

@@ -31,22 +31,16 @@ public class Dispatcher extends Component {
         final String socketPath = Config.Dispatcher.SOCKET_PATH;
         final String logPath = Config.Dispatcher.LOG_PATH;
 
-        // prepare files
-        storage.deleteFileOrDirectory(socketPath);
-        storage.deleteFileOrDirectory(logPath);
-        storage.createFile(logPath);
-
-        // instantiate configuration file template
+        storage.prepareFiles(configPath, logPath, socketPath);
         storage.writeFile(configPath, String.format(
                 storage.readAssetFile(Config.Dispatcher.CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(socketPath),
                 storage.getAbsolutePath(logPath),
                 Config.Dispatcher.LOG_LEVEL));
-
-        // tail log file
-        Logger.createLogThread(TAG, storage.getInputStream(logPath))
+        Logger.createLogThread(TAG, storage.getEmptyInputStream(logPath))
                 .watchFor(Config.Dispatcher.WATCH_PATTERN, this::setReady)
                 .start();
+
         return true;
     }
 
