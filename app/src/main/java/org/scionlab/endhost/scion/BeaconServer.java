@@ -21,6 +21,12 @@ import org.scionlab.endhost.Logger;
 import static org.scionlab.endhost.scion.Config.BeaconServer.*;
 
 public class BeaconServer extends Component {
+    private String configDirectoryPath;
+
+    public BeaconServer(String configDirectoryPath) {
+        this.configDirectoryPath = configDirectoryPath;
+    }
+
     @Override
     protected String getTag() {
         return "BeaconServer";
@@ -31,18 +37,13 @@ public class BeaconServer extends Component {
         storage.prepareFiles(BEACON_DATABASE_PATH, TRUST_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
-                storage.getAbsolutePath(Config.Daemon.CONFIG_DIRECTORY_PATH),
+                storage.getAbsolutePath(configDirectoryPath),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL,
                 storage.getAbsolutePath(BEACON_DATABASE_PATH),
                 storage.getAbsolutePath(TRUST_DATABASE_PATH)));
         setupLogThread(LOG_PATH, WATCH_PATTERN);
         return true;
-    }
-
-    @Override
-    boolean mayRun() {
-        return componentRegistry.isReady(Daemon.class);
     }
 
     @Override

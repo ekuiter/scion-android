@@ -27,6 +27,8 @@ import java.io.InterruptedIOException;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import static org.scionlab.endhost.Config.Logger.*;
+
 public class Logger {
     public static class LogThread extends Thread {
         private Consumer<String> outputConsumer;
@@ -73,10 +75,7 @@ public class Logger {
     }
 
     public static LogThread createLogThread(String tag) {
-        return new Logger.LogThread(
-                line -> Log.i(tag, line),
-                Config.Log.DELETE_PATTERN,
-                Config.Log.UPDATE_INTERVAL);
+        return new Logger.LogThread(line -> Log.i(tag, line), DELETE_PATTERN, UPDATE_INTERVAL);
     }
 
     public static LogThread createLogThread(String tag, InputStream inputStream) {

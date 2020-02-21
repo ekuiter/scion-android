@@ -23,7 +23,6 @@ import com.moandjiezana.toml.Toml;
 
 import org.scionlab.endhost.Logger;
 
-import java.io.File;
 import java.util.Optional;
 import static org.scionlab.endhost.scion.Config.Daemon.*;
 
@@ -31,11 +30,10 @@ import static org.scionlab.endhost.scion.Config.Daemon.*;
  * Performs requests to the SCION network and acts as an endhost.
  */
 public class Daemon extends Component {
-    private String configDirectorySourcePath;
-    private String configPath;
+    private String configDirectoryPath;
 
-    public Daemon(String configDirectorySourcePath) {
-        this.configDirectorySourcePath = configDirectorySourcePath;
+    public Daemon(String configDirectoryPath) {
+        this.configDirectoryPath = configDirectoryPath;
     }
 
     @Override
@@ -45,29 +43,20 @@ public class Daemon extends Component {
 
     @Override
     boolean prepare() {
-        // copy configuration folder provided by the user and find daemon configuration file
-        if (storage.countFilesInDirectory(new File(configDirectorySourcePath)) > CONFIG_DIRECTORY_FILE_LIMIT) {
-            Log.e(getTag(), "too many files in configuration directory, did you choose the right directory?");
-            return false;
-        }
-        storage.deleteFileOrDirectory(CONFIG_DIRECTORY_PATH);
-        storage.copyFileOrDirectory(new File(configDirectorySourcePath), CONFIG_DIRECTORY_PATH);
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
-                CONFIG_DIRECTORY_PATH, CONFIG_PATH_REGEX);
+                configDirectoryPath, CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
             Log.e(getTag(), "could not find SCION daemon configuration file sciond.toml or sd.toml");
             return false;
         }
-        configPath = _configPath.get();
-        Toml config = new Toml().read(storage.getInputStream(configPath));
-        String publicAddress = config.getString(CONFIG_PUBLIC_TOML_PATH);
+        String publicAddress = new Toml().read(storage.getInputStream(_configPath.get())).getString(CONFIG_PUBLIC_TOML_PATH);
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
         // TODO: import certs and keys directories
 
         storage.prepareFiles(RELIABLE_SOCKET_PATH, UNIX_SOCKET_PATH, PATH_DATABASE_PATH, TRUST_DATABASE_PATH);
-        storage.writeFile(configPath, String.format(
+        storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
-                storage.getAbsolutePath(CONFIG_DIRECTORY_PATH),
+                storage.getAbsolutePath(configDirectoryPath),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL,
                 publicAddress,
@@ -84,7 +73,7 @@ public class Daemon extends Component {
     void run() {
         Binary.runDaemon(getContext(),
                 Logger.createLogThread(getTag()),
-                storage.getAbsolutePath(configPath),
+                storage.getAbsolutePath(CONFIG_PATH),
                 storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
     }
 }

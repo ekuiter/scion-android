@@ -20,8 +20,13 @@ package org.scionlab.endhost;
 import java.util.regex.Pattern;
 
 class Config {
-    static class Log {
+    static class Logger {
         static final Pattern DELETE_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} "); // trims information from log output
         static final long UPDATE_INTERVAL = 1000; // how often (in ms) to poll the log file for updates
+    }
+
+    static class MainService {
+        static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config/imported"; // path to configuration directory created in external storage
+        static final int CONFIG_DIRECTORY_FILE_LIMIT = 50; // number of files allowed in imported directory (failsafe if the user chooses wrong)
     }
 }

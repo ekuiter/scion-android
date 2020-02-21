@@ -33,13 +33,13 @@ import androidx.core.app.ActivityCompat;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String DAEMON_CONFIG_DIRECTORY = MainActivity.class.getCanonicalName() + ".DAEMON_CONFIG_DIRECTORY";
+    private static final String CONFIG_DIRECTORY = MainActivity.class.getCanonicalName() + ".CONFIG_DIRECTORY";
     public static final String UPDATE_USER_INTERFACE = MainActivity.class.getCanonicalName() + ".UPDATE_USER_INTERFACE";
 
     private SharedPreferences getPreferences;
     private BroadcastReceiver updateUserInterfaceReceiver;
     private AppCompatButton scionButton;
-    private String daemonConfigDirectory;
+    private String configDirectory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         if (savedInstanceState != null)
-            daemonConfigDirectory = savedInstanceState.getString(DAEMON_CONFIG_DIRECTORY);
+            configDirectory = savedInstanceState.getString(CONFIG_DIRECTORY);
         getPreferences = getPreferences(MODE_PRIVATE);
         scionButton = findViewById(R.id.scionbutton);
     }
@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (daemonConfigDirectory != null)
-            outState.putString(DAEMON_CONFIG_DIRECTORY, daemonConfigDirectory);
+        if (configDirectory != null)
+            outState.putString(CONFIG_DIRECTORY, configDirectory);
     }
 
     private void updateUserInterface() {
@@ -85,18 +85,18 @@ public class MainActivity extends AppCompatActivity {
                     new ChooserDialog(view.getContext())
                             .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
                             .withFilter(true, true)
-                            .withStartFile(getPreferences.getString(DAEMON_CONFIG_DIRECTORY, null))
+                            .withStartFile(getPreferences.getString(CONFIG_DIRECTORY, null))
                             .withChosenListener((path, pathFile) -> {
                                 if (path != null) {
-                                    daemonConfigDirectory = path;
+                                    configDirectory = path;
                                     ActivityCompat.requestPermissions(
                                             this,
                                             new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                             0
                                     );
                                     startService(new Intent(this, MainService.class)
-                                            .putExtra(MainService.DAEMON_CONFIG_DIRECTORY, path));
-                                    getPreferences.edit().putString(DAEMON_CONFIG_DIRECTORY, path).apply();
+                                            .putExtra(MainService.CONFIG_DIRECTORY, path));
+                                    getPreferences.edit().putString(CONFIG_DIRECTORY, path).apply();
                                 }
                             }).build().show());
         } else {

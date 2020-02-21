@@ -29,18 +29,24 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import com.moandjiezana.toml.Toml;
+
 import org.scionlab.endhost.scion.BeaconServer;
 import org.scionlab.endhost.scion.ComponentRegistry;
 import org.scionlab.endhost.scion.Daemon;
 import org.scionlab.endhost.scion.Dispatcher;
 
+import java.io.File;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.scionlab.endhost.Config.MainService.*;
 
 public class MainService extends Service {
     private static final String TAG = "MainService";
     private static final int NOTIFICATION_ID  = 1;
     private static final String NOTIFICATION_CHANNEL = MainService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
-    public static final String DAEMON_CONFIG_DIRECTORY = MainService.class.getCanonicalName() + ".DAEMON_CONFIG_DIRECTORY";
+    public static final String CONFIG_DIRECTORY = MainService.class.getCanonicalName() + ".CONFIG_DIRECTORY";
     private static boolean isRunning = false;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
@@ -66,8 +72,8 @@ public class MainService extends Service {
         if (intent == null || isRunning)
             return ret;
 
-        final String daemonConfigDirectory = intent.getStringExtra(DAEMON_CONFIG_DIRECTORY);
-        if (daemonConfigDirectory == null) {
+        final String configDirectory = intent.getStringExtra(CONFIG_DIRECTORY);
+        if (configDirectory == null) {
             Log.e(TAG, "no daemon configuration directory given");
             return ret;
         }
@@ -75,12 +81,21 @@ public class MainService extends Service {
         // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
+        // copy configuration folder provided by the user
+        Storage storage = Storage.from(this);
+        if (storage.countFilesInDirectory(new File(configDirectory)) > CONFIG_DIRECTORY_FILE_LIMIT) {
+            Log.e(TAG, "too many files in configuration directory, did you choose the right directory?");
+            return ret;
+        }
+        storage.deleteFileOrDirectory(CONFIG_DIRECTORY_PATH);
+        storage.copyFileOrDirectory(new File(configDirectory), CONFIG_DIRECTORY_PATH);
+
         Log.i(TAG, "starting SCION components");
         componentRegistry
                 .start(new Dispatcher())
-                .start(new Daemon(daemonConfigDirectory))
+                .start(new Daemon(CONFIG_DIRECTORY_PATH))
                 //.start(new Scmp(this));
-                .start(new BeaconServer());
+                .start(new BeaconServer(CONFIG_DIRECTORY_PATH));
 
         isRunning = true;
         updateUserInterface();

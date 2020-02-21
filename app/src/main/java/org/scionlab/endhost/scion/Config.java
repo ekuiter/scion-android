@@ -52,8 +52,7 @@ class Config {
 
     static class Daemon {
         static final String CONFIG_TEMPLATE_PATH = "daemon.toml"; // path to configuration file template, located in assets folder
-        static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config/endhost"; // path to configuration directory created in external storage
-        static final int CONFIG_DIRECTORY_FILE_LIMIT = 50; // number of files allowed in imported directory (failsafe if the user chooses wrong)
+        static final String CONFIG_PATH = "EXTERNAL/config/daemon.toml"; // path to configuration file
         static final String CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for configuration file located in configuration directory
         static final String CONFIG_PUBLIC_TOML_PATH = "sd.Public"; // TOML path for public address read from configuration file
         static final String LOG_PATH = "EXTERNAL/logs/daemon.log"; // path to log file created in external storage
