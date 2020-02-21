@@ -19,7 +19,10 @@ package org.scionlab.endhost.scion;
 
 import android.content.Context;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -28,14 +31,21 @@ import java.util.stream.Stream;
  */
 public class ComponentRegistry {
     private Context context;
+    private Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback;
     private ConcurrentHashMap<Class<? extends Component>, Component> components = new ConcurrentHashMap<>();
 
-    public ComponentRegistry(Context context) {
+    public ComponentRegistry(Context context, Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback) {
         this.context = context;
+        this.componentStateCallback = componentStateCallback;
     }
 
     Context getContext() {
         return context;
+    }
+
+    void notifyStateChange() {
+        componentStateCallback.accept(components.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getState())));
     }
 
     private void register(Component component) {
@@ -43,6 +53,7 @@ public class ComponentRegistry {
         if (components.containsKey(cls))
             throw new RuntimeException("SCION component for " + cls + " already registered");
         components.put(cls, component);
+        component.setComponentRegistry(this);
     }
 
     private void unregister(Component component) {
@@ -50,19 +61,18 @@ public class ComponentRegistry {
         if (get(cls) != component)
             throw new RuntimeException("other SCION component registered for " + cls);
         components.remove(cls);
+        component.setComponentRegistry(null);
     }
 
     public ComponentRegistry start(Component component) {
-        component.setComponentRegistry(this);
-        component.start();
         register(component);
+        component.start();
         return this;
     }
 
     private void stop(Component component) {
-        unregister(component);
         component.stop();
-        component.setComponentRegistry(null);
+        unregister(component);
     }
 
     public void stopAll() {

@@ -33,6 +33,8 @@ import org.scionlab.endhost.scion.ComponentRegistry;
 import org.scionlab.endhost.scion.Daemon;
 import org.scionlab.endhost.scion.Dispatcher;
 
+import java.util.stream.Collectors;
+
 public class MainService extends Service {
     private static final String TAG = "MainService";
     private static final int NOTIFICATION_ID  = 1;
@@ -41,10 +43,20 @@ public class MainService extends Service {
     private static boolean isRunning = false;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
-    private ComponentRegistry componentRegistry = new ComponentRegistry(this);
+    private ComponentRegistry componentRegistry;
 
     public static boolean isRunning() {
         return isRunning;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        setupNotification();
+        componentRegistry = new ComponentRegistry(this, componentState ->
+                notify(componentState.entrySet().stream()
+                        .map(e -> e.getKey().getSimpleName() + ": " + e.getValue())
+                        .collect(Collectors.joining("\n"))));
     }
 
     @Override
@@ -60,7 +72,6 @@ public class MainService extends Service {
         }
 
         // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
-        setupNotification();
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
 
         Log.i(TAG, "starting SCION components");

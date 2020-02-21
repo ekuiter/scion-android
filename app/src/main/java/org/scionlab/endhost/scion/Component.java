@@ -28,13 +28,13 @@ import org.scionlab.endhost.Storage;
  * This serves the same purpose as the SCION services in /lib/systemd/system on Linux.
  */
 public abstract class Component {
+    private static final String TAG = "Component";
     ComponentRegistry componentRegistry;
     Storage storage;
     private Thread thread;
     private boolean isReady = false;
-    private String TAG = "Component";
 
-    enum State {
+    public enum State {
         STOPPED, STARTING, READY
     }
 
@@ -56,6 +56,8 @@ public abstract class Component {
     void setReady() {
         Log.i(TAG, "component " + this.getClass().getSimpleName() + " is ready");
         isReady = true;
+        if (componentRegistry != null)
+            componentRegistry.notifyStateChange();
     }
 
     State getState() {
@@ -98,9 +100,12 @@ public abstract class Component {
             } finally {
                 Log.i(TAG, "component " + className + " has stopped");
                 thread = null;
+                if (componentRegistry != null)
+                    componentRegistry.notifyStateChange();
             }
         });
         thread.start();
+        componentRegistry.notifyStateChange();
     }
 
     void stop() {
@@ -109,7 +114,6 @@ public abstract class Component {
 
         Log.i(TAG, "stopping component " + this.getClass().getSimpleName());
         thread.interrupt();
-        thread = null;
     }
 
     // Override this to implement initialization procedures for a SCION component
