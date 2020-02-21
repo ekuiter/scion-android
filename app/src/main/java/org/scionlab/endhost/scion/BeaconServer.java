@@ -41,7 +41,9 @@ public class BeaconServer extends Component {
                 storage.getAbsolutePath(Config.BeaconServer.TRUST_DATABASE_PATH)));
 
         // tail log file
-        Logger.createLogThread(TAG, storage.getInputStream(logPath)).start();
+        Logger.createLogThread(TAG, storage.getInputStream(logPath))
+                .watchFor(Config.BeaconServer.WATCH_PATTERN, this::setReady)
+                .start();
         return true;
     }
 
@@ -54,6 +56,7 @@ public class BeaconServer extends Component {
     void run() {
         Binary.runBeaconServer(getContext(),
                 Logger.createLogThread(TAG),
-                storage.getAbsolutePath(configPath));
+                storage.getAbsolutePath(configPath),
+                storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
     }
 }

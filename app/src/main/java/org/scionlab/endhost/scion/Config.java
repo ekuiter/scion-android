@@ -47,6 +47,7 @@ class Config {
         static final String BEACON_DATABASE_PATH = "EXTERNAL/beacon_server.beacon.db"; // path to path SQLite database created in external storage
         static final String TRUST_DATABASE_PATH = "EXTERNAL/beacon_server.trust.db"; // path to trust SQLite database created in external storage
         static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit), at least info!
+        static final Pattern WATCH_PATTERN = Pattern.compile(".*Started periodic tasks.*$"); // when encountered, consider component ready
     }
 
     static class Daemon {
@@ -61,7 +62,7 @@ class Config {
         static final String TRUST_DATABASE_PATH = "EXTERNAL/daemon.trust.db"; // path to trust SQLite database created in external storage
         static final String PATH_DATABASE_PATH = "EXTERNAL/daemon.path.db"; // path to path SQLite database created in external storage
         static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit), at least info!
-        static final Pattern WATCH_PATTERN = Pattern.compile(".*Registered with dispatcher.*$"); // when encountered, consider daemon ready
+        static final Pattern WATCH_PATTERN = Pattern.compile(".*Registered with dispatcher.*$"); // when encountered, consider component ready
     }
 
     static class Dispatcher {
@@ -70,6 +71,6 @@ class Config {
         static final String LOG_PATH = "EXTERNAL/dispatcher.log"; // path to log file
         static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
         static final String LOG_LEVEL = "trace"; // dispatcher log level (one of trace, debug, info, warn, error, crit), at least info!
-        static final Pattern WATCH_PATTERN = Pattern.compile(".*Accepted new client.*$"); // when encountered, consider dispatcher ready
+        static final Pattern WATCH_PATTERN = Pattern.compile(".*Accepted new client.*$"); // when encountered, consider component ready
     }
 }

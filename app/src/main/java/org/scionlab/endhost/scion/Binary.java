@@ -92,8 +92,10 @@ class Binary {
         Log.i(TAG, "SCION process exited with " + ret);
     }
 
-    static void runBeaconServer(Context context, Logger.LogThread logThread, String configPath) {
-        runProcess(context, logThread, new HashMap<>(),
+    static void runBeaconServer(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
+        HashMap<String, String> env = new HashMap<>();
+        env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
+        runProcess(context, logThread, env,
                 Config.Binary.BEACON_SERVER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 

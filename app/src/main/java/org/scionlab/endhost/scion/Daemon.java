@@ -62,7 +62,7 @@ public class Daemon extends Component {
         Toml config = new Toml().read(storage.getInputStream(configPath));
         String publicAddress = config.getString(Config.Daemon.CONFIG_PUBLIC_TOML_PATH);
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
-        // TODO: import certs
+        // TODO: import certs and keys directories
 
         // prepare files
         storage.deleteFileOrDirectory(reliableSocketPath);
