@@ -53,17 +53,17 @@ public class Daemon extends Component {
         // TODO: for now, we assume the topology file is present at the correct location and has the right values
         // TODO: import certs and keys directories
 
-        storage.prepareFiles(RELIABLE_SOCKET_PATH, UNIX_SOCKET_PATH, PATH_DATABASE_PATH, TRUST_DATABASE_PATH);
+        storage.prepareFiles(RELIABLE_SOCKET_PATH, UNIX_SOCKET_PATH, TRUST_DATABASE_PATH, PATH_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(configDirectoryPath),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL,
+                storage.getAbsolutePath(TRUST_DATABASE_PATH),
+                storage.getAbsolutePath(PATH_DATABASE_PATH),
                 publicAddress,
                 storage.getAbsolutePath(RELIABLE_SOCKET_PATH),
-                storage.getAbsolutePath(UNIX_SOCKET_PATH),
-                storage.getAbsolutePath(PATH_DATABASE_PATH),
-                storage.getAbsolutePath(TRUST_DATABASE_PATH)));
+                storage.getAbsolutePath(UNIX_SOCKET_PATH)));
         setupLogThread(LOG_PATH, WATCH_PATTERN);
 
         return true;

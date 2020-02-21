@@ -111,6 +111,13 @@ class Binary {
                 Config.Binary.DISPATCHER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
+    static void runPathServer(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
+        HashMap<String, String> env = new HashMap<>();
+        env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
+        runProcess(context, logThread, env,
+                Config.Binary.PATH_SERVER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
+    }
+
     static void runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
         runProcess(context, logThread, new HashMap<>(),
                 Config.Binary.SCMP_FLAG,

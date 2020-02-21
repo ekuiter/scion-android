@@ -35,6 +35,8 @@ import org.scionlab.endhost.scion.BeaconServer;
 import org.scionlab.endhost.scion.ComponentRegistry;
 import org.scionlab.endhost.scion.Daemon;
 import org.scionlab.endhost.scion.Dispatcher;
+import org.scionlab.endhost.scion.PathServer;
+import org.scionlab.endhost.scion.Scmp;
 
 import java.io.File;
 import java.util.Optional;
@@ -92,10 +94,11 @@ public class MainService extends Service {
 
         Log.i(TAG, "starting SCION components");
         componentRegistry
+                .start(new BeaconServer(CONFIG_DIRECTORY_PATH))
                 .start(new Dispatcher())
                 .start(new Daemon(CONFIG_DIRECTORY_PATH))
-                //.start(new Scmp(this));
-                .start(new BeaconServer(CONFIG_DIRECTORY_PATH));
+                .start(new PathServer(CONFIG_DIRECTORY_PATH))
+                .start(new Scmp());
 
         isRunning = true;
         updateUserInterface();

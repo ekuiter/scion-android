@@ -16,14 +16,14 @@ Level = "%s"
 MaxAge = 3
 MaxBackups = 1
 
+[trustDB]
+Connection = "%s"
+
+[sd.PathDB]
+Connection = "%s"
+
 [sd]
 Public = "%s"
 SocketFileMode = "0777"
 Reliable = "%s"
 Unix = "%s"
-
-[sd.PathDB]
-Connection = "%s"
-
-[trustDB]
-Connection = "%s"
