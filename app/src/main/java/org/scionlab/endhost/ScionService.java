@@ -28,6 +28,7 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import org.scionlab.endhost.components.BeaconServer;
 import org.scionlab.endhost.components.Daemon;
 import org.scionlab.endhost.components.Dispatcher;
 import org.scionlab.endhost.components.Scmp;
@@ -65,7 +66,9 @@ public class ScionService extends Service {
         ScionComponentRegistry.getInstance()
                 .start(new Dispatcher(this))
                 .start(new Daemon(this, daemonConfigDirectory))
-                .start(new Scmp(this));
+                //.start(new Scmp(this)
+                .start(new BeaconServer(this)
+                );
 
         isRunning = true;
         updateUserInterface();

@@ -1,5 +1,5 @@
 # This is a configuration file template for the SCION dispatcher.
-# It is instantiated with concrete values in the ScionDispatcher class.
+# It is instantiated with concrete values in the Dispatcher class.
 # The structure of this file depends on the SCION version and is thus linked to the binary located in jniLibs.
 
 [dispatcher]

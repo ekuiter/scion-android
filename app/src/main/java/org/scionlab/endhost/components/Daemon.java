@@ -87,7 +87,7 @@ public class Daemon extends ScionComponent {
                 storage.getAbsolutePath(Config.Daemon.PATH_DATABASE_PATH),
                 storage.getAbsolutePath(Config.Daemon.TRUST_DATABASE_PATH)));
 
-        // tail log file and run daemon
+        // tail log file
         Logger.createLogThread(TAG, storage.getInputStream(logPath))
                 .watchFor(Config.Daemon.WATCH_PATTERN, this::setReady)
                 .start();

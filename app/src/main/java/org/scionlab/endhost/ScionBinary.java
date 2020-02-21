@@ -90,9 +90,9 @@ public class ScionBinary {
         Log.i(TAG, "SCION process exited with " + ret);
     }
 
-    public static void runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
+    public static void runBeaconServer(Context context, Logger.LogThread logThread, String configPath) {
         runProcess(context, logThread, new HashMap<>(),
-                Config.Binary.DISPATCHER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
+                Config.Binary.BEACON_SERVER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
     public static void runDaemon(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
@@ -100,6 +100,11 @@ public class ScionBinary {
         env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
         runProcess(context, logThread, env,
                 Config.Binary.DAEMON_FLAG, Config.Binary.CONFIG_FLAG, configPath);
+    }
+
+    public static void runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
+        runProcess(context, logThread, new HashMap<>(),
+                Config.Binary.DISPATCHER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
     }
 
     public static void runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {

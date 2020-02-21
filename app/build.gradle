@@ -69,7 +69,6 @@ dependencies {
     // If symbols have changed and are unavailable for you, either pull the newest version of this
     // repo or consider gradle's --refresh-dependencies option to get the freshest library
     implementation 'com.moandjiezana.toml:toml4j:0.7.2'
-    implementation 'io.noties.markwon:core:4.0.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
