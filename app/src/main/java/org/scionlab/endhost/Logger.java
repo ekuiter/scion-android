@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.util.HashMap;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -32,8 +33,8 @@ import static org.scionlab.endhost.Config.Logger.*;
 public class Logger {
     public static class LogThread extends Thread {
         private Consumer<String> outputConsumer;
-        private Runnable watchCallback;
-        private Pattern watchPattern, deletePattern;
+        private HashMap<Pattern, Runnable> watchPatterns = new HashMap<>();
+        private Pattern deletePattern;
         private long interval;
         InputStream inputStream;
 
@@ -49,8 +50,7 @@ public class Logger {
         }
 
         public LogThread watchFor(Pattern watchPattern, Runnable watchCallback) {
-            this.watchPattern = watchPattern;
-            this.watchCallback = watchCallback;
+            this.watchPatterns.put(watchPattern, watchCallback);
             return this;
         }
 
@@ -60,10 +60,12 @@ public class Logger {
                 //noinspection InfiniteLoopStatement
                 while (true) {
                     for (String line = br.readLine(); line != null; line = br.readLine()) {
-                        line = deletePattern.matcher(line).replaceAll("");
-                        if (watchPattern != null && watchPattern.matcher(line).matches())
-                            watchCallback.run();
-                        outputConsumer.accept(line);
+                        String _line = deletePattern.matcher(line).replaceAll("");
+                        watchPatterns.entrySet().forEach(e -> {
+                            if (e.getKey().matcher(_line).matches())
+                                e.getValue().run();
+                        });
+                        outputConsumer.accept(_line);
                     }
                     Thread.sleep(interval);
                 }

@@ -69,11 +69,10 @@ public abstract class Component {
         return isReady ? State.READY : State.STARTING;
     }
 
-    void setupLogThread(String logPath, Pattern watchPattern) {
+    Logger.LogThread createLogThread(String logPath, Pattern readyPattern) {
         storage.prepareFile(logPath);
-        Logger.createLogThread(getTag(), storage.getEmptyInputStream(logPath))
-                .watchFor(watchPattern, this::setReady)
-                .start();
+        return Logger.createLogThread(getTag(), storage.getEmptyInputStream(logPath))
+                .watchFor(readyPattern, this::setReady);
     }
 
     void start() {

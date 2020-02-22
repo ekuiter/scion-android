@@ -43,7 +43,7 @@ public class CertificateServer extends Component {
                 LOG_LEVEL,
                 storage.getAbsolutePath(TRUST_DATABASE_PATH),
                 storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH)));
-        setupLogThread(LOG_PATH, WATCH_PATTERN);
+        createLogThread(LOG_PATH, READY_PATTERN).start();
         return true;
     }
 

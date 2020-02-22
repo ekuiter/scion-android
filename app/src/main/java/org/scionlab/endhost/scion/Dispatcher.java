@@ -37,7 +37,7 @@ public class Dispatcher extends Component {
                 storage.getAbsolutePath(SOCKET_PATH),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL));
-        setupLogThread(LOG_PATH, WATCH_PATTERN);
+        createLogThread(LOG_PATH, READY_PATTERN).start();
         return true;
     }
 

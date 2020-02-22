@@ -64,7 +64,7 @@ public class Daemon extends Component {
                 publicAddress,
                 storage.getAbsolutePath(RELIABLE_SOCKET_PATH),
                 storage.getAbsolutePath(UNIX_SOCKET_PATH)));
-        setupLogThread(LOG_PATH, WATCH_PATTERN);
+        createLogThread(LOG_PATH, READY_PATTERN).start();
 
         return true;
     }

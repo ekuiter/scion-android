@@ -42,7 +42,7 @@ public class BeaconServer extends Component {
                 LOG_LEVEL,
                 storage.getAbsolutePath(TRUST_DATABASE_PATH),
                 storage.getAbsolutePath(BEACON_DATABASE_PATH)));
-        setupLogThread(LOG_PATH, WATCH_PATTERN);
+        createLogThread(LOG_PATH, READY_PATTERN).start();
         return true;
     }
 
