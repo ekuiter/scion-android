@@ -30,6 +30,7 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import org.scionlab.endhost.scion.BeaconServer;
+import org.scionlab.endhost.scion.BorderRouter;
 import org.scionlab.endhost.scion.CertificateServer;
 import org.scionlab.endhost.scion.ComponentRegistry;
 import org.scionlab.endhost.scion.Daemon;
@@ -92,6 +93,7 @@ public class MainService extends Service {
         Log.i(TAG, "starting SCION components");
         componentRegistry
                 .start(new BeaconServer(CONFIG_DIRECTORY_PATH))
+                .start(new BorderRouter(CONFIG_DIRECTORY_PATH))
                 .start(new CertificateServer(CONFIG_DIRECTORY_PATH))
                 .start(new Dispatcher())
                 .start(new Daemon(CONFIG_DIRECTORY_PATH))

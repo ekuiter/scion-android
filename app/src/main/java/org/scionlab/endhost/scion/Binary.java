@@ -100,6 +100,10 @@ class Binary {
         runProcess(context, logThread, env, BEACON_SERVER_FLAG, CONFIG_FLAG, configPath);
     }
 
+    static void runBorderRouter(Context context, Logger.LogThread logThread, String configPath) {
+        runProcess(context, logThread, new HashMap<>(), BORDER_ROUTER_FLAG, CONFIG_FLAG, configPath); // TODO: dispatcher?
+    }
+
     static void runCertificateServer(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
         env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);

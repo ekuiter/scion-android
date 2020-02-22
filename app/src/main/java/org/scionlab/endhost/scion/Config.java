@@ -23,6 +23,7 @@ class Config {
     static class Binary {
         static final String PATH = "libscion-android.so"; // file name of SCION binary as located in jniLabs subdirectories
         static final String BEACON_SERVER_FLAG = "beacon_srv"; // value of binary's first argument to run the beacon server
+        static final String BORDER_ROUTER_FLAG = "border"; // value of binary's first argument to run the border router
         static final String CERTIFICATE_SERVER_FLAG = "cert_srv"; // value of binary's first argument to run the certificate server
         static final String DAEMON_FLAG = "sciond"; // value of binary's first argument to run the daemon
         static final String DISPATCHER_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher
@@ -50,6 +51,15 @@ class Config {
         static final String TRUST_DATABASE_PATH = "EXTERNAL/databases/beacon_server.trust.db"; // path to trust SQLite database created in external storage
         static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
         static final Pattern READY_PATTERN = Pattern.compile("^.*Started listening UDP.*$"); // when encountered, consider component ready
+    }
+
+    static class BorderRouter {
+        static final String CONFIG_TEMPLATE_PATH = "border_router.toml"; // path to configuration file template, located in assets folder
+        static final String CONFIG_PATH = "EXTERNAL/config/border_router.toml"; // path to configuration file
+        static final String LOG_PATH = "EXTERNAL/logs/border_router.log"; // path to log file created in external storage
+        static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
+        static final Pattern READY_PATTERN = Pattern.compile("^.*_TODO_.*$"); // TODO: when encountered, consider component ready
+        static final Pattern VPN_NOT_READY_PATTERN = Pattern.compile("^.*bind: cannot assign requested address.*$"); // occurs when VPN connection is not ready
     }
 
     static class CertificateServer {
