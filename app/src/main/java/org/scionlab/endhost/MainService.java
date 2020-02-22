@@ -29,9 +29,8 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
-import com.moandjiezana.toml.Toml;
-
 import org.scionlab.endhost.scion.BeaconServer;
+import org.scionlab.endhost.scion.CertificateServer;
 import org.scionlab.endhost.scion.ComponentRegistry;
 import org.scionlab.endhost.scion.Daemon;
 import org.scionlab.endhost.scion.Dispatcher;
@@ -39,7 +38,6 @@ import org.scionlab.endhost.scion.PathServer;
 import org.scionlab.endhost.scion.Scmp;
 
 import java.io.File;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.scionlab.endhost.Config.MainService.*;
@@ -79,10 +77,6 @@ public class MainService extends Service {
             Log.e(TAG, "no daemon configuration directory given");
             return ret;
         }
-
-        // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
-        startForeground(NOTIFICATION_ID, notificationBuilder.build());
-
         // copy configuration folder provided by the user
         Storage storage = Storage.from(this);
         if (storage.countFilesInDirectory(new File(configDirectory)) > CONFIG_DIRECTORY_FILE_LIMIT) {
@@ -92,9 +86,13 @@ public class MainService extends Service {
         storage.deleteFileOrDirectory(CONFIG_DIRECTORY_PATH);
         storage.copyFileOrDirectory(new File(configDirectory), CONFIG_DIRECTORY_PATH);
 
+        // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
+        startForeground(NOTIFICATION_ID, notificationBuilder.build());
+
         Log.i(TAG, "starting SCION components");
         componentRegistry
                 .start(new BeaconServer(CONFIG_DIRECTORY_PATH))
+                .start(new CertificateServer(CONFIG_DIRECTORY_PATH))
                 .start(new Dispatcher())
                 .start(new Daemon(CONFIG_DIRECTORY_PATH))
                 .start(new PathServer(CONFIG_DIRECTORY_PATH))

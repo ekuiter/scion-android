@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.scionlab.endhost.scion.Config.Binary.*;
+
 class Binary {
     private static final String TAG = "Binary";
     private static boolean initialized = false;
@@ -42,7 +44,7 @@ class Binary {
         }
 
         ArrayList<String> command = new ArrayList<>();
-        command.add("./" + Config.Binary.PATH);
+        command.add("./" + PATH);
         command.addAll(Arrays.asList(args));
         //noinspection SimplifyStreamApiCallChains
 
@@ -94,41 +96,38 @@ class Binary {
 
     static void runBeaconServer(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
+        env.put(DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
+        runProcess(context, logThread, env, BEACON_SERVER_FLAG, CONFIG_FLAG, configPath);
+    }
+
+    static void runCertificateServer(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
+        HashMap<String, String> env = new HashMap<>();
         env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
-        runProcess(context, logThread, env,
-                Config.Binary.BEACON_SERVER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
+        runProcess(context, logThread, env, CERTIFICATE_SERVER_FLAG, CONFIG_FLAG, configPath);
     }
 
     static void runDaemon(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
-        env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
-        runProcess(context, logThread, env,
-                Config.Binary.DAEMON_FLAG, Config.Binary.CONFIG_FLAG, configPath);
+        env.put(DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
+        runProcess(context, logThread, env, DAEMON_FLAG, CONFIG_FLAG, configPath);
     }
 
     static void runDispatcher(Context context, Logger.LogThread logThread, String configPath) {
-        runProcess(context, logThread, new HashMap<>(),
-                Config.Binary.DISPATCHER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
+        runProcess(context, logThread, new HashMap<>(), DISPATCHER_FLAG, CONFIG_FLAG, configPath);
     }
 
     static void runPathServer(Context context, Logger.LogThread logThread, String configPath, String dispatcherSocketPath) {
         HashMap<String, String> env = new HashMap<>();
-        env.put(Config.Binary.DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
-        runProcess(context, logThread, env,
-                Config.Binary.PATH_SERVER_FLAG, Config.Binary.CONFIG_FLAG, configPath);
+        env.put(DISPATCHER_SOCKET_ENV, dispatcherSocketPath);
+        runProcess(context, logThread, env, PATH_SERVER_FLAG, CONFIG_FLAG, configPath);
     }
 
     static void runScmp(Context context, Logger.LogThread logThread, String dispatcherSocketPath, String daemonSocketPath, String localAddress, String remoteAddress) {
         runProcess(context, logThread, new HashMap<>(),
-                Config.Binary.SCMP_FLAG,
-                Config.Binary.SCMP_ECHO_FLAG,
-                Config.Binary.SCMP_DISPATCHER_SOCKET_FLAG,
-                dispatcherSocketPath,
-                Config.Binary.SCMP_DAEMON_SOCKET_FLAG,
-                daemonSocketPath,
-                Config.Binary.SCMP_LOCAL_FLAG,
-                localAddress,
-                Config.Binary.SCMP_REMOTE_FLAG,
-                remoteAddress);
+                SCMP_FLAG, SCMP_ECHO_FLAG,
+                SCMP_DISPATCHER_SOCKET_FLAG, dispatcherSocketPath,
+                SCMP_DAEMON_SOCKET_FLAG, daemonSocketPath,
+                SCMP_LOCAL_FLAG, localAddress,
+                SCMP_REMOTE_FLAG, remoteAddress);
     }
 }
