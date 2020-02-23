@@ -21,8 +21,6 @@ import android.util.Log;
 
 import com.moandjiezana.toml.Toml;
 
-import org.scionlab.endhost.Logger;
-
 import java.util.Optional;
 import static org.scionlab.endhost.scion.Config.Daemon.*;
 
@@ -30,12 +28,6 @@ import static org.scionlab.endhost.scion.Config.Daemon.*;
  * Performs requests to the SCION network and acts as an endhost.
  */
 public class Daemon extends Component {
-    private String configDirectoryPath;
-
-    public Daemon(String configDirectoryPath) {
-        this.configDirectoryPath = configDirectoryPath;
-    }
-
     @Override
     protected String getTag() {
         return "Daemon";
@@ -44,7 +36,7 @@ public class Daemon extends Component {
     @Override
     boolean prepare() {
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
-                configDirectoryPath, CONFIG_PATH_REGEX);
+                Config.Component.CONFIG_DIRECTORY_PATH, CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
             Log.e(getTag(), "could not find SCION daemon configuration file sciond.toml or sd.toml");
             return false;
@@ -56,7 +48,7 @@ public class Daemon extends Component {
         storage.prepareFiles(RELIABLE_SOCKET_PATH, UNIX_SOCKET_PATH, TRUST_DATABASE_PATH, PATH_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
-                storage.getAbsolutePath(configDirectoryPath),
+                storage.getAbsolutePath(Config.Component.CONFIG_DIRECTORY_PATH),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL,
                 storage.getAbsolutePath(TRUST_DATABASE_PATH),

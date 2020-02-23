@@ -17,18 +17,9 @@
 
 package org.scionlab.endhost.scion;
 
-import org.scionlab.endhost.Logger;
-
 import static org.scionlab.endhost.scion.Config.PathServer.*;
 
-
 public class PathServer extends Component {
-    private String configDirectoryPath;
-
-    public PathServer(String configDirectoryPath) {
-        this.configDirectoryPath = configDirectoryPath;
-    }
-
     @Override
     protected String getTag() {
         return "PathServer";
@@ -39,7 +30,7 @@ public class PathServer extends Component {
         storage.prepareFiles(TRUST_DATABASE_PATH, PATH_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
-                storage.getAbsolutePath(configDirectoryPath),
+                storage.getAbsolutePath(Config.Component.CONFIG_DIRECTORY_PATH),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL,
                 storage.getAbsolutePath(TRUST_DATABASE_PATH),

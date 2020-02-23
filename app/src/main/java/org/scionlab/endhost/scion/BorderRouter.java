@@ -22,12 +22,6 @@ import android.util.Log;
 import static org.scionlab.endhost.scion.Config.BorderRouter.*;
 
 public class BorderRouter extends Component {
-    private String configDirectoryPath;
-
-    public BorderRouter(String configDirectoryPath) {
-        this.configDirectoryPath = configDirectoryPath;
-    }
-
     @Override
     protected String getTag() {
         return "BorderRouter";
@@ -37,7 +31,7 @@ public class BorderRouter extends Component {
     boolean prepare() {
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
-                storage.getAbsolutePath(configDirectoryPath),
+                storage.getAbsolutePath(Config.Component.CONFIG_DIRECTORY_PATH),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL));
         createLogThread(LOG_PATH, READY_PATTERN)

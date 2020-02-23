@@ -33,13 +33,15 @@ import java.util.stream.Collectors;
 
 import static org.scionlab.endhost.scion.Config.Process.*;
 
+/**
+ * Runs a SCION component via the binary supplied in jniLibs.
+ */
 public class Process {
     private static final String TAG = "Process";
     private static String nativeLibraryDir;
     private Storage storage;
     private Logger.LogThread logThread;
     private Map<String, String> environment = new HashMap<>();
-    private String component;
     private ArrayList<String> arguments = new ArrayList<>();
 
     private Process(Storage storage) {

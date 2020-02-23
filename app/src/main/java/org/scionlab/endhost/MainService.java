@@ -42,7 +42,8 @@ import org.scionlab.endhost.scion.Scmp;
 import java.io.File;
 import java.util.stream.Collectors;
 
-import static org.scionlab.endhost.Config.MainService.*;
+import static org.scionlab.endhost.scion.Config.Component.CONFIG_DIRECTORY_FILE_LIMIT;
+import static org.scionlab.endhost.scion.Config.Component.CONFIG_DIRECTORY_PATH;
 
 public class MainService extends Service {
     private static final String TAG = "MainService";
@@ -94,12 +95,12 @@ public class MainService extends Service {
 
         Log.i(TAG, "starting SCION components");
         componentRegistry
-                .start(new BeaconServer(CONFIG_DIRECTORY_PATH))
-                .start(new BorderRouter(CONFIG_DIRECTORY_PATH))
-                .start(new CertificateServer(CONFIG_DIRECTORY_PATH))
+                .start(new BeaconServer())
+                .start(new BorderRouter())
+                .start(new CertificateServer())
                 .start(new Dispatcher())
-                .start(new Daemon(CONFIG_DIRECTORY_PATH))
-                .start(new PathServer(CONFIG_DIRECTORY_PATH))
+                .start(new Daemon())
+                .start(new PathServer())
                 .start(new Scmp());
 
         isRunning = true;
