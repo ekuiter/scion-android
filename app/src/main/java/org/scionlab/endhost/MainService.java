@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -33,8 +32,9 @@ import org.scionlab.endhost.scion.Scion;
 
 import java.util.stream.Collectors;
 
+import timber.log.Timber;
+
 public class MainService extends Service {
-    private static final String TAG = "MainService";
     private static final int NOTIFICATION_ID  = 1;
     private static final String NOTIFICATION_CHANNEL = MainService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
     public static final String CONFIG_DIRECTORY = MainService.class.getCanonicalName() + ".CONFIG_DIRECTORY";
@@ -65,7 +65,7 @@ public class MainService extends Service {
 
         final String configDirectory = intent.getStringExtra(CONFIG_DIRECTORY);
         if (configDirectory == null) {
-            Log.e(TAG, "no daemon configuration directory given");
+            Timber.e("no daemon configuration directory given");
             return ret;
         }
 

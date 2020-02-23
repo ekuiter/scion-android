@@ -32,6 +32,8 @@ import androidx.core.app.ActivityCompat;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
+import timber.log.Timber;
+
 public class MainActivity extends AppCompatActivity {
     private static final String CONFIG_DIRECTORY = MainActivity.class.getCanonicalName() + ".CONFIG_DIRECTORY";
     public static final String UPDATE_USER_INTERFACE = MainActivity.class.getCanonicalName() + ".UPDATE_USER_INTERFACE";
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Timber.plant(new Logger.Tree());
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         if (savedInstanceState != null)

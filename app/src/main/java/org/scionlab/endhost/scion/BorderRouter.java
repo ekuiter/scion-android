@@ -17,7 +17,7 @@
 
 package org.scionlab.endhost.scion;
 
-import android.util.Log;
+import timber.log.Timber;
 
 import static org.scionlab.endhost.scion.Config.BorderRouter.*;
 
@@ -35,8 +35,8 @@ class BorderRouter extends Component {
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL));
         createLogThread(LOG_PATH, READY_PATTERN)
-                .watchFor(VPN_NOT_READY_PATTERN, () -> Log.e(getTag(),
-                        "could not start border router, please check VPN connection!"))
+                .watchFor(VPN_NOT_READY_PATTERN, () ->
+                        Timber.e("could not start border router, please check VPN connection!"))
                 .start();
         return true;
     }

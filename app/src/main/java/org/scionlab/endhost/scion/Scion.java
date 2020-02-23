@@ -9,10 +9,11 @@ import java.io.File;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import timber.log.Timber;
+
 import static org.scionlab.endhost.scion.Config.Scion.*;
 
 public class Scion {
-    private static final String TAG = "Scion";
     private final Storage storage;
     private final ComponentRegistry componentRegistry;
 
@@ -25,13 +26,13 @@ public class Scion {
     public boolean start(String configDirectory) {
         // copy configuration folder provided by the user
         if (storage.countFilesInDirectory(new File(configDirectory)) > CONFIG_DIRECTORY_FILE_LIMIT) {
-            Log.e(TAG, "too many files in configuration directory, did you choose the right directory?");
+            Timber.e("too many files in configuration directory, did you choose the right directory?");
             return false;
         }
         storage.deleteFileOrDirectory(CONFIG_DIRECTORY_PATH);
         storage.copyFileOrDirectory(new File(configDirectory), CONFIG_DIRECTORY_PATH);
 
-        Log.i(TAG, "starting SCION components");
+        Timber.i("starting SCION components");
         componentRegistry
                 .start(new BeaconServer())
                 .start(new BorderRouter())
@@ -45,7 +46,7 @@ public class Scion {
     }
 
     public void stop() {
-        Log.i(TAG, "stopping SCION components");
+        Timber.i("stopping SCION components");
         componentRegistry.stopAll();
     }
 }

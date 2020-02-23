@@ -17,7 +17,7 @@
 
 package org.scionlab.endhost;
 
-import android.util.Log;
+import androidx.annotation.NonNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,6 +27,8 @@ import java.io.InterruptedIOException;
 import java.util.HashMap;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+
+import timber.log.Timber;
 
 import static org.scionlab.endhost.Config.Logger.*;
 
@@ -76,8 +78,15 @@ public class Logger {
         }
     }
 
+    public static class Tree extends Timber.DebugTree {
+        @Override
+        protected void log(int priority, String tag, @NonNull String message, Throwable t) {
+            super.log(priority, tag, message, t);
+        }
+    }
+
     public static LogThread createLogThread(String tag) {
-        return new Logger.LogThread(line -> Log.i(tag, line), DELETE_PATTERN, UPDATE_INTERVAL);
+        return new Logger.LogThread(line -> Timber.tag(tag).i(line), DELETE_PATTERN, UPDATE_INTERVAL);
     }
 
     public static LogThread createLogThread(String tag, InputStream inputStream) {

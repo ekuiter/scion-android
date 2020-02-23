@@ -17,13 +17,12 @@
 
 package org.scionlab.endhost.scion;
 
-import android.content.Context;
-import android.util.Log;
-
 import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.Storage;
 
 import java.util.regex.Pattern;
+
+import timber.log.Timber;
 
 /**
  * Think of SCION components as "Docker containers": They can be started, stopped,
@@ -48,14 +47,20 @@ public abstract class Component {
         return thread != null;
     }
 
+    private Timber.Tree timber() {
+        return Timber.tag(getTag());
+    }
+
     // Is called when the component transitions from STARTING to READY. Should only
     // be called from within run(). Note that a crash of the component should cause
     // run() to exit instead of setting isReady = false;
-    void setReady() {
-        Log.i(getTag(), "component is ready");
-        isReady = true;
-        if (componentRegistry != null)
-            componentRegistry.notifyStateChange();
+    private void setReady() {
+        if (!isReady) {
+            timber().i("component is ready");
+            isReady = true;
+            if (componentRegistry != null)
+                componentRegistry.notifyStateChange();
+        }
     }
 
 
@@ -76,15 +81,15 @@ public abstract class Component {
             return;
 
         if (componentRegistry == null) {
-            Log.e(getTag(), "not registered with any component registry");
+            timber().i("not registered with any component registry");
             return;
         }
 
-        Log.i(getTag(), "starting component");
+        timber().i("starting component");
         storage = componentRegistry.getStorage();
 
         if (!prepare()) {
-            Log.e(getTag(), "failed to prepare component");
+            timber().e("failed to prepare component");
             return;
         }
 
@@ -93,16 +98,16 @@ public abstract class Component {
                 int retries = 0;
                 for (; retries < Config.Component.READY_RETRIES && !mayRun(); retries++) {
                     if (retries == 0)
-                        Log.i(getTag(), "waiting until component may run");
+                        timber().i("waiting until component may run");
                     Thread.sleep(Config.Component.READY_INTERVAL);
                 }
                 if (retries > 0)
-                    Log.i(getTag(), "done waiting for component");
+                    timber().i("done waiting for component");
                 if (mayRun())
                     run();
             } catch (InterruptedException ignored) {
             } finally {
-                Log.i(getTag(), "component has stopped");
+                timber().i("component has stopped");
                 thread = null;
                 if (componentRegistry != null)
                     componentRegistry.notifyStateChange();
@@ -116,7 +121,7 @@ public abstract class Component {
         if (thread == null)
             return;
 
-        Log.i(getTag(), "stopping component");
+        timber().i("stopping component");
         thread.interrupt();
     }
 

@@ -17,11 +17,12 @@
 
 package org.scionlab.endhost.scion;
 
-import android.util.Log;
-
 import com.moandjiezana.toml.Toml;
 
 import java.util.Optional;
+
+import timber.log.Timber;
+
 import static org.scionlab.endhost.scion.Config.Daemon.*;
 
 /**
@@ -38,7 +39,7 @@ class Daemon extends Component {
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
                 Config.Scion.CONFIG_DIRECTORY_PATH, CONFIG_PATH_REGEX);
         if (!_configPath.isPresent()) {
-            Log.e(getTag(), "could not find SCION daemon configuration file sciond.toml or sd.toml");
+            Timber.e("could not find SCION daemon configuration file sciond.toml or sd.toml");
             return false;
         }
         String publicAddress = new Toml().read(storage.getInputStream(_configPath.get())).getString(CONFIG_PUBLIC_TOML_PATH);

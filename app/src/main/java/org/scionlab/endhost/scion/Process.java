@@ -18,7 +18,6 @@
 package org.scionlab.endhost.scion;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.Storage;
@@ -31,13 +30,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import timber.log.Timber;
+
 import static org.scionlab.endhost.scion.Config.Process.*;
 
 /**
  * Runs a SCION component via the binary supplied in jniLibs.
  */
 class Process {
-    private static final String TAG = "Process";
     private static String nativeLibraryDir;
     private String tag;
     private Storage storage;
@@ -59,8 +59,12 @@ class Process {
     static void initialize(Context context) {
         if (nativeLibraryDir == null) {
             nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
-            Log.i(TAG, "native SCION binary is located in " + nativeLibraryDir);
+            Timber.i("native SCION binary is located in %s", nativeLibraryDir);
         }
+    }
+
+    private Timber.Tree timber() {
+        return Timber.tag(tag);
     }
 
     private Process setLogThread(Logger.LogThread logThread) {
@@ -96,12 +100,13 @@ class Process {
     }
 
     private ProcessBuilder log(ProcessBuilder processBuilder) {
+        String env = environment.entrySet().stream()
+                .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+                .collect(Collectors.joining(" "));
         //noinspection SimplifyStreamApiCallChains
-        Log.i(tag, "starting SCION process");
-        Log.i(tag, String.format("%s %s",
-                environment.entrySet().stream().map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
-                        .collect(Collectors.joining(" ")),
-                processBuilder.command().stream().collect(Collectors.joining(" "))).trim());
+        String invocation = String.format("%s %s", env,
+                processBuilder.command().stream().collect(Collectors.joining(" "))).trim();
+        timber().i(invocation);
         return processBuilder;
     }
 
@@ -129,12 +134,12 @@ class Process {
             try {
                 ret = process.waitFor();
             } catch (InterruptedException e) {
-                Log.i(tag, "thread was interrupted, stopping SCION process");
+                timber().i("thread was interrupted, stopping SCION process");
                 process.destroy();
                 ret = -1;
             }
         }
 
-        Log.i(tag, "SCION process exited with " + ret);
+        timber().i("SCION process exited with %s", ret);
     }
 }
