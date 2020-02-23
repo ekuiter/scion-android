@@ -17,7 +17,7 @@
 
 package org.scionlab.endhost.scion;
 
-import android.content.Context;
+import org.scionlab.endhost.Storage;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,18 +29,18 @@ import java.util.stream.Stream;
  * Acts as a central registry for all SCION components (daemon, dispatcher etc.)
  * For each component, exactly one instance may be registered (see MainService).
  */
-public class ComponentRegistry {
-    private Context context;
+class ComponentRegistry {
+    private Storage storage;
     private Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback;
     private ConcurrentHashMap<Class<? extends Component>, Component> components = new ConcurrentHashMap<>();
 
-    public ComponentRegistry(Context context, Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback) {
-        this.context = context;
+    ComponentRegistry(Storage storage, Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback) {
+        this.storage = storage;
         this.componentStateCallback = componentStateCallback;
     }
 
-    Context getContext() {
-        return context;
+    Storage getStorage() {
+        return storage;
     }
 
     void notifyStateChange() {
@@ -64,7 +64,7 @@ public class ComponentRegistry {
         component.setComponentRegistry(null);
     }
 
-    public ComponentRegistry start(Component component) {
+    ComponentRegistry start(Component component) {
         register(component);
         component.start();
         return this;
@@ -75,7 +75,7 @@ public class ComponentRegistry {
         unregister(component);
     }
 
-    public void stopAll() {
+    void stopAll() {
         components.values().forEach(this::stop);
     }
 

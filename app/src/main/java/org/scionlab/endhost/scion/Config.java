@@ -19,18 +19,16 @@ package org.scionlab.endhost.scion;
 
 import java.util.regex.Pattern;
 
-public class Config {
+class Config {
     static class Process {
         static final String BINARY_PATH = "libscion-android.so"; // file name of SCION binary as located in jniLabs subdirectories
         static final String CONFIG_FLAG = "-lib_env_config"; // flag that specifies a configuration file
         static final String DISPATCHER_SOCKET_ENV = "DISPATCHER_SOCKET"; // environment variable that specifies the dispatcher socket
     }
 
-    public static class Component {
+    static class Component {
         static final int READY_INTERVAL = 250; // how frequently (in ms) to check whether required components are ready
         static final int READY_RETRIES = 60; // when to give up and stop the component
-        public static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config/imported"; // path to configuration directory created in external storage
-        public static final int CONFIG_DIRECTORY_FILE_LIMIT = 50; // number of files allowed in imported directory (failsafe if the user chooses wrong)
     }
 
     static class BeaconServer {
@@ -107,5 +105,10 @@ public class Config {
         static final String REMOTE_FLAG = "-tools_scmp_cmn_remote"; // flag that specifies the remote address
         static final String DISPATCHER_SOCKET_FLAG = "-tools_scmp_dispatcher"; // flag that specifies the dispatcher socket
         static final String DAEMON_SOCKET_FLAG = "-tools_scmp_sciond"; // flag that specifies the daemon socket
+    }
+
+    static class Scion {
+        static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config/imported"; // path to configuration directory created in external storage
+        static final int CONFIG_DIRECTORY_FILE_LIMIT = 50; // number of files allowed in imported directory (failsafe if the user chooses wrong)
     }
 }

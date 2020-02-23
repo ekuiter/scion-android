@@ -36,7 +36,7 @@ import static org.scionlab.endhost.scion.Config.Process.*;
 /**
  * Runs a SCION component via the binary supplied in jniLibs.
  */
-public class Process {
+class Process {
     private static final String TAG = "Process";
     private static String nativeLibraryDir;
     private Storage storage;
@@ -54,7 +54,7 @@ public class Process {
         return new Process(storage).setLogThread(Logger.createLogThread(tag));
     }
 
-    public static void initialize(Context context) {
+    static void initialize(Context context) {
         if (nativeLibraryDir == null) {
             nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
             Log.i(TAG, "native SCION binary is located in " + nativeLibraryDir);

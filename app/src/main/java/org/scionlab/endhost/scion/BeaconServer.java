@@ -19,7 +19,7 @@ package org.scionlab.endhost.scion;
 
 import static org.scionlab.endhost.scion.Config.BeaconServer.*;
 
-public class BeaconServer extends Component {
+class BeaconServer extends Component {
     @Override
     protected String getTag() {
         return "BeaconServer";
@@ -30,7 +30,7 @@ public class BeaconServer extends Component {
         storage.prepareFiles(TRUST_DATABASE_PATH, BEACON_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
-                storage.getAbsolutePath(Config.Component.CONFIG_DIRECTORY_PATH),
+                storage.getAbsolutePath(Config.Scion.CONFIG_DIRECTORY_PATH),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL,
                 storage.getAbsolutePath(TRUST_DATABASE_PATH),

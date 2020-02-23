@@ -20,7 +20,7 @@ package org.scionlab.endhost.scion;
 
 import static org.scionlab.endhost.scion.Config.Scmp.*;
 
-public class Scmp extends Component {
+class Scmp extends Component {
     @Override
     protected String getTag() {
         return "Scmp";

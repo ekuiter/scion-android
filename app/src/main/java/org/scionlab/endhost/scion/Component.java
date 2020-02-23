@@ -44,10 +44,6 @@ public abstract class Component {
         this.componentRegistry = componentRegistry;
     }
 
-    Context getContext() {
-        return componentRegistry.getContext();
-    }
-
     boolean isRunning() {
         return thread != null;
     }
@@ -85,7 +81,7 @@ public abstract class Component {
         }
 
         Log.i(getTag(), "starting component");
-        storage = Storage.from(getContext());
+        storage = componentRegistry.getStorage();
 
         if (!prepare()) {
             Log.e(getTag(), "failed to prepare component");

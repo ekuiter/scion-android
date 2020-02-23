@@ -22,7 +22,7 @@ import static org.scionlab.endhost.scion.Config.Dispatcher.*;
 /**
  * Dispatches requests/responses from other SCION components to the outside world and vice-versa.
  */
-public class Dispatcher extends Component {
+class Dispatcher extends Component {
     @Override
     protected String getTag() {
         return "Dispatcher";

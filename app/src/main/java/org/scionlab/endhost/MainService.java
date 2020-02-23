@@ -29,21 +29,9 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
-import org.scionlab.endhost.scion.BeaconServer;
-import org.scionlab.endhost.scion.BorderRouter;
-import org.scionlab.endhost.scion.CertificateServer;
-import org.scionlab.endhost.scion.ComponentRegistry;
-import org.scionlab.endhost.scion.Daemon;
-import org.scionlab.endhost.scion.Dispatcher;
-import org.scionlab.endhost.scion.PathServer;
-import org.scionlab.endhost.scion.Process;
-import org.scionlab.endhost.scion.Scmp;
+import org.scionlab.endhost.scion.Scion;
 
-import java.io.File;
 import java.util.stream.Collectors;
-
-import static org.scionlab.endhost.scion.Config.Component.CONFIG_DIRECTORY_FILE_LIMIT;
-import static org.scionlab.endhost.scion.Config.Component.CONFIG_DIRECTORY_PATH;
 
 public class MainService extends Service {
     private static final String TAG = "MainService";
@@ -53,7 +41,7 @@ public class MainService extends Service {
     private static boolean isRunning = false;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
-    private ComponentRegistry componentRegistry;
+    private Scion scion;
 
     public static boolean isRunning() {
         return isRunning;
@@ -63,8 +51,7 @@ public class MainService extends Service {
     public void onCreate() {
         super.onCreate();
         setupNotification();
-        Process.initialize(this);
-        componentRegistry = new ComponentRegistry(this, componentState ->
+        scion = new Scion(this, componentState ->
                 notify(componentState.entrySet().stream()
                         .map(e -> e.getKey().getSimpleName() + ": " + e.getValue())
                         .collect(Collectors.joining("\n"))));
@@ -81,28 +68,12 @@ public class MainService extends Service {
             Log.e(TAG, "no daemon configuration directory given");
             return ret;
         }
-        // copy configuration folder provided by the user
-        Storage storage = Storage.from(this);
-        if (storage.countFilesInDirectory(new File(configDirectory)) > CONFIG_DIRECTORY_FILE_LIMIT) {
-            Log.e(TAG, "too many files in configuration directory, did you choose the right directory?");
+
+        if (!scion.start(configDirectory))
             return ret;
-        }
-        storage.deleteFileOrDirectory(CONFIG_DIRECTORY_PATH);
-        storage.copyFileOrDirectory(new File(configDirectory), CONFIG_DIRECTORY_PATH);
 
         // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
-
-        Log.i(TAG, "starting SCION components");
-        componentRegistry
-                .start(new BeaconServer())
-                .start(new BorderRouter())
-                .start(new CertificateServer())
-                .start(new Dispatcher())
-                .start(new Daemon())
-                .start(new PathServer())
-                .start(new Scmp());
-
         isRunning = true;
         updateUserInterface();
         return ret;
@@ -113,8 +84,7 @@ public class MainService extends Service {
         if (!isRunning)
             return;
 
-        Log.i(TAG, "stopping SCION components");
-        componentRegistry.stopAll();
+        scion.stop();
         stopForeground(STOP_FOREGROUND_REMOVE);
         isRunning = false;
         updateUserInterface();
