@@ -23,8 +23,20 @@
         android:gravity="center">
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/scionbutton"
-            android:textSize="30sp"
+            android:textSize="20sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none">
+            <TextView
+                android:id="@+id/logTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8sp"
+                android:textSize="12sp"/>
+        </ScrollView>
     </LinearLayout>
 </LinearLayout>

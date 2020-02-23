@@ -17,7 +17,6 @@
 
 package org.scionlab.endhost.scion;
 
-
 import static org.scionlab.endhost.scion.Config.Scmp.*;
 
 class Scmp extends Component {

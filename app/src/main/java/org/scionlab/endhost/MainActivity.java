@@ -24,6 +24,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,18 +44,25 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences getPreferences;
     private BroadcastReceiver updateUserInterfaceReceiver;
     private AppCompatButton scionButton;
+    private ScrollView scrollView;
+    private TextView logTextView;
     private String configDirectory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Timber.plant(new Logger.Tree());
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         if (savedInstanceState != null)
             configDirectory = savedInstanceState.getString(CONFIG_DIRECTORY);
         getPreferences = getPreferences(MODE_PRIVATE);
         scionButton = findViewById(R.id.scionbutton);
+        scrollView = findViewById(R.id.scrollView);
+        logTextView = findViewById(R.id.logTextView);
+        Timber.plant(new Logger.Tree((tag, message) -> runOnUiThread(() -> {
+            logTextView.append(String.format("%s: %s\n", tag, message));
+            scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+        })));
     }
 
     @Override
@@ -91,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
                             .withStartFile(getPreferences.getString(CONFIG_DIRECTORY, null))
                             .withChosenListener((path, pathFile) -> {
                                 if (path != null) {
+                                    logTextView.setText("");
                                     configDirectory = path;
                                     ActivityCompat.requestPermissions(
                                             this,

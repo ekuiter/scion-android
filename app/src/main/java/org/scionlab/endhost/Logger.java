@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.util.HashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -79,9 +80,16 @@ public class Logger {
     }
 
     public static class Tree extends Timber.DebugTree {
+        private BiConsumer<String, String> outputConsumer;
+
+        Tree(BiConsumer<String, String> outputConsumer) {
+            this.outputConsumer = outputConsumer;
+        }
+
         @Override
         protected void log(int priority, String tag, @NonNull String message, Throwable t) {
             super.log(priority, tag, message, t);
+            outputConsumer.accept(tag, message);
         }
     }
 
