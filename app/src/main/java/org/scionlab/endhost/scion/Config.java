@@ -20,22 +20,10 @@ package org.scionlab.endhost.scion;
 import java.util.regex.Pattern;
 
 class Config {
-    static class Binary {
-        static final String PATH = "libscion-android.so"; // file name of SCION binary as located in jniLabs subdirectories
-        static final String BEACON_SERVER_FLAG = "beacon_srv"; // value of binary's first argument to run the beacon server
-        static final String BORDER_ROUTER_FLAG = "border"; // value of binary's first argument to run the border router
-        static final String CERTIFICATE_SERVER_FLAG = "cert_srv"; // value of binary's first argument to run the certificate server
-        static final String DAEMON_FLAG = "sciond"; // value of binary's first argument to run the daemon
-        static final String DISPATCHER_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher
-        static final String PATH_SERVER_FLAG = "path_srv"; // value of binary's first argument to run the path server
-        static final String SCMP_FLAG = "scmp"; // value of binary's first argument to run the scmp tool
+    static class Process {
+        static final String BINARY_PATH = "libscion-android.so"; // file name of SCION binary as located in jniLabs subdirectories
         static final String CONFIG_FLAG = "-lib_env_config"; // flag that specifies a configuration file
         static final String DISPATCHER_SOCKET_ENV = "DISPATCHER_SOCKET"; // environment variable that specifies the dispatcher socket
-        static final String SCMP_ECHO_FLAG = "echo"; // value of scmp's first argument to run an echo request
-        static final String SCMP_LOCAL_FLAG = "-tools_scmp_cmn_local"; // flag that specifies the local address
-        static final String SCMP_REMOTE_FLAG = "-tools_scmp_cmn_remote"; // flag that specifies the remote address
-        static final String SCMP_DISPATCHER_SOCKET_FLAG = "-tools_scmp_dispatcher"; // flag that specifies the dispatcher socket
-        static final String SCMP_DAEMON_SOCKET_FLAG = "-tools_scmp_sciond"; // flag that specifies the daemon socket
     }
 
     static class Component {
@@ -44,6 +32,7 @@ class Config {
     }
 
     static class BeaconServer {
+        static final String BINARY_FLAG = "beacon_srv"; // value of binary's first argument to run the beacon server
         static final String CONFIG_TEMPLATE_PATH = "beacon_server.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "EXTERNAL/config/beacon_server.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/beacon_server.log"; // path to log file created in external storage
@@ -54,6 +43,7 @@ class Config {
     }
 
     static class BorderRouter {
+        static final String BINARY_FLAG = "border"; // value of binary's first argument to run the border router
         static final String CONFIG_TEMPLATE_PATH = "border_router.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "EXTERNAL/config/border_router.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/border_router.log"; // path to log file created in external storage
@@ -63,6 +53,7 @@ class Config {
     }
 
     static class CertificateServer {
+        static final String BINARY_FLAG = "cert_srv"; // value of binary's first argument to run the certificate server
         static final String CONFIG_TEMPLATE_PATH = "certificate_server.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "EXTERNAL/config/certificate_server.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/certificate_server.log"; // path to log file created in external storage
@@ -72,6 +63,7 @@ class Config {
     }
 
     static class Daemon {
+        static final String BINARY_FLAG = "sciond"; // value of binary's first argument to run the daemon
         static final String CONFIG_TEMPLATE_PATH = "daemon.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "EXTERNAL/config/daemon.toml"; // path to configuration file
         static final String CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for configuration file located in configuration directory
@@ -86,6 +78,7 @@ class Config {
     }
 
     static class Dispatcher {
+        static final String BINARY_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher
         static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "EXTERNAL/config/dispatcher.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/dispatcher.log"; // path to log file
@@ -95,6 +88,7 @@ class Config {
     }
 
     static class PathServer {
+        static final String BINARY_FLAG = "path_srv"; // value of binary's first argument to run the path server
         static final String CONFIG_TEMPLATE_PATH = "path_server.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "EXTERNAL/config/path_server.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/path_server.log"; // path to log file created in external storage
@@ -102,5 +96,14 @@ class Config {
         static final String TRUST_DATABASE_PATH = "EXTERNAL/databases/path_server.trust.db"; // path to trust SQLite database created in external storage
         static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
         static final Pattern READY_PATTERN = Pattern.compile("^.*Started listening UDP.*$"); // when encountered, consider component ready
+    }
+
+    static class Scmp {
+        static final String BINARY_FLAG = "scmp"; // value of binary's first argument to run the scmp tool
+        static final String ECHO_FLAG = "echo"; // value of scmp's first argument to run an echo request
+        static final String LOCAL_FLAG = "-tools_scmp_cmn_local"; // flag that specifies the local address
+        static final String REMOTE_FLAG = "-tools_scmp_cmn_remote"; // flag that specifies the remote address
+        static final String DISPATCHER_SOCKET_FLAG = "-tools_scmp_dispatcher"; // flag that specifies the dispatcher socket
+        static final String DAEMON_SOCKET_FLAG = "-tools_scmp_sciond"; // flag that specifies the daemon socket
     }
 }

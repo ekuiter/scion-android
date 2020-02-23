@@ -17,7 +17,6 @@
 
 package org.scionlab.endhost.scion;
 
-import org.scionlab.endhost.Logger;
 import static org.scionlab.endhost.scion.Config.Dispatcher.*;
 
 /**
@@ -43,8 +42,9 @@ public class Dispatcher extends Component {
 
     @Override
     void run() {
-        Binary.runDispatcher(getContext(),
-                Logger.createLogThread(getTag()),
-                storage.getAbsolutePath(CONFIG_PATH));
+        Process.from(storage, getTag())
+                .addArgument(BINARY_FLAG)
+                .addConfigurationFile(CONFIG_PATH)
+                .run();
     }
 }

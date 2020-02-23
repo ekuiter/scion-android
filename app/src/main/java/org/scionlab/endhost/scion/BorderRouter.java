@@ -19,8 +19,6 @@ package org.scionlab.endhost.scion;
 
 import android.util.Log;
 
-import org.scionlab.endhost.Logger;
-
 import static org.scionlab.endhost.scion.Config.BorderRouter.*;
 
 public class BorderRouter extends Component {
@@ -51,8 +49,9 @@ public class BorderRouter extends Component {
 
     @Override
     void run() {
-        Binary.runBorderRouter(getContext(),
-                Logger.createLogThread(getTag()),
-                storage.getAbsolutePath(CONFIG_PATH));
+        Process.from(storage, getTag())
+                .addArgument(BINARY_FLAG)
+                .addConfigurationFile(CONFIG_PATH)
+                .run();
     }
 }

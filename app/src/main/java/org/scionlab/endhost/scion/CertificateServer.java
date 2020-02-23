@@ -49,9 +49,10 @@ public class CertificateServer extends Component {
 
     @Override
     void run() {
-        Binary.runCertificateServer(getContext(),
-                Logger.createLogThread(getTag()),
-                storage.getAbsolutePath(CONFIG_PATH),
-                storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
+        Process.from(storage, getTag())
+                .connectToDispatcher()
+                .addArgument(BINARY_FLAG)
+                .addConfigurationFile(CONFIG_PATH)
+                .run();
     }
 }

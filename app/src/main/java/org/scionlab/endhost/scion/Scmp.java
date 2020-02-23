@@ -17,7 +17,8 @@
 
 package org.scionlab.endhost.scion;
 
-import org.scionlab.endhost.Logger;
+
+import static org.scionlab.endhost.scion.Config.Scmp.*;
 
 public class Scmp extends Component {
     @Override
@@ -77,11 +78,13 @@ public class Scmp extends Component {
 
     @Override
     void run() {
-        Binary.runScmp(getContext(),
-                Logger.createLogThread(getTag()),
-                storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH),
-                storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH),
-                "17-ffaa:1:cf9,[192.168.0.123]",
-                "19-ffaa:0:1301,[0.0.0.0]"); // 17-ffaa:1:cf9,[192.168.0.8]
+        Process.from(storage, getTag())
+                .addArgument(BINARY_FLAG)
+                .addArgument(ECHO_FLAG)
+                .addArgument(DISPATCHER_SOCKET_FLAG, Config.Dispatcher.SOCKET_PATH)
+                .addArgument(DAEMON_SOCKET_FLAG, Config.Daemon.RELIABLE_SOCKET_PATH)
+                .addArgument(LOCAL_FLAG, "17-ffaa:1:cf9,[192.168.0.123]")
+                .addArgument(REMOTE_FLAG, "19-ffaa:0:1301,[0.0.0.0]") // 17-ffaa:1:cf9,[192.168.0.8]
+                .run();
     }
 }

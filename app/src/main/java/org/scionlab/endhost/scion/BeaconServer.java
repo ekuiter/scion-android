@@ -17,7 +17,6 @@
 
 package org.scionlab.endhost.scion;
 
-import org.scionlab.endhost.Logger;
 import static org.scionlab.endhost.scion.Config.BeaconServer.*;
 
 public class BeaconServer extends Component {
@@ -48,9 +47,10 @@ public class BeaconServer extends Component {
 
     @Override
     void run() {
-        Binary.runBeaconServer(getContext(),
-                Logger.createLogThread(getTag()),
-                storage.getAbsolutePath(CONFIG_PATH),
-                storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
+        Process.from(storage, getTag())
+                .connectToDispatcher()
+                .addArgument(BINARY_FLAG)
+                .addConfigurationFile(CONFIG_PATH)
+                .run();
     }
 }

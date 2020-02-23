@@ -36,6 +36,7 @@ import org.scionlab.endhost.scion.ComponentRegistry;
 import org.scionlab.endhost.scion.Daemon;
 import org.scionlab.endhost.scion.Dispatcher;
 import org.scionlab.endhost.scion.PathServer;
+import org.scionlab.endhost.scion.Process;
 import org.scionlab.endhost.scion.Scmp;
 
 import java.io.File;
@@ -61,6 +62,7 @@ public class MainService extends Service {
     public void onCreate() {
         super.onCreate();
         setupNotification();
+        Process.initialize(this);
         componentRegistry = new ComponentRegistry(this, componentState ->
                 notify(componentState.entrySet().stream()
                         .map(e -> e.getKey().getSimpleName() + ": " + e.getValue())
