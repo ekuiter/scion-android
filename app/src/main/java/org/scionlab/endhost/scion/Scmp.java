@@ -78,11 +78,11 @@ class Scmp extends Component {
 
     @Override
     void run() {
-        Process.from(storage, getTag())
+        Process.from(getTag(), storage)
                 .addArgument(BINARY_FLAG)
                 .addArgument(ECHO_FLAG)
-                .addArgument(DISPATCHER_SOCKET_FLAG, Config.Dispatcher.SOCKET_PATH)
-                .addArgument(DAEMON_SOCKET_FLAG, Config.Daemon.RELIABLE_SOCKET_PATH)
+                .addArgument(DISPATCHER_SOCKET_FLAG, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH))
+                .addArgument(DAEMON_SOCKET_FLAG, storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH))
                 .addArgument(LOCAL_FLAG, "17-ffaa:1:cf9,[192.168.0.123]")
                 .addArgument(REMOTE_FLAG, "19-ffaa:0:1301,[0.0.0.0]") // 17-ffaa:1:cf9,[192.168.0.8]
                 .run();

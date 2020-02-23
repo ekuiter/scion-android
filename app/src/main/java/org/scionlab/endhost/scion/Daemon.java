@@ -63,7 +63,7 @@ class Daemon extends Component {
 
     @Override
     void run() {
-        Process.from(storage, getTag())
+        Process.from(getTag(), storage)
                 .connectToDispatcher()
                 .addArgument(BINARY_FLAG)
                 .addConfigurationFile(CONFIG_PATH)

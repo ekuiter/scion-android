@@ -39,19 +39,21 @@ import static org.scionlab.endhost.scion.Config.Process.*;
 class Process {
     private static final String TAG = "Process";
     private static String nativeLibraryDir;
+    private String tag;
     private Storage storage;
     private Logger.LogThread logThread;
     private Map<String, String> environment = new HashMap<>();
     private ArrayList<String> arguments = new ArrayList<>();
 
-    private Process(Storage storage) {
+    private Process(String tag, Storage storage) {
+        this.tag = tag;
         this.storage = storage;
         if (nativeLibraryDir == null)
             throw new RuntimeException("process class must be initialized first");
     }
 
-    static Process from(Storage storage, String tag) {
-        return new Process(storage).setLogThread(Logger.createLogThread(tag));
+    static Process from(String tag, Storage storage) {
+        return new Process(tag, storage).setLogThread(Logger.createLogThread(tag));
     }
 
     static void initialize(Context context) {
@@ -95,7 +97,8 @@ class Process {
 
     private ProcessBuilder log(ProcessBuilder processBuilder) {
         //noinspection SimplifyStreamApiCallChains
-        Log.i(TAG, String.format("%s %s",
+        Log.i(tag, "starting SCION process");
+        Log.i(tag, String.format("%s %s",
                 environment.entrySet().stream().map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
                         .collect(Collectors.joining(" ")),
                 processBuilder.command().stream().collect(Collectors.joining(" "))).trim());
@@ -126,12 +129,12 @@ class Process {
             try {
                 ret = process.waitFor();
             } catch (InterruptedException e) {
-                Log.i(TAG, "thread was interrupted, stopping SCION process");
+                Log.i(tag, "thread was interrupted, stopping SCION process");
                 process.destroy();
                 ret = -1;
             }
         }
 
-        Log.i(TAG, "SCION process exited with " + ret);
+        Log.i(tag, "SCION process exited with " + ret);
     }
 }
