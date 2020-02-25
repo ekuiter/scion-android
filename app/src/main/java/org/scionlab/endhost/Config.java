@@ -21,6 +21,15 @@ import java.util.regex.Pattern;
 
 class Config {
     static class Logger {
+        static final org.scionlab.endhost.Logger.LogLevel DEFAULT_LOG_LEVEL = org.scionlab.endhost.Logger.LogLevel.NONE; // default log level on startup
+        static final org.scionlab.endhost.Logger.LogLevel DEFAULT_LINE_LOG_LEVEL = org.scionlab.endhost.Logger.LogLevel.INFO; // log level for lines that do not match
+        static final String TRACE_PREFIX = "[TRACE] [DBUG] "; // prefix for lines with the trace log level
+        static final String DEBUG_PREFIX = "[DBUG] "; // prefix for lines with the debug log level
+        static final String INFO_PREFIX = "[INFO] "; // prefix for lines with the info log level
+        static final String WARN_PREFIX = "[WARN] "; // prefix for lines with the warn log level
+        static final String ERROR_PREFIX = "[EROR] "; // prefix for lines with the error log level
+        static final String CRIT_PREFIX = "[CRIT] "; // prefix for lines with the crit log level
+        static final String SKIP_LINE_PREFIX = "> "; // skip setting the message log level for lines starting with this prefix
         static final Pattern DELETE_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}\\+\\d{4} "); // trims information from log output
         static final long UPDATE_INTERVAL = 1000; // how often (in ms) to poll the log file for updates
     }

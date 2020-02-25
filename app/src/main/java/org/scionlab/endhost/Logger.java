@@ -17,6 +17,9 @@
 
 package org.scionlab.endhost;
 
+import android.annotation.SuppressLint;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import java.io.BufferedReader;
@@ -25,9 +28,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import timber.log.Timber;
 
@@ -79,22 +84,68 @@ public class Logger {
         }
     }
 
+    public enum LogLevel {
+        TRACE(0, TRACE_PREFIX),
+        DEBUG(1, DEBUG_PREFIX),
+        INFO(2, INFO_PREFIX),
+        WARN(3, WARN_PREFIX),
+        ERROR(4, ERROR_PREFIX),
+        CRIT(5, CRIT_PREFIX),
+        NONE(6, null); // displays only log messages from the Android app
+
+        private int value;
+        private String prefix;
+        @SuppressLint("UseSparseArrays")
+
+        LogLevel(int value, String prefix) {
+            this.value = value;
+            this.prefix = prefix;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public String getPrefix() {
+            return prefix;
+        }
+    }
+
     public static class Tree extends Timber.DebugTree {
         private BiConsumer<String, String> outputConsumer;
+        private LogLevel logLevel = DEFAULT_LOG_LEVEL;
+        private int messageLogLevel = DEFAULT_LINE_LOG_LEVEL.getValue();
 
         Tree(BiConsumer<String, String> outputConsumer) {
             this.outputConsumer = outputConsumer;
         }
 
+        void setLogLevel(LogLevel logLevel) {
+            this.logLevel = logLevel;
+        }
+
         @Override
         protected void log(int priority, String tag, @NonNull String message, Throwable t) {
-            super.log(priority, tag, message, t);
-            outputConsumer.accept(tag, message);
+            // assuming Log.DEBUG corresponds exactly to the SCION output (see below)
+            if (priority == Log.DEBUG && !message.startsWith(SKIP_LINE_PREFIX))
+                messageLogLevel = Stream.of(LogLevel.values())
+                        .filter(e -> e.getPrefix() != null && message.startsWith(e.getPrefix()))
+                        .findFirst().map(LogLevel::getValue).orElse(DEFAULT_LINE_LOG_LEVEL.getValue());
+
+            // all SCION output is logged as Log.DEBUG, this output is filtered
+            // according to the log level. All other messages (i.e., from the app),
+            // are logged ignoring the log level.
+            if (priority > Log.DEBUG || logLevel.getValue() <= messageLogLevel) {
+                // log with at least Log.INFO because Logcat tends to ignore DEBUG messages
+                super.log(Math.max(Log.INFO, priority), tag, message, t);
+                outputConsumer.accept(tag, message);
+            }
         }
     }
 
     public static LogThread createLogThread(String tag) {
-        return new Logger.LogThread(line -> Timber.tag(tag).i(line), DELETE_PATTERN, UPDATE_INTERVAL);
+        // log all tailed files and processes as Log.DEBUG
+        return new Logger.LogThread(line -> Timber.tag(tag).d(line), DELETE_PATTERN, UPDATE_INTERVAL);
     }
 
     public static LogThread createLogThread(String tag, InputStream inputStream) {

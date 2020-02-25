@@ -38,7 +38,7 @@ class Config {
         static final String LOG_PATH = "EXTERNAL/logs/beacon_server.log"; // path to log file created in external storage
         static final String BEACON_DATABASE_PATH = "EXTERNAL/databases/beacon_server.beacon.db"; // path to beacon SQLite database created in external storage
         static final String TRUST_DATABASE_PATH = "EXTERNAL/databases/beacon_server.trust.db"; // path to trust SQLite database created in external storage
-        static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
+        static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
         static final Pattern READY_PATTERN = Pattern.compile("^.*Started listening UDP.*$"); // when encountered, consider component ready
     }
 
@@ -47,7 +47,7 @@ class Config {
         static final String CONFIG_TEMPLATE_PATH = "border_router.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "EXTERNAL/config/border_router.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/border_router.log"; // path to log file created in external storage
-        static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
+        static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
         static final Pattern READY_PATTERN = Pattern.compile("^.*_TODO_.*$"); // TODO: when encountered, consider component ready
         static final Pattern VPN_NOT_READY_PATTERN = Pattern.compile("^.*bind: cannot assign requested address.*$"); // occurs when VPN connection is not ready
     }
@@ -58,7 +58,7 @@ class Config {
         static final String CONFIG_PATH = "EXTERNAL/config/certificate_server.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/certificate_server.log"; // path to log file created in external storage
         static final String TRUST_DATABASE_PATH = "EXTERNAL/databases/certificate_server.trust.db"; // path to trust SQLite database created in external storage
-        static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
+        static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
         static final Pattern READY_PATTERN = Pattern.compile("^.*Started listening UDP.*$"); // when encountered, consider component ready
     }
 
@@ -73,7 +73,7 @@ class Config {
         static final String UNIX_SOCKET_PATH = "INTERNAL/daemon.unix.sock"; // path to UNIX socket created in internal storage
         static final String TRUST_DATABASE_PATH = "EXTERNAL/databases/daemon.trust.db"; // path to trust SQLite database created in external storage
         static final String PATH_DATABASE_PATH = "EXTERNAL/databases/daemon.path.db"; // path to path SQLite database created in external storage
-        static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
+        static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
         static final Pattern READY_PATTERN = Pattern.compile("^.*Registered with dispatcher.*$"); // when encountered, consider component ready
     }
 
@@ -83,7 +83,7 @@ class Config {
         static final String CONFIG_PATH = "EXTERNAL/config/dispatcher.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/dispatcher.log"; // path to log file
         static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
-        static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
+        static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
         static final Pattern READY_PATTERN = Pattern.compile("^.*Accepted new client.*$"); // when encountered, consider component ready
     }
 
@@ -94,7 +94,7 @@ class Config {
         static final String LOG_PATH = "EXTERNAL/logs/path_server.log"; // path to log file created in external storage
         static final String PATH_DATABASE_PATH = "EXTERNAL/databases/path_server.path.db"; // path to path SQLite database created in external storage
         static final String TRUST_DATABASE_PATH = "EXTERNAL/databases/path_server.trust.db"; // path to trust SQLite database created in external storage
-        static final String LOG_LEVEL = "trace"; // log level (one of trace, debug, info, warn, error, crit), at least info!
+        static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
         static final Pattern READY_PATTERN = Pattern.compile("^.*Started listening UDP.*$"); // when encountered, consider component ready
     }
 

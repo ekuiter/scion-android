@@ -25,7 +25,9 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,12 +59,26 @@ public class MainActivity extends AppCompatActivity {
             configDirectory = savedInstanceState.getString(CONFIG_DIRECTORY);
         getPreferences = getPreferences(MODE_PRIVATE);
         scionButton = findViewById(R.id.scionbutton);
+        Spinner logLevelSpinner = findViewById(R.id.logLevelSpinner);
         scrollView = findViewById(R.id.scrollView);
         logTextView = findViewById(R.id.logTextView);
-        Timber.plant(new Logger.Tree((tag, message) -> runOnUiThread(() -> {
+
+        Logger.Tree tree = new Logger.Tree((tag, message) -> runOnUiThread(() -> {
             logTextView.append(String.format("%s: %s\n", tag, message));
             scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
-        })));
+        }));
+        logLevelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                tree.setLogLevel(Logger.LogLevel.valueOf((String) parent.getItemAtPosition(position)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        Timber.plant(tree);
     }
 
     @Override
