@@ -19,8 +19,6 @@ package org.scionlab.endhost.scion;
 
 import android.content.Context;
 
-import org.scionlab.endhost.Storage;
-
 import java.io.File;
 import java.util.Map;
 import java.util.function.Consumer;

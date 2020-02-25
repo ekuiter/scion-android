@@ -17,8 +17,6 @@
 
 package org.scionlab.endhost.scion;
 
-import org.scionlab.endhost.Storage;
-
 import java.util.regex.Pattern;
 
 import timber.log.Timber;

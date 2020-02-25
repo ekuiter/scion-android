@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.endhost.scion;
 
 import android.content.Context;
 
@@ -66,7 +66,7 @@ public class Storage {
                 .replaceFirst("^INTERNAL/", ""));
     }
 
-    public InputStream getInputStream(String path) {
+    InputStream getInputStream(String path) {
         try {
             return new FileInputStream(getFile(path));
         } catch (FileNotFoundException e) {
@@ -75,18 +75,9 @@ public class Storage {
         }
     }
 
-    public InputStream getEmptyInputStream(String path) {
+    InputStream getEmptyInputStream(String path) {
         createFile(path);
         return getInputStream(path);
-    }
-
-    public OutputStream getOutputStream(String path) {
-        try {
-            return new FileOutputStream(getFile(path));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private String getRelativePath(String path, File file) {
@@ -94,7 +85,7 @@ public class Storage {
         return storage + getFilesDir(context, path).toURI().relativize(file.toURI()).getPath();
     }
 
-    public String getAbsolutePath(String path) {
+    String getAbsolutePath(String path) {
         return getFile(path).getAbsolutePath();
     }
 
@@ -112,11 +103,7 @@ public class Storage {
         }
     }
 
-    public String readFile(String path) {
-        return readFile(getInputStream(path));
-    }
-
-    public String readAssetFile(String path) {
+    String readAssetFile(String path) {
         try {
             return readFile(context.getAssets().open(path));
         } catch (IOException e) {
@@ -125,12 +112,12 @@ public class Storage {
         }
     }
 
-    public void createDirectory(String path) {
+    private void createDirectory(String path) {
         //noinspection ResultOfMethodCallIgnored
         getFile(path).mkdirs();
     }
 
-    public int countFilesInDirectory(File file) {
+    int countFilesInDirectory(File file) {
         int counted = Boolean.compare(file.exists(), false);
         if (file.isDirectory())
             for (File c : Objects.requireNonNull(file.listFiles()))
@@ -166,16 +153,17 @@ public class Storage {
         return copied;
     }
 
-    public void deleteFileOrDirectory(String path) {
+    void deleteFileOrDirectory(String path) {
         File f = getFile(path);
         deleteFileOrDirectory(f);
     }
 
-    public void copyFileOrDirectory(File src, String dstPath) {
+    @SuppressWarnings("SameParameterValue")
+    void copyFileOrDirectory(File src, String dstPath) {
         copyFileOrDirectory(src, getFile(dstPath));
     }
 
-    public void createFile(String path) {
+    private void createFile(String path) {
         File f = getFile(path);
         if (f.getParentFile() != null && !f.getParentFile().exists())
             createDirectory(new File(path).getParent());
@@ -188,16 +176,16 @@ public class Storage {
         }
     }
 
-    public void prepareFile(String path) {
+    void prepareFile(String path) {
         createFile(path);
         deleteFileOrDirectory(path);
     }
 
-    public void prepareFiles(String... paths) {
+    void prepareFiles(String... paths) {
         Stream.of(paths).forEach(this::prepareFile);
     }
 
-    public void writeFile(String path, String content) {
+    void writeFile(String path, String content) {
         deleteFileOrDirectory(path);
         createFile(path);
         try {
@@ -209,7 +197,8 @@ public class Storage {
         }
     }
 
-    public Optional<String> findFirstMatchingFileInDirectory(String path, String regex) {
+    @SuppressWarnings("SameParameterValue")
+    Optional<String> findFirstMatchingFileInDirectory(String path, String regex) {
         final File dir = getFile(path);
         if (!dir.isDirectory())
             return Optional.empty();
