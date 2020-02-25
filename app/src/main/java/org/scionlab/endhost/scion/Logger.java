@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.endhost.scion;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -36,10 +35,10 @@ import java.util.stream.Stream;
 
 import timber.log.Timber;
 
-import static org.scionlab.endhost.Config.Logger.*;
+import static org.scionlab.endhost.scion.Config.Logger.*;
 
 public class Logger {
-    public static class LogThread extends Thread {
+    static class LogThread extends Thread {
         private Consumer<String> outputConsumer;
         private HashMap<Pattern, Runnable> watchPatterns = new HashMap<>();
         private Pattern deletePattern;
@@ -52,12 +51,12 @@ public class Logger {
             this.interval = interval;
         }
 
-        public LogThread setInputStream(InputStream inputStream) {
+        LogThread setInputStream(InputStream inputStream) {
             this.inputStream = inputStream;
             return this;
         }
 
-        public LogThread watchFor(Pattern watchPattern, Runnable watchCallback) {
+        LogThread watchFor(Pattern watchPattern, Runnable watchCallback) {
             this.watchPatterns.put(watchPattern, watchCallback);
             return this;
         }
@@ -116,11 +115,11 @@ public class Logger {
         private LogLevel logLevel = DEFAULT_LOG_LEVEL;
         private int messageLogLevel = DEFAULT_LINE_LOG_LEVEL.getValue();
 
-        Tree(BiConsumer<String, String> outputConsumer) {
+        public Tree(BiConsumer<String, String> outputConsumer) {
             this.outputConsumer = outputConsumer;
         }
 
-        void setLogLevel(LogLevel logLevel) {
+        public void setLogLevel(LogLevel logLevel) {
             this.logLevel = logLevel;
         }
 
@@ -143,12 +142,12 @@ public class Logger {
         }
     }
 
-    public static LogThread createLogThread(String tag) {
+    static LogThread createLogThread(String tag) {
         // log all tailed files and processes as Log.DEBUG
         return new Logger.LogThread(line -> Timber.tag(tag).d(line), DELETE_PATTERN, UPDATE_INTERVAL);
     }
 
-    public static LogThread createLogThread(String tag, InputStream inputStream) {
+    static LogThread createLogThread(String tag, InputStream inputStream) {
         return createLogThread(tag).setInputStream(inputStream);
     }
 }

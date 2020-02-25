@@ -37,6 +37,8 @@ import androidx.core.app.ActivityCompat;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
+import org.scionlab.endhost.scion.Logger;
+
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
@@ -75,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
         Timber.plant(tree);

@@ -17,7 +17,6 @@
 
 package org.scionlab.endhost.scion;
 
-import org.scionlab.endhost.Logger;
 import org.scionlab.endhost.Storage;
 
 import java.util.regex.Pattern;
