@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUserInterface() {
-        if (!MainService.isRunning()) {
+        if (!ScionService.isRunning()) {
             scionButton.setText(R.string.scionbuttonstart);
             scionButton.setOnClickListener(view ->
                     new ChooserDialog(view.getContext())
@@ -137,12 +137,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startScionService(String configDirectory) {
-        startService(new Intent(this, MainService.class)
-                .putExtra(MainService.VERSION, Scion.Version.V0_4_0)
-                .putExtra(MainService.CONFIG_DIRECTORY, configDirectory));
+        startService(new Intent(this, ScionService.class)
+                .putExtra(ScionService.VERSION, Scion.Version.V0_4_0)
+                .putExtra(ScionService.CONFIG_DIRECTORY, configDirectory));
     }
 
     private void stopScionService() {
-        stopService(new Intent(this, MainService.class));
+        stopService(new Intent(this, ScionService.class));
     }
 }

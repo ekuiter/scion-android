@@ -34,11 +34,11 @@ import java.util.stream.Collectors;
 
 import timber.log.Timber;
 
-public class MainService extends Service {
+public class ScionService extends Service {
     private static final int NOTIFICATION_ID  = 1;
-    private static final String NOTIFICATION_CHANNEL = MainService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
-    public static final String VERSION = MainService.class.getCanonicalName() + ".VERSION";
-    public static final String CONFIG_DIRECTORY = MainService.class.getCanonicalName() + ".CONFIG_DIRECTORY";
+    private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
+    public static final String VERSION = ScionService.class.getCanonicalName() + ".VERSION";
+    public static final String CONFIG_DIRECTORY = ScionService.class.getCanonicalName() + ".CONFIG_DIRECTORY";
     private static boolean isRunning = false;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;

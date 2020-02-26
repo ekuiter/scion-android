@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 /**
  * Acts as a central registry for all SCION components (daemon, dispatcher etc.)
- * For each component, exactly one instance may be registered (see MainService).
+ * For each component, exactly one instance may be registered (see Scion).
  */
 class ComponentRegistry {
     private String binaryPath;
