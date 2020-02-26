@@ -33,7 +33,7 @@ class Config {
     }
 
     static class Logger {
-        static final LogLevel DEFAULT_LOG_LEVEL = LogLevel.NONE; // default log level on startup
+        static final LogLevel DEFAULT_LOG_LEVEL = LogLevel.CRIT; // default log level on startup
         static final LogLevel DEFAULT_LINE_LOG_LEVEL = LogLevel.INFO; // log level for lines that do not match
         static final String TRACE_PREFIX = "[TRACE] [DBUG] "; // prefix for lines with the trace log level
         static final String DEBUG_PREFIX = "[DBUG] "; // prefix for lines with the debug log level

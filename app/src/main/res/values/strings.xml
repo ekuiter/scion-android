@@ -12,7 +12,6 @@
     <string name="scmpcreatecert" formatted="true">Created self-signed certificate: %3$s</string>
     <string name="scmpcertexists" formatted="true">Key and certificate already exist: %3$s %4$s</string>
     <string-array name="log_levels">
-        <item>NONE</item>
         <item>CRIT</item>
         <item>ERROR</item>
         <item>WARN</item>

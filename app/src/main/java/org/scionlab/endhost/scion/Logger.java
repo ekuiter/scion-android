@@ -89,8 +89,7 @@ public class Logger {
         INFO(2, INFO_PREFIX),
         WARN(3, WARN_PREFIX),
         ERROR(4, ERROR_PREFIX),
-        CRIT(5, CRIT_PREFIX),
-        NONE(6, null); // displays only log messages from the Android app
+        CRIT(5, CRIT_PREFIX);
 
         private int value;
         private String prefix;
@@ -127,7 +126,7 @@ public class Logger {
             // assuming Log.DEBUG corresponds exactly to the SCION output (see below)
             if (priority == Log.DEBUG && !message.startsWith(SKIP_LINE_PREFIX))
                 messageLogLevel = Stream.of(LogLevel.values())
-                        .filter(e -> e.getPrefix() != null && message.startsWith(e.getPrefix()))
+                        .filter(e -> message.startsWith(e.getPrefix()))
                         .findFirst().map(LogLevel::getValue).orElse(DEFAULT_LINE_LOG_LEVEL.getValue());
 
             // all SCION output is logged as Log.DEBUG, this output is filtered

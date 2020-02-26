@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startScionService(String configDirectory) {
         startService(new Intent(this, ScionService.class)
-                .putExtra(ScionService.VERSION, Scion.Version.V0_4_0)
+                .putExtra(ScionService.VERSION, Scion.Version.SCIONLAB)
                 .putExtra(ScionService.CONFIG_DIRECTORY, configDirectory));
     }
 
