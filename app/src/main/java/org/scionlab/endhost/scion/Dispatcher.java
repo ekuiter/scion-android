@@ -37,8 +37,7 @@ class Dispatcher extends Component {
 
     @Override
     void run() {
-        Process.from(getTag(), storage)
-                .addArgument(BINARY_FLAG)
+        process.addArgument(BINARY_FLAG)
                 .addConfigurationFile(CONFIG_PATH)
                 .run();
     }

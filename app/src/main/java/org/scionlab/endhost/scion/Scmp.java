@@ -72,8 +72,7 @@ class Scmp extends Component {
 
     @Override
     void run() {
-        Process.from(getTag(), storage)
-                .addArgument(BINARY_FLAG)
+        process.addArgument(BINARY_FLAG)
                 .addArgument(ECHO_FLAG)
                 .addArgument(DISPATCHER_SOCKET_FLAG, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH))
                 .addArgument(DAEMON_SOCKET_FLAG, storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH))

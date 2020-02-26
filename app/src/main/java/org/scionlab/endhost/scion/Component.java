@@ -29,6 +29,7 @@ import timber.log.Timber;
 public abstract class Component {
     ComponentRegistry componentRegistry;
     Storage storage;
+    Process process;
     private Thread thread;
     private boolean isReady = false;
 
@@ -84,6 +85,7 @@ public abstract class Component {
 
         timber().i("starting component");
         storage = componentRegistry.getStorage();
+        process = Process.from(getTag(), storage);
 
         if (!prepare()) {
             timber().e("failed to prepare component");
