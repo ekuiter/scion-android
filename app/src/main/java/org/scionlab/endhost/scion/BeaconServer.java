@@ -21,11 +21,6 @@ import static org.scionlab.endhost.scion.Config.BeaconServer.*;
 
 class BeaconServer extends Component {
     @Override
-    protected String getTag() {
-        return "BeaconServer";
-    }
-
-    @Override
     boolean prepare() {
         storage.prepareFiles(TRUST_DATABASE_PATH, BEACON_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(

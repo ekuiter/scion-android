@@ -24,11 +24,6 @@ import static org.scionlab.endhost.scion.Config.Dispatcher.*;
  */
 class Dispatcher extends Component {
     @Override
-    protected String getTag() {
-        return "Dispatcher";
-    }
-
-    @Override
     boolean prepare() {
         storage.prepareFile(SOCKET_PATH);
         storage.writeFile(CONFIG_PATH, String.format(

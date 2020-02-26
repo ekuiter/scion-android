@@ -30,11 +30,6 @@ import static org.scionlab.endhost.scion.Config.Daemon.*;
  */
 class Daemon extends Component {
     @Override
-    protected String getTag() {
-        return "Daemon";
-    }
-
-    @Override
     boolean prepare() {
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
                 Config.Scion.CONFIG_DIRECTORY_PATH, CONFIG_PATH_REGEX);

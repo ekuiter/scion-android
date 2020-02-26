@@ -122,7 +122,9 @@ public abstract class Component {
         thread.interrupt();
     }
 
-    protected abstract String getTag();
+    String getTag() {
+        return getClass().getSimpleName();
+    }
 
     // Override this to implement initialization procedures for a SCION component
     // (such as writing configuration files). This is run in the main thread and

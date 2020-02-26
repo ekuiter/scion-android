@@ -21,11 +21,6 @@ import static org.scionlab.endhost.scion.Config.CertificateServer.*;
 
 class CertificateServer extends Component {
     @Override
-    protected String getTag() {
-        return "CertificateServer";
-    }
-
-    @Override
     boolean prepare() {
         storage.prepareFiles(TRUST_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(

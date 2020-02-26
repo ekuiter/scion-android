@@ -23,11 +23,6 @@ import static org.scionlab.endhost.scion.Config.BorderRouter.*;
 
 class BorderRouter extends Component {
     @Override
-    protected String getTag() {
-        return "BorderRouter";
-    }
-
-    @Override
     boolean prepare() {
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),

@@ -21,11 +21,6 @@ import static org.scionlab.endhost.scion.Config.PathServer.*;
 
 class PathServer extends Component {
     @Override
-    protected String getTag() {
-        return "PathServer";
-    }
-
-    @Override
     boolean prepare() {
         storage.prepareFiles(TRUST_DATABASE_PATH, PATH_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(

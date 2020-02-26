@@ -21,11 +21,6 @@ import static org.scionlab.endhost.scion.Config.Scmp.*;
 
 class Scmp extends Component {
     @Override
-    protected String getTag() {
-        return "Scmp";
-    }
-
-    @Override
     boolean prepare() {
         /*File gencert = mkdir("gen-certs");
         Provider bcProvider = new BouncyCastleProvider();
