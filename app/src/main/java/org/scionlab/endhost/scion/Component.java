@@ -85,7 +85,10 @@ public abstract class Component {
 
         timber().i("starting component");
         storage = componentRegistry.getStorage();
-        process = Process.from(getTag(), storage);
+        String binaryPath = componentRegistry.getBinaryPath();
+        if (binaryPath == null)
+            throw new RuntimeException("no binary path given");
+        process = Process.from(binaryPath, getTag(), storage);
 
         if (!prepare()) {
             timber().e("failed to prepare component");

@@ -41,14 +41,14 @@ import java.util.stream.Stream;
  * however, some security restrictions apply (e.g., Unix sockets must be stored internally).
  * In general, we try to store as much files externally as possible to facilitate debugging.
  */
-public class Storage {
+class Storage {
     private Context context;
 
     private Storage(Context context) {
         this.context = context;
     }
 
-    public static Storage from(Context context) {
+    static Storage from(Context context) {
         return new Storage(context);
     }
 

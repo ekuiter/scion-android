@@ -36,21 +36,23 @@ import static org.scionlab.endhost.scion.Config.Process.*;
  */
 class Process {
     private static String nativeLibraryDir;
+    private String binaryPath;
     private String tag;
     private Storage storage;
     private Logger.LogThread logThread;
     private Map<String, String> environment = new HashMap<>();
     private ArrayList<String> arguments = new ArrayList<>();
 
-    private Process(String tag, Storage storage) {
+    private Process(String binaryPath, String tag, Storage storage) {
+        this.binaryPath = binaryPath;
         this.tag = tag;
         this.storage = storage;
         if (nativeLibraryDir == null)
             throw new RuntimeException("process class must be initialized first");
     }
 
-    static Process from(String tag, Storage storage) {
-        return new Process(tag, storage).setLogThread(Logger.createLogThread(tag));
+    static Process from(String binaryPath, String tag, Storage storage) {
+        return new Process(binaryPath, tag, storage).setLogThread(Logger.createLogThread(tag));
     }
 
     static void initialize(Context context) {
@@ -85,7 +87,7 @@ class Process {
 
     private ProcessBuilder build() {
         ArrayList<String> command = new ArrayList<>();
-        command.add("./" + BINARY_PATH);
+        command.add("./" + binaryPath);
         command.addAll(arguments);
 
         ProcessBuilder processBuilder = new ProcessBuilder()

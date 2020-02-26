@@ -37,6 +37,7 @@ import timber.log.Timber;
 public class MainService extends Service {
     private static final int NOTIFICATION_ID  = 1;
     private static final String NOTIFICATION_CHANNEL = MainService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
+    public static final String VERSION = MainService.class.getCanonicalName() + ".VERSION";
     public static final String CONFIG_DIRECTORY = MainService.class.getCanonicalName() + ".CONFIG_DIRECTORY";
     private static boolean isRunning = false;
     private NotificationManager notificationManager;
@@ -63,13 +64,19 @@ public class MainService extends Service {
         if (intent == null || isRunning)
             return ret;
 
+        final Scion.Version version = (Scion.Version) intent.getSerializableExtra(VERSION);
+        if (version == null) {
+            Timber.e("no SCION version given");
+            return ret;
+        }
+
         final String configDirectory = intent.getStringExtra(CONFIG_DIRECTORY);
         if (configDirectory == null) {
             Timber.e("no daemon configuration directory given");
             return ret;
         }
 
-        if (!scion.start(configDirectory))
+        if (!scion.start(version, configDirectory))
             return ret;
 
         // make this a foreground service, decreasing the probability that Android arbitrarily kills this service

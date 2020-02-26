@@ -38,6 +38,7 @@ import androidx.core.app.ActivityCompat;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
 import org.scionlab.endhost.scion.Logger;
+import org.scionlab.endhost.scion.Scion;
 
 import timber.log.Timber;
 
@@ -125,15 +126,23 @@ public class MainActivity extends AppCompatActivity {
                                             new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                             0
                                     );
-                                    startService(new Intent(this, MainService.class)
-                                            .putExtra(MainService.CONFIG_DIRECTORY, path));
                                     getPreferences.edit().putString(CONFIG_DIRECTORY, path).apply();
+                                    startScionService(configDirectory);
                                 }
                             }).build().show());
         } else {
             scionButton.setText(R.string.scionbuttonstop);
-            scionButton.setOnClickListener(view ->
-                    stopService(new Intent(this, MainService.class)));
+            scionButton.setOnClickListener(view -> stopScionService());
         }
+    }
+
+    private void startScionService(String configDirectory) {
+        startService(new Intent(this, MainService.class)
+                .putExtra(MainService.VERSION, Scion.Version.V0_4_0)
+                .putExtra(MainService.CONFIG_DIRECTORY, configDirectory));
+    }
+
+    private void stopScionService() {
+        stopService(new Intent(this, MainService.class));
     }
 }

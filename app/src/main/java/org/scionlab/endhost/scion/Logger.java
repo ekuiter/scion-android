@@ -94,7 +94,6 @@ public class Logger {
 
         private int value;
         private String prefix;
-        @SuppressLint("UseSparseArrays")
 
         LogLevel(int value, String prefix) {
             this.value = value;

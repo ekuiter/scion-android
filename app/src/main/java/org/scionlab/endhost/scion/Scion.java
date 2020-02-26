@@ -31,13 +31,28 @@ public class Scion {
     private final Storage storage;
     private final ComponentRegistry componentRegistry;
 
+    public enum Version {
+        V0_4_0(V0_4_0_BINARY_PATH),
+        SCIONLAB(SCIONLAB_BINARY_PATH);
+
+        private String binaryPath;
+
+        Version(String binaryPath) {
+            this.binaryPath = binaryPath;
+        }
+
+        public String getBinaryPath() {
+            return binaryPath;
+        }
+    }
+
     public Scion(Context context, Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback) {
         Process.initialize(context);
         storage = Storage.from(context);
         componentRegistry = new ComponentRegistry(storage, componentStateCallback);
     }
 
-    public boolean start(String configDirectory) {
+    public boolean start(Version version, String configDirectory) {
         // copy configuration folder provided by the user
         if (storage.countFilesInDirectory(new File(configDirectory)) > CONFIG_DIRECTORY_FILE_LIMIT) {
             Timber.e("too many files in configuration directory, did you choose the right directory?");
@@ -48,6 +63,7 @@ public class Scion {
 
         Timber.i("starting SCION components");
         componentRegistry
+                .setBinaryPath(version.getBinaryPath())
                 .start(new BeaconServer())
                 .start(new BorderRouter())
                 .start(new CertificateServer())

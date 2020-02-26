@@ -28,6 +28,7 @@ import java.util.stream.Stream;
  * For each component, exactly one instance may be registered (see MainService).
  */
 class ComponentRegistry {
+    private String binaryPath;
     private Storage storage;
     private Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback;
     private ConcurrentHashMap<Class<? extends Component>, Component> components = new ConcurrentHashMap<>();
@@ -39,6 +40,15 @@ class ComponentRegistry {
 
     Storage getStorage() {
         return storage;
+    }
+
+    ComponentRegistry setBinaryPath(String binaryPath) {
+        this.binaryPath = binaryPath;
+        return this;
+    }
+
+    String getBinaryPath() {
+        return binaryPath;
     }
 
     void notifyStateChange() {
