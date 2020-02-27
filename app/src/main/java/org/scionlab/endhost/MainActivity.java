@@ -29,6 +29,7 @@ import android.widget.AdapterView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -127,7 +128,12 @@ public class MainActivity extends AppCompatActivity {
                                             0
                                     );
                                     getPreferences.edit().putString(CONFIG_DIRECTORY, path).apply();
-                                    startScionService(configDirectory);
+                                    VPNPermissionFragment.askPermission(this, (String errorMessage) -> {
+                                        if (errorMessage == null)
+                                            startScionService(configDirectory);
+                                        else
+                                            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+                                    });
                                 }
                             }).build().show());
         } else {

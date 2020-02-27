@@ -23,6 +23,11 @@ import static org.scionlab.endhost.scion.Config.BorderRouter.*;
 
 class BorderRouter extends Component {
     @Override
+    boolean mayRun() {
+        return componentRegistry.isReady(VPNClient.class);
+    }
+
+    @Override
     boolean prepare() {
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
@@ -31,14 +36,15 @@ class BorderRouter extends Component {
                 LOG_LEVEL));
         createLogThread(LOG_PATH, READY_PATTERN)
                 .watchFor(VPN_NOT_READY_PATTERN, () ->
-                        Timber.e("could not start border router, please check VPN connection!"))
+                        Timber.e("could not start border router, please check VPN connection"))
                 .start();
         return true;
     }
 
     @Override
     void run() {
-        process.addArgument(BINARY_FLAG)
+        process.connectToDispatcher()
+                .addArgument(BINARY_FLAG)
                 .addConfigurationFile(CONFIG_PATH)
                 .run();
     }

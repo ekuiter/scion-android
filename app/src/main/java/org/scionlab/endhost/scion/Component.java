@@ -49,10 +49,14 @@ public abstract class Component {
         return Timber.tag(getTag());
     }
 
+    boolean isReady() {
+        return isReady;
+    }
+
     // Is called when the component transitions from STARTING to READY. Should only
     // be called from within run(). Note that a crash of the component should cause
     // run() to exit instead of setting isReady = false;
-    private void setReady() {
+    void setReady() {
         if (!isReady) {
             timber().i("component is ready");
             isReady = true;
@@ -127,14 +131,16 @@ public abstract class Component {
         thread.interrupt();
     }
 
-    String getTag() {
+    private String getTag() {
         return getClass().getSimpleName();
     }
 
     // Override this to implement initialization procedures for a SCION component
     // (such as writing configuration files). This is run in the main thread and
     // as such, will not be interrupted. This will be called right before mayRun().
-    abstract boolean prepare();
+    boolean prepare() {
+        return true;
+    }
 
     // Called before run() to make sure this component may actually be started.
     // Override this to check to check whether other required components are ready.

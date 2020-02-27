@@ -24,6 +24,11 @@ import static org.scionlab.endhost.scion.Config.Dispatcher.*;
  */
 class Dispatcher extends Component {
     @Override
+    boolean mayRun() {
+        return componentRegistry.isReady(VPNClient.class);
+    }
+    
+    @Override
     boolean prepare() {
         storage.prepareFile(SOCKET_PATH);
         storage.writeFile(CONFIG_PATH, String.format(

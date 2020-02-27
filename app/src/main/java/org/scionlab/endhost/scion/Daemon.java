@@ -30,6 +30,11 @@ import static org.scionlab.endhost.scion.Config.Daemon.*;
  */
 class Daemon extends Component {
     @Override
+    boolean mayRun() {
+        return componentRegistry.isReady(VPNClient.class);
+    }
+
+    @Override
     boolean prepare() {
         Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
                 Config.Scion.CONFIG_DIRECTORY_PATH, CONFIG_PATH_REGEX);
@@ -53,7 +58,6 @@ class Daemon extends Component {
                 storage.getAbsolutePath(RELIABLE_SOCKET_PATH),
                 storage.getAbsolutePath(UNIX_SOCKET_PATH)));
         createLogThread(LOG_PATH, READY_PATTERN).start();
-
         return true;
     }
 

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import timber.log.Timber;
@@ -68,6 +69,14 @@ class Process {
 
     private Process setLogThread(Logger.LogThread logThread) {
         this.logThread = logThread;
+        return this;
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    Process watchFor(Pattern watchPattern, Runnable watchCallback) {
+        if (logThread == null)
+            throw new RuntimeException("no log thread given");
+        logThread.watchFor(watchPattern, watchCallback);
         return this;
     }
 

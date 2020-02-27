@@ -17,6 +17,7 @@
 
 package org.scionlab.endhost.scion;
 
+import android.app.Service;
 import android.content.Context;
 
 import java.io.File;
@@ -28,6 +29,7 @@ import timber.log.Timber;
 import static org.scionlab.endhost.scion.Config.Scion.*;
 
 public class Scion {
+    private final Service service;
     private final Storage storage;
     private final ComponentRegistry componentRegistry;
 
@@ -46,9 +48,10 @@ public class Scion {
         }
     }
 
-    public Scion(Context context, Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback) {
-        Process.initialize(context);
-        storage = Storage.from(context);
+    public Scion(Service service, Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback) {
+        this.service = service;
+        Process.initialize(service);
+        storage = Storage.from(service);
         componentRegistry = new ComponentRegistry(storage, componentStateCallback);
     }
 
@@ -64,6 +67,7 @@ public class Scion {
         Timber.i("starting SCION components");
         componentRegistry
                 .setBinaryPath(version.getBinaryPath())
+                .start(new VPNClient(service))
                 .start(new BeaconServer())
                 .start(new BorderRouter())
                 .start(new CertificateServer())

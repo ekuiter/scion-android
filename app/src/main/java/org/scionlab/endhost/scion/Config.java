@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 import static org.scionlab.endhost.scion.Logger.*;
 
-class Config {
+public class Config {
     static class Process {
         static final String CONFIG_FLAG = "-lib_env_config"; // flag that specifies a configuration file
         static final String DISPATCHER_SOCKET_ENV = "DISPATCHER_SOCKET"; // environment variable that specifies the dispatcher socket
@@ -29,7 +29,7 @@ class Config {
 
     static class Component {
         static final int READY_INTERVAL = 250; // how frequently (in ms) to check whether required components are ready
-        static final int READY_RETRIES = 60; // when to give up and stop the component
+        static final int READY_RETRIES = 120; // when to give up and stop the component
     }
 
     static class Logger {
@@ -63,7 +63,7 @@ class Config {
         static final String CONFIG_PATH = "EXTERNAL/config/border_router.toml"; // path to configuration file
         static final String LOG_PATH = "EXTERNAL/logs/border_router.log"; // path to log file created in external storage
         static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
-        static final Pattern READY_PATTERN = Pattern.compile("^.*_TODO_.*$"); // TODO: when encountered, consider component ready
+        static final Pattern READY_PATTERN = Pattern.compile("^.*Registered with dispatcher.*$"); // when encountered, consider component ready
         static final Pattern VPN_NOT_READY_PATTERN = Pattern.compile("^.*bind: cannot assign requested address.*$"); // occurs when VPN connection is not ready
     }
 
@@ -120,6 +120,7 @@ class Config {
         static final String REMOTE_FLAG = "-tools_scmp_cmn_remote"; // flag that specifies the remote address
         static final String DISPATCHER_SOCKET_FLAG = "-tools_scmp_dispatcher"; // flag that specifies the dispatcher socket
         static final String DAEMON_SOCKET_FLAG = "-tools_scmp_sciond"; // flag that specifies the daemon socket
+        static final Pattern READY_PATTERN = Pattern.compile("^.*bytes from.*$"); // when encountered, consider component ready
     }
 
     static class Scion {
@@ -127,5 +128,13 @@ class Config {
         static final String SCIONLAB_BINARY_PATH = "libscion-scionlab.so"; // same for the scionlab fork of SCION
         static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config/imported"; // path to configuration directory created in external storage
         static final int CONFIG_DIRECTORY_FILE_LIMIT = 50; // number of files allowed in imported directory (failsafe if the user chooses wrong)
+    }
+
+    public static class VPNClient {
+        public static final String PACKAGE_NAME = "de.blinkt.openvpn"; // package name of OpenVPN application
+        static final int CRASH_INTERVAL = 1000; // how frequently (in ms) to check whether OpenVPN has crashed
+        static final String NOPROCESS_STATE = "NOPROCESS"; // state of OpenVPN application when no process is running
+        static final String VPN_GENERATE_CONFIG = "VPN_GENERATE_CONFIG"; // state of OpenVPN application when VPN configuration is generated
+        static final String CONNECTED_STATE = "CONNECTED"; // OpenVPN connected state (see https://openvpn.net/community-resources/management-interface/)
     }
 }

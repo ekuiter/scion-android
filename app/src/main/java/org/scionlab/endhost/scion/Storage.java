@@ -103,6 +103,10 @@ class Storage {
         }
     }
 
+    String readFile(String path) {
+        return readFile(getInputStream(path));
+    }
+
     String readAssetFile(String path) {
         try {
             return readFile(context.getAssets().open(path));
