@@ -99,7 +99,7 @@ public class Config {
         static final String LOG_PATH = "EXTERNAL/logs/dispatcher.log"; // path to log file
         static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
         static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
-        static final Pattern READY_PATTERN = Pattern.compile("^.*Accepted new client.*$"); // when encountered, consider component ready
+        static final Pattern READY_PATTERN = Pattern.compile("^.*Dispatcher starting.*$"); // when encountered, consider component ready
     }
 
     static class PathServer {

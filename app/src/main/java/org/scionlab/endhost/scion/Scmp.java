@@ -22,7 +22,9 @@ import static org.scionlab.endhost.scion.Config.Scmp.*;
 class Scmp extends Component {
     @Override
     boolean mayRun() {
-        return componentRegistry.isReady(VPNClient.class, Dispatcher.class, Daemon.class);
+        return componentRegistry.isReady(Dispatcher.class, VPNClient.class,
+                BeaconServer.class, BorderRouter.class, CertificateServer.class,
+                Daemon.class, PathServer.class);
     }
 
     @Override

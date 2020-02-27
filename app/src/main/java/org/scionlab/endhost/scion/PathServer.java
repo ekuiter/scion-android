@@ -22,7 +22,7 @@ import static org.scionlab.endhost.scion.Config.PathServer.*;
 class PathServer extends Component {
     @Override
     boolean mayRun() {
-        return componentRegistry.isReady(VPNClient.class);
+        return componentRegistry.isReady(Dispatcher.class);
     }
 
     @Override

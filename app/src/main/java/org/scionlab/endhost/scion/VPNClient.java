@@ -56,12 +56,15 @@ class VPNClient extends Component {
                 switch (state) {
                     case NOPROCESS_STATE:
                         if (isReady()) {
-                            // TODO: stop SCION
-                            Timber.e("VPN client stopped by user, SCION may stop working");
+                            Timber.e("VPN client stopped by user");
                             shouldCrash = true;
                         }
                         break;
                     case VPN_GENERATE_CONFIG:
+                        if (restarted) {
+                            Timber.e("VPN client restarted by user");
+                            shouldCrash = true;
+                        }
                         restarted = true;
                         break;
                     case CONNECTED_STATE:

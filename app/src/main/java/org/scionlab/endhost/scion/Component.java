@@ -31,7 +31,7 @@ public abstract class Component {
     Storage storage;
     Process process;
     private Thread thread;
-    private boolean isReady = false;
+    private boolean doneWaiting = false, isReady = false;
 
     public enum State {
         STOPPED, STARTING, READY
@@ -65,7 +65,6 @@ public abstract class Component {
         }
     }
 
-
     State getState() {
         if (!isRunning())
             return State.STOPPED;
@@ -76,6 +75,11 @@ public abstract class Component {
         storage.prepareFile(logPath);
         return Logger.createLogThread(getTag(), storage.getEmptyInputStream(logPath))
                 .watchFor(readyPattern, this::setReady);
+    }
+
+    void notifyStateChange() {
+        if (doneWaiting && !mayRun())
+            stop();
     }
 
     void start() {
@@ -109,6 +113,7 @@ public abstract class Component {
                 }
                 if (retries > 0)
                     timber().i("done waiting for component");
+                doneWaiting = true;
                 if (mayRun())
                     run();
             } catch (InterruptedException ignored) {
@@ -142,7 +147,7 @@ public abstract class Component {
         return true;
     }
 
-    // Called before run() to make sure this component may actually be started.
+    // Called before/while run() to make sure this component may actually be running.
     // Override this to check to check whether other required components are ready.
     boolean mayRun() {
         return true;

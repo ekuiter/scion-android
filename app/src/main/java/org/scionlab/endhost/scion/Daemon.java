@@ -31,7 +31,7 @@ import static org.scionlab.endhost.scion.Config.Daemon.*;
 class Daemon extends Component {
     @Override
     boolean mayRun() {
-        return componentRegistry.isReady(VPNClient.class);
+        return componentRegistry.isReady(Dispatcher.class);
     }
 
     @Override

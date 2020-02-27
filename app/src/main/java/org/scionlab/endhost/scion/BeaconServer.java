@@ -22,7 +22,7 @@ import static org.scionlab.endhost.scion.Config.BeaconServer.*;
 class BeaconServer extends Component {
     @Override
     boolean mayRun() {
-        return componentRegistry.isReady(VPNClient.class);
+        return componentRegistry.isReady(Dispatcher.class);
     }
 
     @Override

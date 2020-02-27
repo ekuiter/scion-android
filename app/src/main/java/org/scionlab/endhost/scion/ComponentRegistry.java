@@ -52,6 +52,7 @@ class ComponentRegistry {
     }
 
     void notifyStateChange() {
+        components.values().forEach(Component::notifyStateChange);
         componentStateCallback.accept(components.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getState())));
     }
