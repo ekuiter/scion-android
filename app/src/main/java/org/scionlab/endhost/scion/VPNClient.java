@@ -102,8 +102,7 @@ class VPNClient extends Component {
             service.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
             while (!shouldCrash)
                 Thread.sleep(CRASH_INTERVAL);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ignored) {
         }
 
         if (shouldCrash)
@@ -117,6 +116,10 @@ class VPNClient extends Component {
                 Timber.e(e);
             }
         }
-        service.unbindService(serviceConnection);
+
+        try {
+            service.unbindService(serviceConnection);
+        } catch (IllegalArgumentException ignored) {
+        }
     }
 }

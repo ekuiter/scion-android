@@ -103,6 +103,7 @@ class Storage {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     String readFile(String path) {
         return readFile(getInputStream(path));
     }

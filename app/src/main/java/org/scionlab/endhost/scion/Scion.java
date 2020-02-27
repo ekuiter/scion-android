@@ -18,7 +18,6 @@
 package org.scionlab.endhost.scion;
 
 import android.app.Service;
-import android.content.Context;
 
 import java.io.File;
 import java.util.Map;

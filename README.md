@@ -22,7 +22,6 @@ This software uses the following libraries:
 - [AndroidX](https://developer.android.com/jetpack/androidx), used under the conditions of the [Apache License, Version 2.0](https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/LICENSE.txt)
 - [Material Components for Android](https://material.io/develop/android/), used under the conditions of the [Apache License, Version 2.0](https://github.com/material-components/material-components-android/blob/master/LICENSE)
 - [android-file-chooser](https://github.com/hedzr/android-file-chooser), used under the conditions of the [Apache License, Version 2.0](https://github.com/hedzr/android-file-chooser/blob/master/LICENSE)
-- [Spongy Castle](https://rtyley.github.io/spongycastle/), used under the conditions of [their adaptation of the MIT X11 License](https://github.com/rtyley/spongycastle/blob/spongy-master/LICENSE.html)
 - [toml4j](https://github.com/mwanji/toml4j), used under the conditions of [The MIT License](https://github.com/mwanji/toml4j/blob/master/LICENSE)
 - [Timber](https://github.com/JakeWharton/timber), used under the conditions of the [Apache License, Version 2.0](https://github.com/JakeWharton/timber/blob/master/LICENSE.txt)
 - [OpenVPN for Android](https://github.com/schwabe/ics-openvpn/), used under the conditions of the [GNU General Public License, Version 2.0](https://github.com/schwabe/ics-openvpn/blob/master/doc/LICENSE.txt)

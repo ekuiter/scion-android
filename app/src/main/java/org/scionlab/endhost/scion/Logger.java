@@ -17,7 +17,6 @@
 
 package org.scionlab.endhost.scion;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
 
 import androidx.annotation.NonNull;

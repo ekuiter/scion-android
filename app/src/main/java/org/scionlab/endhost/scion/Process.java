@@ -141,7 +141,7 @@ class Process {
             // block until the process dies or the current thread is interrupted, in which case we kill the process
             try {
                 ret = process.waitFor();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
                 timber().i("thread was interrupted, stopping SCION process");
                 process.destroy();
                 ret = -1;
