@@ -1,0 +1,80 @@
+{
+  "BeaconService": {
+    "beacon_server": {
+      "Addrs": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.1",
+            "L4Port": 31041
+          }
+        }
+      }
+    }
+  },
+  "BorderRouters": {
+    "border_router": {
+      "CtrlAddr": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.1",
+            "L4Port": 30045
+          }
+        }
+      },
+      "Interfaces": {
+        "1": {
+          "Bandwidth": 1000,
+          "ISD_AS": "%s",
+          "LinkTo": "PARENT",
+          "MTU": 1472,
+          "Overlay": "UDP/IPv4",
+          "PublicOverlay": {
+            "Addr": "%s",
+            "OverlayPort": %d
+          },
+          "RemoteOverlay": {
+            "Addr": "%s",
+            "OverlayPort": %d
+          }
+        }
+      },
+      "InternalAddrs": {
+        "IPv4": {
+          "PublicOverlay": {
+            "Addr": "127.0.0.1",
+            "OverlayPort": 31045
+          }
+        }
+      }
+    }
+  },
+  "CertificateService": {
+    "certificate_server": {
+      "Addrs": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.1",
+            "L4Port": 31042
+          }
+        }
+      }
+    }
+  },
+  "Core": false,
+  "Discovery": {},
+  "ISD_AS": "%s",
+  "MTU": 1472,
+  "Overlay": "UDP/IPv4",
+  "PathService": {
+    "path_server": {
+      "Addrs": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.1",
+            "L4Port": 31043
+          }
+        }
+      }
+    }
+  }
+}

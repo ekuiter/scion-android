@@ -33,16 +33,17 @@ import static org.scionlab.endhost.scion.Config.VPNClient.*;
 
 class VPNClient extends Component {
     private Service service;
+    private String config;
     private IOpenVPNAPIService openVPNAPIService;
     private boolean shouldCrash, restarted;
 
-    VPNClient(Service service) {
+    VPNClient(Service service, String config) {
         this.service = service;
+        this.config = config;
     }
 
     @Override
     void run() {
-        String config = storage.readFile(Config.Scion.CONFIG_DIRECTORY_PATH + "/client.conf");
         Intent intent = new Intent(IOpenVPNAPIService.class.getName()).setPackage(PACKAGE_NAME);
 
         IOpenVPNStatusCallback openVPNStatusCallback = new IOpenVPNStatusCallback.Stub() {

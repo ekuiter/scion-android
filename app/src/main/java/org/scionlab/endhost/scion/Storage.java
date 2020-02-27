@@ -66,13 +66,17 @@ class Storage {
                 .replaceFirst("^INTERNAL/", ""));
     }
 
-    InputStream getInputStream(String path) {
+    private InputStream getInputStream(File file) {
         try {
-            return new FileInputStream(getFile(path));
+            return new FileInputStream(file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    InputStream getInputStream(String path) {
+        return getInputStream(getFile(path));
     }
 
     InputStream getEmptyInputStream(String path) {
@@ -103,9 +107,12 @@ class Storage {
         }
     }
 
-    @SuppressWarnings("SameParameterValue")
     String readFile(String path) {
         return readFile(getInputStream(path));
+    }
+
+    String readFile(File file) {
+        return readFile(getInputStream(file));
     }
 
     String readAssetFile(String path) {
@@ -117,7 +124,7 @@ class Storage {
         }
     }
 
-    private void createDirectory(String path) {
+    void createDirectory(String path) {
         //noinspection ResultOfMethodCallIgnored
         getFile(path).mkdirs();
     }
@@ -163,9 +170,12 @@ class Storage {
         deleteFileOrDirectory(f);
     }
 
-    @SuppressWarnings("SameParameterValue")
     void copyFileOrDirectory(File src, String dstPath) {
         copyFileOrDirectory(src, getFile(dstPath));
+    }
+
+    void copyFileOrDirectory(String path, String dstPath) {
+        copyFileOrDirectory(getFile(path), dstPath);
     }
 
     private void createFile(String path) {
@@ -202,16 +212,20 @@ class Storage {
         }
     }
 
-    @SuppressWarnings("SameParameterValue")
-    Optional<String> findFirstMatchingFileInDirectory(String path, String regex) {
+    Optional<String> findInDirectory(String path, String regex) {
         final File dir = getFile(path);
         if (!dir.isDirectory())
             return Optional.empty();
 
         for (final File child : Objects.requireNonNull(dir.listFiles()))
-            if (child.isFile() && child.getName().matches(regex))
+            if (child.getName().matches(regex))
                 return Optional.of(getRelativePath(path, child));
 
         return Optional.empty();
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    Optional<String> findInDirectory(Optional<String> path, String regex) {
+        return path.flatMap(p -> findInDirectory(p, regex));
     }
 }

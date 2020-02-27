@@ -81,8 +81,6 @@ public class Config {
         static final String BINARY_FLAG = "sciond"; // value of binary's first argument to run the daemon
         static final String CONFIG_TEMPLATE_PATH = "daemon.toml"; // path to configuration file template, located in assets folder
         static final String CONFIG_PATH = "EXTERNAL/config/daemon.toml"; // path to configuration file
-        static final String CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for configuration file located in configuration directory
-        static final String CONFIG_PUBLIC_TOML_PATH = "sd.Public"; // TOML path for public address read from configuration file
         static final String LOG_PATH = "EXTERNAL/logs/daemon.log"; // path to log file created in external storage
         static final String RELIABLE_SOCKET_PATH = "INTERNAL/daemon.reliable.sock"; // path to reliable socket created in internal storage
         static final String UNIX_SOCKET_PATH = "INTERNAL/daemon.unix.sock"; // path to UNIX socket created in internal storage
@@ -127,8 +125,29 @@ public class Config {
     static class Scion {
         static final String V0_4_0_BINARY_PATH = "libscion-v0.4.0.so"; // file name of SCION v0.4.0 binary located in jniLabs subdirectories
         static final String SCIONLAB_BINARY_PATH = "libscion-scionlab.so"; // same for the scionlab fork of SCION
-        static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config/imported"; // path to configuration directory created in external storage
-        static final int CONFIG_DIRECTORY_FILE_LIMIT = 50; // number of files allowed in imported directory (failsafe if the user chooses wrong)
+        static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config"; // path to config directory where all configuration files are stored
+        static final String GEN_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/gen"; // path to gen directory created in external storage
+        static final String CERTS_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/certs"; // path to certs directory created in external storage
+        static final String KEYS_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/keys"; // path to keys directory created in external storage
+        static final String TOPOLOGY_PATH = CONFIG_DIRECTORY_PATH + "/topology.json"; // path to topology file created in external storage
+        static final String TOPOLOGY_TEMPLATE_PATH = "topology.json"; // path to topology file template, located in assets folder
+        static final int GEN_DIRECTORY_FILE_LIMIT = 100; // number of files allowed in imported directory (failsafe if the user chooses wrong)
+        static final String ISD_DIRECTORY_PATH_REGEX = "^ISD.*$"; // regex for ISD directory
+        static final String AS_DIRECTORY_PATH_REGEX = "^AS.*$"; // regex for AS directory
+        static final String COMPONENT_DIRECTORY_PATH_REGEX = "^br.*$"; // regex for a component directory including certs, keys, and topology.json
+        static final String ENDHOST_DIRECTORY_PATH_REGEX = "^endhost$"; // regex for the endhost directory including the daemon configuration file
+        static final String CERTS_DIRECTORY_PATH_REGEX = "^certs$"; // regex for the certs directory
+        static final String KEYS_DIRECTORY_PATH_REGEX = "^keys$"; // regex for the keys directory
+        static final String TOPOLOGY_PATH_REGEX = "^topology\\.json$"; // regex for the topology file
+        static final String DAEMON_CONFIG_PATH_REGEX = "^s.*d\\.toml$"; // regex for the daemon configuration file
+        static final String DAEMON_CONFIG_PUBLIC_TOML_PATH = "sd.Public"; // TOML path for public address read from daemon configuration file
+        static final String BORDER_ROUTERS_JSON_PATH = "BorderRouters"; // JSON path for border routers object in topology file
+        static final String INTERFACES_JSON_PATH = "Interfaces"; // JSON path for interfaces object in topology file
+        static final String IA_JSON_PATH = "ISD_AS"; // JSON path for IA string in topology file
+        static final String PUBLIC_OVERLAY_JSON_PATH = "PublicOverlay"; // JSON path for public overlay object in topology file
+        static final String REMOTE_OVERLAY_JSON_PATH = "RemoteOverlay"; // JSON path for public overlay object in topology file
+        static final String OVERLAY_ADDR_JSON_PATH = "Addr"; // JSON path for overlay address string in topology file
+        static final String OVERLAY_PORT_JSON_PATH = "OverlayPort"; // JSON path for overlay port integer object in topology file
     }
 
     public static class VPNClient {

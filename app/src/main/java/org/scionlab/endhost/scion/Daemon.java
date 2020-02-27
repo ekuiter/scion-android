@@ -29,6 +29,12 @@ import static org.scionlab.endhost.scion.Config.Daemon.*;
  * Performs requests to the SCION network and acts as an endhost.
  */
 class Daemon extends Component {
+    private String publicAddress;
+
+    Daemon(String publicAddress) {
+        this.publicAddress = publicAddress;
+    }
+
     @Override
     Class[] dependsOn() {
         return new Class[]{Dispatcher.class};
@@ -36,16 +42,6 @@ class Daemon extends Component {
 
     @Override
     boolean prepare() {
-        Optional<String> _configPath = storage.findFirstMatchingFileInDirectory(
-                Config.Scion.CONFIG_DIRECTORY_PATH, CONFIG_PATH_REGEX);
-        if (!_configPath.isPresent()) {
-            Timber.e("could not find SCION daemon configuration file sciond.toml or sd.toml");
-            return false;
-        }
-        String publicAddress = new Toml().read(storage.getInputStream(_configPath.get())).getString(CONFIG_PUBLIC_TOML_PATH);
-        // TODO: for now, we assume the topology file is present at the correct location and has the right values
-        // TODO: import certs and keys directories
-
         storage.prepareFiles(RELIABLE_SOCKET_PATH, UNIX_SOCKET_PATH, TRUST_DATABASE_PATH, PATH_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),

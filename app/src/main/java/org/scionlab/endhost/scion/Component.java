@@ -27,7 +27,7 @@ import timber.log.Timber;
  * This serves the same purpose as the SCION services in /lib/systemd/system on Linux.
  */
 abstract class Component {
-    ComponentRegistry componentRegistry;
+    private ComponentRegistry componentRegistry;
     Storage storage;
     Process process;
     private Thread thread;
@@ -60,9 +60,13 @@ abstract class Component {
         if (!isReady) {
             timber().i("component is ready");
             isReady = true;
-            if (componentRegistry != null)
-                componentRegistry.notifyStateChange();
         }
+        notifyStateChange();
+    }
+
+    synchronized void notifyStateChange() {
+        if (componentRegistry != null)
+            componentRegistry.notifyStateChange();
     }
 
     State getState() {
@@ -88,7 +92,7 @@ abstract class Component {
                 .watchFor(readyPattern, this::setReady);
     }
 
-    synchronized void notifyStateChange() {
+    synchronized void stateHasChanged() {
         if (doneWaiting && !mayRun())
             stop();
     }
@@ -159,7 +163,7 @@ abstract class Component {
     }
 
     // Called before/while run() to make sure this component may actually be running.
-    boolean mayRun() {
+    private boolean mayRun() {
         if (componentRegistry == null)
             return false;
         return componentRegistry.isReady(dependsOn());

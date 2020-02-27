@@ -41,7 +41,7 @@ public class ScionService extends Service {
     private static final int NOTIFICATION_ID  = 1;
     private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
     public static final String VERSION = ScionService.class.getCanonicalName() + ".VERSION";
-    public static final String CONFIG_DIRECTORY = ScionService.class.getCanonicalName() + ".CONFIG_DIRECTORY";
+    public static final String GEN_DIRECTORY = ScionService.class.getCanonicalName() + ".GEN_DIRECTORY";
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
     private Handler handler;
@@ -82,16 +82,16 @@ public class ScionService extends Service {
             return ret;
         }
 
-        final String configDirectory = intent.getStringExtra(CONFIG_DIRECTORY);
-        if (configDirectory == null) {
-            Timber.e("no daemon configuration directory given");
+        final String genDirectory = intent.getStringExtra(GEN_DIRECTORY);
+        if (genDirectory == null) {
+            Timber.e("no gen directory given");
             return ret;
         }
 
         handler.post(() -> {
             // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
             startForeground(NOTIFICATION_ID, notificationBuilder.build());
-            scion.start(version, configDirectory);
+            scion.start(version, genDirectory, genDirectory + "/client.conf"); // TODO
         });
 
         return ret;
