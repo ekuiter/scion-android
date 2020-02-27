@@ -21,8 +21,8 @@ import static org.scionlab.endhost.scion.Config.BeaconServer.*;
 
 class BeaconServer extends Component {
     @Override
-    boolean mayRun() {
-        return componentRegistry.isReady(Dispatcher.class);
+    Class[] dependsOn() {
+        return new Class[]{Dispatcher.class};
     }
 
     @Override

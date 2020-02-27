@@ -46,6 +46,7 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity {
     private static final String CONFIG_DIRECTORY = MainActivity.class.getCanonicalName() + ".CONFIG_DIRECTORY";
     public static final String UPDATE_USER_INTERFACE = MainActivity.class.getCanonicalName() + ".UPDATE_USER_INTERFACE";
+    public static final String SCION_STATE = MainActivity.class.getCanonicalName() + ".SCION_STATE";
 
     private SharedPreferences getPreferences;
     private BroadcastReceiver updateUserInterfaceReceiver;
@@ -90,11 +91,11 @@ public class MainActivity extends AppCompatActivity {
         updateUserInterfaceReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateUserInterface();
+                updateUserInterface((Scion.State) intent.getSerializableExtra(SCION_STATE));
             }
         };
         registerReceiver(updateUserInterfaceReceiver, new IntentFilter(UPDATE_USER_INTERFACE));
-        updateUserInterface();
+        updateUserInterface(ScionService.getState());
     }
 
     @Override
@@ -110,8 +111,11 @@ public class MainActivity extends AppCompatActivity {
             outState.putString(CONFIG_DIRECTORY, configDirectory);
     }
 
-    private void updateUserInterface() {
-        if (!ScionService.isRunning()) {
+    private void updateUserInterface(Scion.State state) {
+        if (state == null)
+            state = Scion.State.STOPPED;
+
+        if (state == Scion.State.STOPPED) {
             scionButton.setText(R.string.scionbuttonstart);
             scionButton.setOnClickListener(view ->
                     new ChooserDialog(view.getContext())

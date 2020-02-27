@@ -21,6 +21,7 @@ import android.app.Service;
 
 import java.io.File;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import timber.log.Timber;
@@ -31,6 +32,11 @@ public class Scion {
     private final Service service;
     private final Storage storage;
     private final ComponentRegistry componentRegistry;
+    private Scmp scmp;
+
+    public enum State {
+        STOPPED, STARTING, HEALTHY, UNHEALTHY
+    }
 
     public enum Version {
         V0_4_0(V0_4_0_BINARY_PATH),
@@ -47,18 +53,20 @@ public class Scion {
         }
     }
 
-    public Scion(Service service, Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback) {
+    public Scion(Service service, BiConsumer<State, Map<String, Scion.State>> stateCallback) {
         this.service = service;
         Process.initialize(service);
         storage = Storage.from(service);
-        componentRegistry = new ComponentRegistry(storage, componentStateCallback);
+        componentRegistry = new ComponentRegistry(storage,
+                (Map<String, Scion.State> componentState) ->
+                        stateCallback.accept(getState(), componentState));
     }
 
-    public boolean start(Version version, String configDirectory) {
+    public void start(Version version, String configDirectory) {
         // copy configuration folder provided by the user
         if (storage.countFilesInDirectory(new File(configDirectory)) > CONFIG_DIRECTORY_FILE_LIMIT) {
             Timber.e("too many files in configuration directory, did you choose the right directory?");
-            return false;
+            return;
         }
         storage.deleteFileOrDirectory(CONFIG_DIRECTORY_PATH);
         storage.copyFileOrDirectory(new File(configDirectory), CONFIG_DIRECTORY_PATH);
@@ -73,13 +81,23 @@ public class Scion {
                 .start(new Dispatcher())
                 .start(new Daemon())
                 .start(new PathServer())
-                .start(new Scmp());
-
-        return true;
+                .start(scmp = new Scmp())
+                .notifyStateChange();
     }
 
     public void stop() {
         Timber.i("stopping SCION components");
-        componentRegistry.stopAll();
+        componentRegistry.stopAll().notifyStateChange();
+        scmp = null;
+    }
+
+    public State getState() {
+        if (!componentRegistry.hasRegisteredComponents())
+            return State.STOPPED;
+        if (componentRegistry.hasStartingComponents())
+            return State.STARTING;
+        if (scmp != null && scmp.isHealthy())
+            return State.HEALTHY;
+        return State.UNHEALTHY;
     }
 }

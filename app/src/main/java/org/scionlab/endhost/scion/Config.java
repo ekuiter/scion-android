@@ -121,6 +121,7 @@ public class Config {
         static final String DISPATCHER_SOCKET_FLAG = "-tools_scmp_dispatcher"; // flag that specifies the dispatcher socket
         static final String DAEMON_SOCKET_FLAG = "-tools_scmp_sciond"; // flag that specifies the daemon socket
         static final Pattern READY_PATTERN = Pattern.compile("^.*bytes from.*$"); // when encountered, consider component ready
+        static final long HEALTH_TIMEOUT = 2000; // how long the component is considered healthy after the last received ping
     }
 
     static class Scion {

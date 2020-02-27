@@ -30,8 +30,8 @@ import static org.scionlab.endhost.scion.Config.Daemon.*;
  */
 class Daemon extends Component {
     @Override
-    boolean mayRun() {
-        return componentRegistry.isReady(Dispatcher.class);
+    Class[] dependsOn() {
+        return new Class[]{Dispatcher.class};
     }
 
     @Override

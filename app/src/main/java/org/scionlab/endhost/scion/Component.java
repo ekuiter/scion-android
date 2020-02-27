@@ -26,14 +26,14 @@ import timber.log.Timber;
  * and have a state that usually transitions from STOPPED to STARTING and then READY.
  * This serves the same purpose as the SCION services in /lib/systemd/system on Linux.
  */
-public abstract class Component {
+abstract class Component {
     ComponentRegistry componentRegistry;
     Storage storage;
     Process process;
     private Thread thread;
     private boolean doneWaiting = false, isReady = false;
 
-    public enum State {
+    enum State {
         STOPPED, STARTING, READY
     }
 
@@ -49,14 +49,14 @@ public abstract class Component {
         return Timber.tag(getTag());
     }
 
-    boolean isReady() {
-        return isReady;
+    boolean isHealthy() {
+        return getState() == State.READY;
     }
 
     // Is called when the component transitions from STARTING to READY. Should only
     // be called from within run(). Note that a crash of the component should cause
     // run() to exit instead of setting isReady = false;
-    void setReady() {
+    synchronized void setReady() {
         if (!isReady) {
             timber().i("component is ready");
             isReady = true;
@@ -71,18 +71,29 @@ public abstract class Component {
         return isReady ? State.READY : State.STARTING;
     }
 
+    Scion.State getScionState() {
+        switch (getState()) {
+            case STOPPED:
+                return Scion.State.STOPPED;
+            case STARTING:
+                return Scion.State.STARTING;
+            default:
+                return isHealthy() ? Scion.State.HEALTHY : Scion.State.UNHEALTHY;
+        }
+    }
+
     Logger.LogThread createLogThread(String logPath, Pattern readyPattern) {
         storage.prepareFile(logPath);
         return Logger.createLogThread(getTag(), storage.getEmptyInputStream(logPath))
                 .watchFor(readyPattern, this::setReady);
     }
 
-    void notifyStateChange() {
+    synchronized void notifyStateChange() {
         if (doneWaiting && !mayRun())
             stop();
     }
 
-    void start() {
+    synchronized void start() {
         if (thread != null)
             return;
 
@@ -128,7 +139,7 @@ public abstract class Component {
         componentRegistry.notifyStateChange();
     }
 
-    void stop() {
+    synchronized void stop() {
         if (thread == null)
             return;
 
@@ -148,9 +159,15 @@ public abstract class Component {
     }
 
     // Called before/while run() to make sure this component may actually be running.
-    // Override this to check to check whether other required components are ready.
     boolean mayRun() {
-        return true;
+        if (componentRegistry == null)
+            return false;
+        return componentRegistry.isReady(dependsOn());
+    }
+
+    // Override this to check to define  which other components are required.
+    Class[] dependsOn() {
+        return new Class[]{};
     }
 
     // Rverride this to run the actual (long-running) SCION process - everything

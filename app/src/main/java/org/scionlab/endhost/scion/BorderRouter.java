@@ -23,8 +23,8 @@ import static org.scionlab.endhost.scion.Config.BorderRouter.*;
 
 class BorderRouter extends Component {
     @Override
-    boolean mayRun() {
-        return componentRegistry.isReady(Dispatcher.class, VPNClient.class);
+    Class[] dependsOn() {
+        return new Class[]{Dispatcher.class, VPNClient.class};
     }
 
     @Override

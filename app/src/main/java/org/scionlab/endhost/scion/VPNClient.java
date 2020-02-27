@@ -55,7 +55,7 @@ class VPNClient extends Component {
 
                 switch (state) {
                     case NOPROCESS_STATE:
-                        if (isReady()) {
+                        if (getState() == State.READY) {
                             Timber.e("VPN client stopped by user");
                             shouldCrash = true;
                         }

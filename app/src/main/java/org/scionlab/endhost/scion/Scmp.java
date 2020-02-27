@@ -17,25 +17,37 @@
 
 package org.scionlab.endhost.scion;
 
+import timber.log.Timber;
+
 import static org.scionlab.endhost.scion.Config.Scmp.*;
 
 class Scmp extends Component {
+    private long lastPingReceived;
+
     @Override
-    boolean mayRun() {
-        return componentRegistry.isReady(Dispatcher.class, VPNClient.class,
+    Class[] dependsOn() {
+        return new Class[]{Dispatcher.class, VPNClient.class,
                 BeaconServer.class, BorderRouter.class, CertificateServer.class,
-                Daemon.class, PathServer.class);
+                Daemon.class, PathServer.class};
     }
 
     @Override
     void run() {
-        process.watchFor(READY_PATTERN, this::setReady)
-                .addArgument(BINARY_FLAG)
+        process.addArgument(BINARY_FLAG)
                 .addArgument(ECHO_FLAG)
                 .addArgument(DISPATCHER_SOCKET_FLAG, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH))
                 .addArgument(DAEMON_SOCKET_FLAG, storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH))
                 .addArgument(LOCAL_FLAG, "19-ffaa:1:cf4,[192.168.0.123]")
                 .addArgument(REMOTE_FLAG, "19-ffaa:0:1301,[0.0.0.0]")
+                .watchFor(READY_PATTERN, () -> {
+                    lastPingReceived = System.currentTimeMillis();
+                    setReady();
+                })
                 .run();
+    }
+
+    @Override
+    boolean isHealthy() {
+        return getState() == State.READY && System.currentTimeMillis() - lastPingReceived <= HEALTH_TIMEOUT;
     }
 }

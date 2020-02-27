@@ -24,7 +24,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 
 import androidx.core.app.NotificationCompat;
 
@@ -39,29 +42,38 @@ public class ScionService extends Service {
     private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
     public static final String VERSION = ScionService.class.getCanonicalName() + ".VERSION";
     public static final String CONFIG_DIRECTORY = ScionService.class.getCanonicalName() + ".CONFIG_DIRECTORY";
-    private static boolean isRunning = false;
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
+    private Handler handler;
     private Scion scion;
+    private static Scion.State state;
 
-    public static boolean isRunning() {
-        return isRunning;
+    public static Scion.State getState() {
+        return state;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         setupNotification();
-        scion = new Scion(this, componentState ->
-                notify(componentState.entrySet().stream()
-                        .map(e -> e.getKey().getSimpleName() + ": " + e.getValue())
-                        .collect(Collectors.joining("\n"))));
+        HandlerThread handlerThread = new HandlerThread("ScionService");
+        handlerThread.start();
+        Looper looper = handlerThread.getLooper();
+        handler = new Handler(looper);
+        scion = new Scion(this, (state, componentState) -> {
+            ScionService.state = state;
+            updateUserInterface(state);
+            notify(state, "SCION: " + state + "\n" +
+                    componentState.entrySet().stream()
+                            .map(e -> e.getKey() + ": " + e.getValue())
+                            .collect(Collectors.joining("\n")));
+        });
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int ret = super.onStartCommand(intent, flags, startId);
-        if (intent == null || isRunning)
+        if (intent == null || scion.getState() != Scion.State.STOPPED)
             return ret;
 
         final Scion.Version version = (Scion.Version) intent.getSerializableExtra(VERSION);
@@ -76,25 +88,24 @@ public class ScionService extends Service {
             return ret;
         }
 
-        if (!scion.start(version, configDirectory))
-            return ret;
+        handler.post(() -> {
+            // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
+            startForeground(NOTIFICATION_ID, notificationBuilder.build());
+            scion.start(version, configDirectory);
+        });
 
-        // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
-        startForeground(NOTIFICATION_ID, notificationBuilder.build());
-        isRunning = true;
-        updateUserInterface();
         return ret;
     }
 
     @Override
     public void onDestroy() {
-        if (!isRunning)
+        if (scion.getState() == Scion.State.STOPPED)
             return;
 
-        scion.stop();
-        stopForeground(STOP_FOREGROUND_REMOVE);
-        isRunning = false;
-        updateUserInterface();
+        handler.post(() -> {
+            scion.stop();
+            stopForeground(STOP_FOREGROUND_REMOVE);
+        });
     }
 
     @Override
@@ -102,8 +113,9 @@ public class ScionService extends Service {
         return null;
     }
 
-    private void updateUserInterface() {
-        sendBroadcast(new Intent(MainActivity.UPDATE_USER_INTERFACE));
+    private void updateUserInterface(Scion.State state) {
+        sendBroadcast(new Intent(MainActivity.UPDATE_USER_INTERFACE)
+                .putExtra(MainActivity.SCION_STATE, state));
     }
 
     private void setupNotification() {
@@ -122,8 +134,10 @@ public class ScionService extends Service {
                 .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
     }
 
-    private void notify(String text) {
-        notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+    private void notify(Scion.State state, String text) {
+        if (state != Scion.State.STOPPED) {
+            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
+            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+        }
     }
 }

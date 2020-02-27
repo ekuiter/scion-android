@@ -30,12 +30,12 @@ import java.util.stream.Stream;
 class ComponentRegistry {
     private String binaryPath;
     private Storage storage;
-    private Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback;
+    private Consumer<Map<String, Scion.State>> stateCallback;
     private ConcurrentHashMap<Class<? extends Component>, Component> components = new ConcurrentHashMap<>();
 
-    ComponentRegistry(Storage storage, Consumer<Map<Class<? extends Component>, Component.State>> componentStateCallback) {
+    ComponentRegistry(Storage storage, Consumer<Map<String, Scion.State>> stateCallback) {
         this.storage = storage;
-        this.componentStateCallback = componentStateCallback;
+        this.stateCallback = stateCallback;
     }
 
     Storage getStorage() {
@@ -53,8 +53,10 @@ class ComponentRegistry {
 
     void notifyStateChange() {
         components.values().forEach(Component::notifyStateChange);
-        componentStateCallback.accept(components.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getState())));
+        stateCallback.accept(components.entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> e.getKey().getSimpleName(),
+                        e -> e.getValue().getScionState())));
     }
 
     private void register(Component component) {
@@ -84,8 +86,17 @@ class ComponentRegistry {
         unregister(component);
     }
 
-    void stopAll() {
+    boolean hasRegisteredComponents() {
+        return components.size() > 0;
+    }
+
+    boolean hasStartingComponents() {
+        return components.values().stream().anyMatch(component -> component.getState() == Component.State.STARTING);
+    }
+
+    ComponentRegistry stopAll() {
         components.values().forEach(this::stop);
+        return this;
     }
 
     private Component get(Class<? extends Component> cls) {
