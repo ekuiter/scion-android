@@ -2,7 +2,7 @@
 
 ![SCION](scion.png)
 
-The [SCION](https://www.scion-architecture.net/) Android app enables you to run a [SCIONLab AS](https://scionlab.org) on an Android smartphone.
+The [SCION](https://www.scion-architecture.net/) Android app enables you to run a [SCIONLab](https://scionlab.org) AS on an Android smartphone.
 
 ### Getting Started
 
