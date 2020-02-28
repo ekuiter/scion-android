@@ -72,13 +72,15 @@ public class Scion {
                         stateCallback.accept(getState(), componentState));
     }
 
-    public void start(Version version, String scionlabArchiveFile) {
+    public void start(Version version, String scionlabArchiveFile, String scmpRemoteAddress) {
         try {
+            Timber.i("extracting scionlab archive file");
             ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
                     .extract(new File(scionlabArchiveFile), storage.getFile(TMP_DIRECTORY_PATH));
             start(version,
                     storage.getAbsolutePath(TMP_GEN_DIRECTORY_PATH),
-                    storage.getAbsolutePath(TMP_VPN_CONFIG_PATH));
+                    storage.getAbsolutePath(TMP_VPN_CONFIG_PATH),
+                    scmpRemoteAddress);
             storage.deleteFileOrDirectory(TMP_DIRECTORY_PATH);
         } catch (IOException e) {
             Timber.e(e);
@@ -86,8 +88,8 @@ public class Scion {
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public void start(Version version, String genDirectory, String vpnConfigFile) {
-        // copy gen directory provided by the user
+    public void start(Version version, String genDirectory, String vpnConfigFile, String scmpRemoteAddress) {
+        Timber.i("writing SCION configuration");
         if (storage.countFilesInDirectory(new File(genDirectory)) > GEN_DIRECTORY_FILE_LIMIT) {
             Timber.e("too many files in gen directory, did you choose the right directory?");
             return;
@@ -116,6 +118,7 @@ public class Scion {
         if (!writeTopology(topologyPath.get()))
             return;
         String publicAddress = readDaemonConfig(daemonConfigPath.get());
+        String localAddress = publicAddress.substring(0, publicAddress.lastIndexOf(":"));
         storage.deleteFileOrDirectory(GEN_DIRECTORY_PATH);
 
         Timber.i("starting SCION components");
@@ -128,7 +131,7 @@ public class Scion {
                 .start(new Dispatcher())
                 .start(new Daemon(publicAddress))
                 .start(new PathServer())
-                .start(scmp = new Scmp())
+                .start(scmp = new Scmp(localAddress, scmpRemoteAddress))
                 .notifyStateChange();
     }
 

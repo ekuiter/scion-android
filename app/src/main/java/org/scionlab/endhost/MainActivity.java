@@ -26,6 +26,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences getPreferences;
     private BroadcastReceiver updateUserInterfaceReceiver;
     private AppCompatButton scionButton;
+    private EditText scmpRemoteAddressEditText;
     private ScrollView scrollView;
     private TextView logTextView;
     private String scionlabArchiveFile;
@@ -64,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
             scionlabArchiveFile = savedInstanceState.getString(SCIONLAB_ARCHIVE_FILE);
         getPreferences = getPreferences(MODE_PRIVATE);
         scionButton = findViewById(R.id.scionbutton);
+        scmpRemoteAddressEditText = findViewById(R.id.scmpRemoteAddressEditText);
         Spinner logLevelSpinner = findViewById(R.id.logLevelSpinner);
         scrollView = findViewById(R.id.scrollView);
         logTextView = findViewById(R.id.logTextView);
@@ -149,7 +152,8 @@ public class MainActivity extends AppCompatActivity {
     private void startScionService(String scionlabArchiveFile) {
         startService(new Intent(this, ScionService.class)
                 .putExtra(ScionService.VERSION, Scion.Version.SCIONLAB)
-                .putExtra(ScionService.SCIONLAB_ARCHIVE_FILE, scionlabArchiveFile));
+                .putExtra(ScionService.SCIONLAB_ARCHIVE_FILE, scionlabArchiveFile)
+                .putExtra(ScionService.SCMP_REMOTE_ADDRESS, scmpRemoteAddressEditText.getText().toString()));
     }
 
     private void stopScionService() {

@@ -21,6 +21,12 @@ import static org.scionlab.endhost.scion.Config.Scmp.*;
 
 class Scmp extends Component {
     private long lastPingReceived;
+    private String localAddress, remoteAddress;
+
+    Scmp(String localAddress, String remoteAddress) {
+        this.localAddress = localAddress;
+        this.remoteAddress = remoteAddress;
+    }
 
     @Override
     Class[] dependsOn() {
@@ -46,8 +52,8 @@ class Scmp extends Component {
                 .addArgument(ECHO_FLAG)
                 .addArgument(DISPATCHER_SOCKET_FLAG, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH))
                 .addArgument(DAEMON_SOCKET_FLAG, storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH))
-                .addArgument(LOCAL_FLAG, "19-ffaa:1:cf4,[192.168.0.123]")
-                .addArgument(REMOTE_FLAG, "17-ffaa:0:1102,[0.0.0.0]")
+                .addArgument(LOCAL_FLAG, localAddress)
+                .addArgument(REMOTE_FLAG, remoteAddress)
                 .watchFor(READY_PATTERN, () -> {
                     lastPingReceived = System.currentTimeMillis();
                     setReady();

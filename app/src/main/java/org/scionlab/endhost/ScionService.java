@@ -42,6 +42,7 @@ public class ScionService extends Service {
     private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
     public static final String VERSION = ScionService.class.getCanonicalName() + ".VERSION";
     public static final String SCIONLAB_ARCHIVE_FILE = ScionService.class.getCanonicalName() + ".SCIONLAB_ARCHIVE_FILE";
+    public static final String SCMP_REMOTE_ADDRESS = ScionService.class.getCanonicalName() + ".SCMP_REMOTE_ADDRESS";
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
     private Handler handler;
@@ -88,10 +89,16 @@ public class ScionService extends Service {
             return ret;
         }
 
+        final String scmpRemoteAddress = intent.getStringExtra(SCMP_REMOTE_ADDRESS);
+        if (scmpRemoteAddress == null) {
+            Timber.e("no SCMP remote address given");
+            return ret;
+        }
+
         handler.post(() -> {
             // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
             startForeground(NOTIFICATION_ID, notificationBuilder.build());
-            scion.start(version, scionlabArchiveFile);
+            scion.start(version, scionlabArchiveFile, scmpRemoteAddress);
         });
 
         return ret;
