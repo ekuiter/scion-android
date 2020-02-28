@@ -6,7 +6,35 @@ The [SCION](https://www.scion-architecture.net/) Android app enables you to run 
 
 ### Getting Started
 
-Clone this repository with `git clone --recurse-submodules https://github.com/ekuiter/scion-android.git`.
+Clone this repository:
+
+```
+git clone --recurse-submodules https://github.com/ekuiter/scion-android.git
+cd scion-android
+```
+
+Then import this project into Android Studio or run the following in a shell to build the app:
+
+```
+# build an Android App Bundle (AAB) suitable for publishing in the Play Console
+# (also possible from Android Studio with Build > Build Bundle(s) / APK(s) > Build Bundle(s))
+./gradlew bundle
+cd app/build/outputs/bundle/release
+
+# optionally, inspect the created AAB with bundletool (see https://developer.android.com/studio/command-line/bundletool)
+wget https://github.com/google/bundletool/releases/download/0.13.0/bundletool-all-0.13.0.jar
+
+# build an APK set for all device configurations
+java -jar bundletool-all-0.13.0.jar build-apks --bundle=app-release.aab --output=all.apks
+
+# build an APK set for the connected device and install
+java -jar bundletool-all-0.13.0.jar build-apks --bundle=app-release.aab --output=connected.apks --connected-device
+java -jar bundletool-all-0.13.0.jar install-apks --apks=connected.apks
+
+# build universal APK, which can be deployed on any device (see https://stackoverflow.com/q/53040047)
+java -jar bundletool-all-0.13.0.jar build-apks --bundle=app-release.aab --output=universal.apks --mode=universal
+unzip universal.apks
+```
 
 ### License
 
