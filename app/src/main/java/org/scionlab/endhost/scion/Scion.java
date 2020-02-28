@@ -23,8 +23,12 @@ import com.moandjiezana.toml.Toml;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.rauschig.jarchivelib.ArchiveFormat;
+import org.rauschig.jarchivelib.ArchiverFactory;
+import org.rauschig.jarchivelib.CompressionType;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -68,6 +72,19 @@ public class Scion {
                         stateCallback.accept(getState(), componentState));
     }
 
+    public void start(Version version, String scionlabArchiveFile) {
+        try {
+            ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
+                    .extract(new File(scionlabArchiveFile), storage.getFile(TMP_DIRECTORY_PATH));
+            start(version,
+                    storage.getAbsolutePath(TMP_GEN_DIRECTORY_PATH),
+                    storage.getAbsolutePath(TMP_VPN_CONFIG_PATH));
+            storage.deleteFileOrDirectory(TMP_DIRECTORY_PATH);
+        } catch (IOException e) {
+            Timber.e(e);
+        }
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public void start(Version version, String genDirectory, String vpnConfigFile) {
         // copy gen directory provided by the user
@@ -75,7 +92,6 @@ public class Scion {
             Timber.e("too many files in gen directory, did you choose the right directory?");
             return;
         }
-        storage.createDirectory(CONFIG_DIRECTORY_PATH);
         storage.deleteFileOrDirectory(GEN_DIRECTORY_PATH);
         storage.copyFileOrDirectory(new File(genDirectory), GEN_DIRECTORY_PATH);
 
@@ -94,6 +110,7 @@ public class Scion {
             return;
         }
 
+        storage.createDirectory(CONFIG_DIRECTORY_PATH);
         storage.copyFileOrDirectory(certsPath.get(), CERTS_DIRECTORY_PATH);
         storage.copyFileOrDirectory(keysPath.get(), KEYS_DIRECTORY_PATH);
         if (!writeTopology(topologyPath.get()))

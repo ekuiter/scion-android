@@ -126,7 +126,10 @@ public class Config {
         static final String V0_4_0_BINARY_PATH = "libscion-v0.4.0.so"; // file name of SCION v0.4.0 binary located in jniLabs subdirectories
         static final String SCIONLAB_BINARY_PATH = "libscion-scionlab.so"; // same for the scionlab fork of SCION
         static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config"; // path to config directory where all configuration files are stored
-        static final String GEN_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/gen"; // path to gen directory created in external storage
+        static final String TMP_DIRECTORY_PATH = "EXTERNAL/tmp"; // path to temporary directory used for extracting scionlab archive file
+        static final String TMP_GEN_DIRECTORY_PATH = TMP_DIRECTORY_PATH + "/gen"; // path to gen directory extracted from archive file
+        static final String TMP_VPN_CONFIG_PATH = TMP_DIRECTORY_PATH + "/client.conf"; // path to OpenVPN configuration extracted from archive file
+        static final String GEN_DIRECTORY_PATH = "EXTERNAL/gen"; // path to gen directory created in external storage
         static final String CERTS_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/certs"; // path to certs directory created in external storage
         static final String KEYS_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/keys"; // path to keys directory created in external storage
         static final String TOPOLOGY_PATH = CONFIG_DIRECTORY_PATH + "/topology.json"; // path to topology file created in external storage

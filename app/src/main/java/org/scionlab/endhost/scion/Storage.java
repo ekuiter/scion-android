@@ -60,7 +60,7 @@ class Storage {
         throw new RuntimeException("invalid path " + path + ", please specify storage");
     }
 
-    private File getFile(String path) {
+    File getFile(String path) {
         return new File(getFilesDir(context, path), path
                 .replaceFirst("^EXTERNAL/", "")
                 .replaceFirst("^INTERNAL/", ""));

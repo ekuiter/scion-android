@@ -67,4 +67,6 @@ dependencies {
     implementation 'androidx.core:core:1.2.0'
     implementation 'com.moandjiezana.toml:toml4j:0.7.2'
     implementation 'com.jakewharton.timber:timber:4.7.1'
+    //noinspection GradleDependency
+    implementation 'org.rauschig:jarchivelib:0.8.0'
 }

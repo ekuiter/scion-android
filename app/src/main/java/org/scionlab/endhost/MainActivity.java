@@ -44,7 +44,7 @@ import org.scionlab.endhost.scion.Scion;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String GEN_DIRECTORY = MainActivity.class.getCanonicalName() + ".GEN_DIRECTORY";
+    private static final String SCIONLAB_ARCHIVE_FILE = MainActivity.class.getCanonicalName() + ".SCIONLAB_ARCHIVE_FILE";
     public static final String UPDATE_USER_INTERFACE = MainActivity.class.getCanonicalName() + ".UPDATE_USER_INTERFACE";
     public static final String SCION_STATE = MainActivity.class.getCanonicalName() + ".SCION_STATE";
 
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatButton scionButton;
     private ScrollView scrollView;
     private TextView logTextView;
-    private String genDirectory;
+    private String scionlabArchiveFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         if (savedInstanceState != null)
-            genDirectory = savedInstanceState.getString(GEN_DIRECTORY);
+            scionlabArchiveFile = savedInstanceState.getString(SCIONLAB_ARCHIVE_FILE);
         getPreferences = getPreferences(MODE_PRIVATE);
         scionButton = findViewById(R.id.scionbutton);
         Spinner logLevelSpinner = findViewById(R.id.logLevelSpinner);
@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (genDirectory != null)
-            outState.putString(GEN_DIRECTORY, genDirectory);
+        if (scionlabArchiveFile != null)
+            outState.putString(SCIONLAB_ARCHIVE_FILE, scionlabArchiveFile);
     }
 
     private void updateUserInterface(Scion.State state) {
@@ -120,21 +120,21 @@ public class MainActivity extends AppCompatActivity {
             scionButton.setOnClickListener(view ->
                     new ChooserDialog(view.getContext())
                             .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
-                            .withFilter(true, true)
-                            .withStartFile(getPreferences.getString(GEN_DIRECTORY, null))
+                            .withFilter(false, true)
+                            .withStartFile(getPreferences.getString(SCIONLAB_ARCHIVE_FILE, null))
                             .withChosenListener((path, pathFile) -> {
                                 if (path != null) {
                                     logTextView.setText("");
-                                    genDirectory = path;
+                                    scionlabArchiveFile = path;
                                     ActivityCompat.requestPermissions(
                                             this,
                                             new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                             0
                                     );
-                                    getPreferences.edit().putString(GEN_DIRECTORY, path).apply();
+                                    getPreferences.edit().putString(SCIONLAB_ARCHIVE_FILE, path).apply();
                                     VPNPermissionFragment.askPermission(this, (String errorMessage) -> {
                                         if (errorMessage == null)
-                                            startScionService(genDirectory);
+                                            startScionService(scionlabArchiveFile);
                                         else
                                             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
                                     });
@@ -146,10 +146,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void startScionService(String genDirectory) {
+    private void startScionService(String scionlabArchiveFile) {
         startService(new Intent(this, ScionService.class)
                 .putExtra(ScionService.VERSION, Scion.Version.SCIONLAB)
-                .putExtra(ScionService.GEN_DIRECTORY, genDirectory));
+                .putExtra(ScionService.SCIONLAB_ARCHIVE_FILE, scionlabArchiveFile));
     }
 
     private void stopScionService() {
