@@ -17,12 +17,6 @@
 
 package org.scionlab.endhost.scion;
 
-import com.moandjiezana.toml.Toml;
-
-import java.util.Optional;
-
-import timber.log.Timber;
-
 import static org.scionlab.endhost.scion.Config.Daemon.*;
 
 /**

@@ -36,6 +36,11 @@ class Scmp extends Component {
     }
 
     @Override
+    boolean isHealthy() {
+        return getState() == State.READY && System.currentTimeMillis() - lastPingReceived <= HEALTH_TIMEOUT;
+    }
+
+    @Override
     void run() {
         Thread notifyStateChangeThread = new Thread(() -> {
                 try {
@@ -61,10 +66,5 @@ class Scmp extends Component {
                 .run();
 
         notifyStateChangeThread.interrupt();
-    }
-
-    @Override
-    boolean isHealthy() {
-        return getState() == State.READY && System.currentTimeMillis() - lastPingReceived <= HEALTH_TIMEOUT;
     }
 }

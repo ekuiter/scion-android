@@ -41,7 +41,7 @@ abstract class Component {
         this.componentRegistry = componentRegistry;
     }
 
-    boolean isRunning() {
+    private boolean isRunning() {
         return thread != null;
     }
 

@@ -17,7 +17,6 @@
 
 package org.scionlab.endhost;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +34,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.app.ActivityCompat;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
@@ -142,11 +140,10 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    chooseScionLabConfiguration(scionLabConfiguration -> {
-                        ScionLabService.start(this,
-                                scionLabConfiguration,
-                                pingAddressEditText.getText().toString());
-                    });
+                    chooseScionLabConfiguration(scionLabConfiguration ->
+                            ScionLabService.start(this,
+                                    scionLabConfiguration,
+                                    pingAddressEditText.getText().toString()));
                 });
             });
         } else {

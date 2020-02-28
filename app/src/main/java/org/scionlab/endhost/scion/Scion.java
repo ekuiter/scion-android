@@ -23,12 +23,8 @@ import com.moandjiezana.toml.Toml;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.rauschig.jarchivelib.ArchiveFormat;
-import org.rauschig.jarchivelib.ArchiverFactory;
-import org.rauschig.jarchivelib.CompressionType;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
