@@ -37,7 +37,7 @@ class Daemon extends Component {
 
     @Override
     Class[] dependsOn() {
-        return new Class[]{Dispatcher.class};
+        return new Class[]{Dispatcher.class, VPNClient.class};
     }
 
     @Override
