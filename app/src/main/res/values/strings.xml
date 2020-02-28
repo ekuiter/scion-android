@@ -1,18 +1,13 @@
 <resources>
-    <string name="app_name">SCION</string>
-    <string name="scionbuttonstart">SCION!</string>
-    <string name="scionbuttonstop">Stop.</string>
-    <string name="choosesciondcfg">Choose scionlab archive file</string>
+    <string name="applicationName">SCION</string>
+    <string name="scionButtonStart">Start</string>
+    <string name="scionButtonStop">Stop</string>
+    <string name="chooseScionLabConfiguration">Choose SCIONLab configuration</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-    <string name="servicechannel_name">SCION Service</string>
-    <string name="servicechannel_description">Keeps SCION alive when the app is not in the foreground.</string>
-    <string name="scmpcreatekey" formatted="true">Created private key: %3$s</string>
-    <string name="scmpreadkey" formatted="true">Read private key: %3$s</string>
-    <string name="scmpcreatecert" formatted="true">Created self-signed certificate: %3$s</string>
-    <string name="scmpcertexists" formatted="true">Key and certificate already exist: %3$s %4$s</string>
-    <string name="scmpRemoteAddress">17-ffaa:0:1102,[0.0.0.0]</string>
-    <string-array name="log_levels">
+    <string name="notificationChannelDescription">Provides a connection to the SCION network.</string>
+    <string name="pingAddress">17-ffaa:0:1102,[0.0.0.0]</string>
+    <string-array name="logLevels">
         <item>CRIT</item>
         <item>ERROR</item>
         <item>WARN</item>

@@ -39,23 +39,37 @@ import androidx.core.app.ActivityCompat;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
+import org.scionlab.endhost.scion.Config;
 import org.scionlab.endhost.scion.Logger;
 import org.scionlab.endhost.scion.Scion;
+
+import java.util.function.Consumer;
 
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String SCIONLAB_ARCHIVE_FILE = MainActivity.class.getCanonicalName() + ".SCIONLAB_ARCHIVE_FILE";
+    private static final String SCIONLAB_CONFIGURATION = MainActivity.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION";
     public static final String UPDATE_USER_INTERFACE = MainActivity.class.getCanonicalName() + ".UPDATE_USER_INTERFACE";
     public static final String SCION_STATE = MainActivity.class.getCanonicalName() + ".SCION_STATE";
 
     private SharedPreferences getPreferences;
     private BroadcastReceiver updateUserInterfaceReceiver;
     private AppCompatButton scionButton;
-    private EditText scmpRemoteAddressEditText;
+    private EditText pingAddressEditText;
     private ScrollView scrollView;
     private TextView logTextView;
-    private String scionlabArchiveFile;
+    private String scionLabConfiguration;
+
+    static void updateUserInterface(Context context, Scion.State state) {
+        context.sendBroadcast(new Intent(UPDATE_USER_INTERFACE)
+                .putExtra(SCION_STATE, state));
+    }
+
+    static Intent bringToForeground(Context context) {
+        return new Intent(context, MainActivity.class)
+                .setAction(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +77,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         if (savedInstanceState != null)
-            scionlabArchiveFile = savedInstanceState.getString(SCIONLAB_ARCHIVE_FILE);
+            scionLabConfiguration = savedInstanceState.getString(SCIONLAB_CONFIGURATION);
         getPreferences = getPreferences(MODE_PRIVATE);
         scionButton = findViewById(R.id.scionbutton);
-        scmpRemoteAddressEditText = findViewById(R.id.scmpRemoteAddressEditText);
+        pingAddressEditText = findViewById(R.id.pingAddressEditText);
         Spinner logLevelSpinner = findViewById(R.id.logLevelSpinner);
         scrollView = findViewById(R.id.scrollView);
         logTextView = findViewById(R.id.logTextView);
@@ -98,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         registerReceiver(updateUserInterfaceReceiver, new IntentFilter(UPDATE_USER_INTERFACE));
-        updateUserInterface(ScionService.getState());
+        updateUserInterface(ScionLabService.getState());
     }
 
     @Override
@@ -110,8 +124,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (scionlabArchiveFile != null)
-            outState.putString(SCIONLAB_ARCHIVE_FILE, scionlabArchiveFile);
+        if (scionLabConfiguration != null)
+            outState.putString(SCIONLAB_CONFIGURATION, scionLabConfiguration);
     }
 
     private void updateUserInterface(Scion.State state) {
@@ -119,44 +133,39 @@ public class MainActivity extends AppCompatActivity {
             state = Scion.State.STOPPED;
 
         if (state == Scion.State.STOPPED) {
-            scionButton.setText(R.string.scionbuttonstart);
-            scionButton.setOnClickListener(view ->
-                    new ChooserDialog(view.getContext())
-                            .withResources(R.string.choosesciondcfg, R.string.ok, R.string.cancel)
-                            .withFilter(false, true)
-                            .withStartFile(getPreferences.getString(SCIONLAB_ARCHIVE_FILE, null))
-                            .withChosenListener((path, pathFile) -> {
-                                if (path != null) {
-                                    logTextView.setText("");
-                                    scionlabArchiveFile = path;
-                                    ActivityCompat.requestPermissions(
-                                            this,
-                                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                            0
-                                    );
-                                    getPreferences.edit().putString(SCIONLAB_ARCHIVE_FILE, path).apply();
-                                    VPNPermissionFragment.askPermission(this, (String errorMessage) -> {
-                                        if (errorMessage == null)
-                                            startScionService(scionlabArchiveFile);
-                                        else
-                                            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-                                    });
-                                }
-                            }).build().show());
+            scionButton.setText(R.string.scionButtonStart);
+            scionButton.setOnClickListener(view -> {
+                logTextView.setText("");
+                VPNPermissionFragment.askPermission(this, (String errorMessage) -> {
+                    if (errorMessage != null) {
+                        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    chooseScionLabConfiguration(scionLabConfiguration -> {
+                        ScionLabService.start(this,
+                                scionLabConfiguration,
+                                pingAddressEditText.getText().toString());
+                    });
+                });
+            });
         } else {
-            scionButton.setText(R.string.scionbuttonstop);
-            scionButton.setOnClickListener(view -> stopScionService());
+            scionButton.setText(R.string.scionButtonStop);
+            scionButton.setOnClickListener(view -> ScionLabService.stop(this));
         }
     }
 
-    private void startScionService(String scionlabArchiveFile) {
-        startService(new Intent(this, ScionService.class)
-                .putExtra(ScionService.VERSION, Scion.Version.SCIONLAB)
-                .putExtra(ScionService.SCIONLAB_ARCHIVE_FILE, scionlabArchiveFile)
-                .putExtra(ScionService.SCMP_REMOTE_ADDRESS, scmpRemoteAddressEditText.getText().toString()));
-    }
-
-    private void stopScionService() {
-        stopService(new Intent(this, ScionService.class));
+    private void chooseScionLabConfiguration(Consumer<String> callback) {
+        new ChooserDialog(this)
+                .withResources(R.string.chooseScionLabConfiguration, R.string.ok, R.string.cancel)
+                .withStartFile(getPreferences.getString(SCIONLAB_CONFIGURATION, null))
+                .withFilterRegex(false, false, Config.Scion.SCIONLAB_CONFIGURATION_REGEX)
+                .withChosenListener((path, pathFile) -> {
+                    if (path != null) {
+                        scionLabConfiguration = path;
+                        getPreferences.edit().putString(SCIONLAB_CONFIGURATION, scionLabConfiguration).apply();
+                        callback.accept(path);
+                    }
+                }).build().show();
     }
 }

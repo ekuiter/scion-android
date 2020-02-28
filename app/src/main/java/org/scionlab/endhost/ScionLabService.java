@@ -32,24 +32,34 @@ import android.os.Looper;
 import androidx.core.app.NotificationCompat;
 
 import org.scionlab.endhost.scion.Scion;
+import org.scionlab.endhost.scion.ScionLab;
 
 import java.util.stream.Collectors;
 
 import timber.log.Timber;
 
-public class ScionService extends Service {
+public class ScionLabService extends Service {
     private static final int NOTIFICATION_ID  = 1;
-    private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
-    public static final String VERSION = ScionService.class.getCanonicalName() + ".VERSION";
-    public static final String SCIONLAB_ARCHIVE_FILE = ScionService.class.getCanonicalName() + ".SCIONLAB_ARCHIVE_FILE";
-    public static final String SCMP_REMOTE_ADDRESS = ScionService.class.getCanonicalName() + ".SCMP_REMOTE_ADDRESS";
+    private static final String NOTIFICATION_CHANNEL = ScionLabService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
+    public static final String SCIONLAB_CONFIGURATION = ScionLabService.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION";
+    public static final String PING_ADDRESS = ScionLabService.class.getCanonicalName() + ".PING_ADDRESS";
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
     private Handler handler;
-    private Scion scion;
+    private ScionLab scionLab;
     private static Scion.State state;
 
-    public static Scion.State getState() {
+    static void start(Context context, String scionLabConfiguration, String pingAddress) {
+        context.startService(new Intent(context, ScionLabService.class)
+                .putExtra(SCIONLAB_CONFIGURATION, scionLabConfiguration)
+                .putExtra(PING_ADDRESS, pingAddress));
+    }
+
+    static void stop(Context context) {
+        context.stopService(new Intent(context, ScionLabService.class));
+    }
+
+    static Scion.State getState() {
         return state;
     }
 
@@ -57,13 +67,13 @@ public class ScionService extends Service {
     public void onCreate() {
         super.onCreate();
         setupNotification();
-        HandlerThread handlerThread = new HandlerThread("ScionService");
+        HandlerThread handlerThread = new HandlerThread("ScionLabService");
         handlerThread.start();
         Looper looper = handlerThread.getLooper();
         handler = new Handler(looper);
-        scion = new Scion(this, (state, componentState) -> {
-            ScionService.state = state;
-            updateUserInterface(state);
+        scionLab = new ScionLab(this, (state, componentState) -> {
+            ScionLabService.state = state;
+            MainActivity.updateUserInterface(this, state);
             notify(state, "SCION: " + state + "\n" +
                     componentState.entrySet().stream()
                             .map(e -> e.getKey() + ": " + e.getValue())
@@ -74,31 +84,25 @@ public class ScionService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int ret = super.onStartCommand(intent, flags, startId);
-        if (intent == null || scion.getState() != Scion.State.STOPPED)
+        if (intent == null || scionLab.getState() != Scion.State.STOPPED)
             return ret;
 
-        final Scion.Version version = (Scion.Version) intent.getSerializableExtra(VERSION);
-        if (version == null) {
-            Timber.e("no SCION version given");
-            return ret;
-        }
-
-        final String scionlabArchiveFile = intent.getStringExtra(SCIONLAB_ARCHIVE_FILE);
-        if (scionlabArchiveFile == null) {
-            Timber.e("no scionlab archive file given");
+        final String scionLabConfiguration = intent.getStringExtra(SCIONLAB_CONFIGURATION);
+        if (scionLabConfiguration == null) {
+            Timber.e("no SCIONLab configuration given");
             return ret;
         }
 
-        final String scmpRemoteAddress = intent.getStringExtra(SCMP_REMOTE_ADDRESS);
-        if (scmpRemoteAddress == null) {
-            Timber.e("no SCMP remote address given");
+        final String pingAddress = intent.getStringExtra(PING_ADDRESS);
+        if (pingAddress == null) {
+            Timber.e("no ping address given");
             return ret;
         }
 
         handler.post(() -> {
             // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
             startForeground(NOTIFICATION_ID, notificationBuilder.build());
-            scion.start(version, scionlabArchiveFile, scmpRemoteAddress);
+            scionLab.start(scionLabConfiguration, pingAddress);
         });
 
         return ret;
@@ -106,11 +110,11 @@ public class ScionService extends Service {
 
     @Override
     public void onDestroy() {
-        if (scion.getState() == Scion.State.STOPPED)
+        if (scionLab.getState() == Scion.State.STOPPED)
             return;
 
         handler.post(() -> {
-            scion.stop();
+            scionLab.stop();
             stopForeground(STOP_FOREGROUND_REMOVE);
         });
     }
@@ -120,25 +124,18 @@ public class ScionService extends Service {
         return null;
     }
 
-    private void updateUserInterface(Scion.State state) {
-        sendBroadcast(new Intent(MainActivity.UPDATE_USER_INTERFACE)
-                .putExtra(MainActivity.SCION_STATE, state));
-    }
-
     private void setupNotification() {
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
-                    NOTIFICATION_CHANNEL, getString(R.string.servicechannel_name), NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription(getString(R.string.servicechannel_description));
+                    NOTIFICATION_CHANNEL, getString(R.string.applicationName), NotificationManager.IMPORTANCE_LOW);
+            channel.setDescription(getString(R.string.notificationChannelDescription));
             notificationManager.createNotificationChannel(channel);
         }
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setAction(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
         notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
                 .setSmallIcon(R.drawable.ic_scion_logo)
-                .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
+                .setContentIntent(PendingIntent.getActivity(this, 0,
+                        MainActivity.bringToForeground(this), 0));
     }
 
     private void notify(Scion.State state, String text) {
