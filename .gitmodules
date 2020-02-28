@@ -1,4 +1,4 @@
 [submodule "app/src/main/jniLibs"]
 	path = app/src/main/jniLibs
 	url = https://github.com/ekuiter/scion-android-binary.git
-	branch = jniLibs
+	branch = jniLibs-scionlab

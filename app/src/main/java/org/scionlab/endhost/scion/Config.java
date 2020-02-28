@@ -123,8 +123,8 @@ public class Config {
     }
 
     public static class Scion {
-        static final String V0_4_0_BINARY_PATH = "libscion-v0.4.0.so"; // file name of SCION v0.4.0 binary located in jniLabs subdirectories
-        static final String SCIONLAB_BINARY_PATH = "libscion-scionlab.so"; // same for the scionlab fork of SCION
+        static final String V0_4_0_BINARY_PATH = "libscion-v0.4.0.so"; // file name of SCION v0.4.0 binary in jniLibs (not shipped by default)
+        static final String SCIONLAB_BINARY_PATH = "libscion-scionlab.so"; // same for the scionlab fork of SCION (shipped and used by default)
         static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config"; // path to config directory where all configuration files are stored
         public static final String SCIONLAB_CONFIGURATION_REGEX = "^.*\\.tar\\.gz$"; // regex for SCIONLab configuration file
         static final String TMP_DIRECTORY_PATH = "EXTERNAL/tmp"; // path to temporary directory used for extracting SCIONLab configuration
