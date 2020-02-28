@@ -90,8 +90,8 @@ class ComponentRegistry {
         return components.size() > 0;
     }
 
-    boolean hasStartingComponents() {
-        return components.values().stream().anyMatch(component -> component.getState() == Component.State.STARTING);
+    boolean hasComponentsWithState(Component.State state) {
+        return components.values().stream().anyMatch(component -> component.getState() == state);
     }
 
     ComponentRegistry stopAll() {

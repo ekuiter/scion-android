@@ -125,7 +125,8 @@ public class Scion {
     public State getState() {
         if (!componentRegistry.hasRegisteredComponents())
             return State.STOPPED;
-        if (componentRegistry.hasStartingComponents())
+        if (componentRegistry.hasComponentsWithState(Component.State.STARTING) &&
+            !componentRegistry.hasComponentsWithState(Component.State.STOPPED))
             return State.STARTING;
         if (scmp != null && scmp.isHealthy())
             return State.HEALTHY;
