@@ -13,6 +13,19 @@ android {
         versionCode 1
         versionName '1.0.0'
     }
+    signingConfigs {
+        release {
+            storeFile file("../play-store/keystore.jks")
+            storePassword "PASSWORD" // replace with actual keystore password
+            keyAlias "scion"
+            keyPassword "PASSWORD" // replace with actual keystore password
+        }
+    }
+    buildTypes {
+        release {
+            // signingConfig signingConfigs.release // remove comment to sign AAB
+        }
+    }
     buildToolsVersion = '29.0.2'
 }
 
