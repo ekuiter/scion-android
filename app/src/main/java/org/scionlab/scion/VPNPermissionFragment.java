@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.scion;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 import de.blinkt.openvpn.api.IOpenVPNAPIService;
 import timber.log.Timber;
 
-import static org.scionlab.endhost.scion.Config.VPNClient.*;
+import static org.scionlab.scion.as.Config.VPNClient.*;
 
 public class VPNPermissionFragment extends Fragment {
     private Consumer<String> callback;

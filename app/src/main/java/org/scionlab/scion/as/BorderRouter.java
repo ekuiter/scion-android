@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import timber.log.Timber;
 
-import static org.scionlab.endhost.scion.Config.BorderRouter.*;
+import static org.scionlab.scion.as.Config.BorderRouter.*;
 
 class BorderRouter extends Component {
     @Override

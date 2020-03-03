@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,10 +30,10 @@ import java.util.stream.Stream;
 class ComponentRegistry {
     private String binaryPath;
     private Storage storage;
-    private Consumer<Map<String, Scion.State>> stateCallback;
+    private Consumer<Map<String, ScionAS.State>> stateCallback;
     private ConcurrentHashMap<Class<? extends Component>, Component> components = new ConcurrentHashMap<>();
 
-    ComponentRegistry(Storage storage, Consumer<Map<String, Scion.State>> stateCallback) {
+    ComponentRegistry(Storage storage, Consumer<Map<String, ScionAS.State>> stateCallback) {
         this.storage = storage;
         this.stateCallback = stateCallback;
     }

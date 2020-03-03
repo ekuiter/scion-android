@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.scion;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -31,35 +31,35 @@ import android.os.Looper;
 
 import androidx.core.app.NotificationCompat;
 
-import org.scionlab.endhost.scion.Scion;
-import org.scionlab.endhost.scion.ScionLab;
+import org.scionlab.scion.as.ScionAS;
+import org.scionlab.scion.as.ScionLabAS;
 
 import java.util.stream.Collectors;
 
 import timber.log.Timber;
 
-public class ScionLabService extends Service {
+public class ScionService extends Service {
     private static final int NOTIFICATION_ID  = 1;
-    private static final String NOTIFICATION_CHANNEL = ScionLabService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
-    public static final String SCIONLAB_CONFIGURATION = ScionLabService.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION";
-    public static final String PING_ADDRESS = ScionLabService.class.getCanonicalName() + ".PING_ADDRESS";
+    private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
+    private static final String SCIONLAB_CONFIGURATION = ScionService.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION";
+    private static final String PING_ADDRESS = ScionService.class.getCanonicalName() + ".PING_ADDRESS";
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
     private Handler handler;
-    private ScionLab scionLab;
-    private static Scion.State state;
+    private ScionLabAS scionLabAS;
+    private static ScionAS.State state;
 
     static void start(Context context, String scionLabConfiguration, String pingAddress) {
-        context.startService(new Intent(context, ScionLabService.class)
+        context.startService(new Intent(context, ScionService.class)
                 .putExtra(SCIONLAB_CONFIGURATION, scionLabConfiguration)
                 .putExtra(PING_ADDRESS, pingAddress));
     }
 
     static void stop(Context context) {
-        context.stopService(new Intent(context, ScionLabService.class));
+        context.stopService(new Intent(context, ScionService.class));
     }
 
-    static Scion.State getState() {
+    static ScionAS.State getState() {
         return state;
     }
 
@@ -67,12 +67,12 @@ public class ScionLabService extends Service {
     public void onCreate() {
         super.onCreate();
         setupNotification();
-        HandlerThread handlerThread = new HandlerThread("ScionLabService");
+        HandlerThread handlerThread = new HandlerThread("ScionService");
         handlerThread.start();
         Looper looper = handlerThread.getLooper();
         handler = new Handler(looper);
-        scionLab = new ScionLab(this, (state, componentState) -> {
-            ScionLabService.state = state;
+        scionLabAS = new ScionLabAS(this, (state, componentState) -> {
+            ScionService.state = state;
             MainActivity.updateUserInterface(this, state);
             notify(state, "SCION: " + state + "\n" +
                     componentState.entrySet().stream()
@@ -84,7 +84,7 @@ public class ScionLabService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int ret = super.onStartCommand(intent, flags, startId);
-        if (intent == null || scionLab.getState() != Scion.State.STOPPED)
+        if (intent == null || scionLabAS.getState() != ScionAS.State.STOPPED)
             return ret;
 
         final String scionLabConfiguration = intent.getStringExtra(SCIONLAB_CONFIGURATION);
@@ -102,7 +102,7 @@ public class ScionLabService extends Service {
         handler.post(() -> {
             // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
             startForeground(NOTIFICATION_ID, notificationBuilder.build());
-            scionLab.start(scionLabConfiguration, pingAddress);
+            scionLabAS.start(scionLabConfiguration, pingAddress);
         });
 
         return ret;
@@ -110,11 +110,11 @@ public class ScionLabService extends Service {
 
     @Override
     public void onDestroy() {
-        if (scionLab.getState() == Scion.State.STOPPED)
+        if (scionLabAS.getState() == ScionAS.State.STOPPED)
             return;
 
         handler.post(() -> {
-            scionLab.stop();
+            scionLabAS.stop();
             stopForeground(STOP_FOREGROUND_REMOVE);
         });
     }
@@ -138,8 +138,8 @@ public class ScionLabService extends Service {
                         MainActivity.bringToForeground(this), 0));
     }
 
-    private void notify(Scion.State state, String text) {
-        if (state != Scion.State.STOPPED) {
+    private void notify(ScionAS.State state, String text) {
+        if (state != ScionAS.State.STOPPED) {
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }

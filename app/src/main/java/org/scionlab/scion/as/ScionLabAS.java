@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import android.app.Service;
 
@@ -30,12 +30,15 @@ import java.util.function.BiConsumer;
 
 import timber.log.Timber;
 
-import static org.scionlab.endhost.scion.Config.Scion.TMP_DIRECTORY_PATH;
-import static org.scionlab.endhost.scion.Config.Scion.TMP_GEN_DIRECTORY_PATH;
-import static org.scionlab.endhost.scion.Config.Scion.TMP_VPN_CONFIG_PATH;
+import static org.scionlab.scion.as.Config.Scion.TMP_DIRECTORY_PATH;
+import static org.scionlab.scion.as.Config.Scion.TMP_GEN_DIRECTORY_PATH;
+import static org.scionlab.scion.as.Config.Scion.TMP_VPN_CONFIG_PATH;
 
-public class ScionLab extends Scion {
-    public ScionLab(Service service, BiConsumer<State, Map<String, State>> stateCallback) {
+/**
+ * Starts a SCION AS from a given scionlab.org .tar.gz configuration file.
+ */
+public class ScionLabAS extends ScionAS {
+    public ScionLabAS(Service service, BiConsumer<State, Map<String, State>> stateCallback) {
         super(service, stateCallback);
     }
 

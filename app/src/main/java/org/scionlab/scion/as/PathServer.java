@@ -15,20 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
-import static org.scionlab.endhost.scion.Config.Daemon.*;
+import static org.scionlab.scion.as.Config.PathServer.*;
 
-/**
- * Performs requests to the SCION network and acts as an endhost.
- */
-class Daemon extends Component {
-    private String publicAddress;
-
-    Daemon(String publicAddress) {
-        this.publicAddress = publicAddress;
-    }
-
+class PathServer extends Component {
     @Override
     Class[] dependsOn() {
         return new Class[]{Dispatcher.class, VPNClient.class};
@@ -36,17 +27,14 @@ class Daemon extends Component {
 
     @Override
     boolean prepare() {
-        storage.prepareFiles(RELIABLE_SOCKET_PATH, UNIX_SOCKET_PATH, TRUST_DATABASE_PATH, PATH_DATABASE_PATH);
+        storage.prepareFiles(TRUST_DATABASE_PATH, PATH_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(Config.Scion.CONFIG_DIRECTORY_PATH),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL,
                 storage.getAbsolutePath(TRUST_DATABASE_PATH),
-                storage.getAbsolutePath(PATH_DATABASE_PATH),
-                publicAddress,
-                storage.getAbsolutePath(RELIABLE_SOCKET_PATH),
-                storage.getAbsolutePath(UNIX_SOCKET_PATH)));
+                storage.getAbsolutePath(PATH_DATABASE_PATH)));
         createLogThread(LOG_PATH, READY_PATTERN).start();
         return true;
     }

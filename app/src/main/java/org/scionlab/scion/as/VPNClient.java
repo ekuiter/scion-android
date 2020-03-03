@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -29,7 +29,7 @@ import de.blinkt.openvpn.api.IOpenVPNAPIService;
 import de.blinkt.openvpn.api.IOpenVPNStatusCallback;
 import timber.log.Timber;
 
-import static org.scionlab.endhost.scion.Config.VPNClient.*;
+import static org.scionlab.scion.as.Config.VPNClient.*;
 
 class VPNClient extends Component {
     private Service service;

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import java.util.regex.Pattern;
 
@@ -75,14 +75,14 @@ abstract class Component {
         return isReady ? State.READY : State.STARTING;
     }
 
-    Scion.State getScionState() {
+    ScionAS.State getScionState() {
         switch (getState()) {
             case STOPPED:
-                return Scion.State.STOPPED;
+                return ScionAS.State.STOPPED;
             case STARTING:
-                return Scion.State.STARTING;
+                return ScionAS.State.STARTING;
             default:
-                return isHealthy() ? Scion.State.HEALTHY : Scion.State.UNHEALTHY;
+                return isHealthy() ? ScionAS.State.HEALTHY : ScionAS.State.UNHEALTHY;
         }
     }
 

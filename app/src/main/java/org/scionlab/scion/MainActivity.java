@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost;
+package org.scionlab.scion;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,9 +37,9 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
-import org.scionlab.endhost.scion.Config;
-import org.scionlab.endhost.scion.Logger;
-import org.scionlab.endhost.scion.Scion;
+import org.scionlab.scion.as.Config;
+import org.scionlab.scion.as.Logger;
+import org.scionlab.scion.as.ScionAS;
 
 import java.util.function.Consumer;
 
@@ -47,8 +47,8 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
     private static final String SCIONLAB_CONFIGURATION = MainActivity.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION";
-    public static final String UPDATE_USER_INTERFACE = MainActivity.class.getCanonicalName() + ".UPDATE_USER_INTERFACE";
-    public static final String SCION_STATE = MainActivity.class.getCanonicalName() + ".SCION_STATE";
+    private static final String UPDATE_USER_INTERFACE = MainActivity.class.getCanonicalName() + ".UPDATE_USER_INTERFACE";
+    private static final String SCION_STATE = MainActivity.class.getCanonicalName() + ".SCION_STATE";
 
     private SharedPreferences getPreferences;
     private BroadcastReceiver updateUserInterfaceReceiver;
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView logTextView;
     private String scionLabConfiguration;
 
-    static void updateUserInterface(Context context, Scion.State state) {
+    static void updateUserInterface(Context context, ScionAS.State state) {
         context.sendBroadcast(new Intent(UPDATE_USER_INTERFACE)
                 .putExtra(SCION_STATE, state));
     }
@@ -106,11 +106,11 @@ public class MainActivity extends AppCompatActivity {
         updateUserInterfaceReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateUserInterface((Scion.State) intent.getSerializableExtra(SCION_STATE));
+                updateUserInterface((ScionAS.State) intent.getSerializableExtra(SCION_STATE));
             }
         };
         registerReceiver(updateUserInterfaceReceiver, new IntentFilter(UPDATE_USER_INTERFACE));
-        updateUserInterface(ScionLabService.getState());
+        updateUserInterface(ScionService.getState());
     }
 
     @Override
@@ -126,11 +126,11 @@ public class MainActivity extends AppCompatActivity {
             outState.putString(SCIONLAB_CONFIGURATION, scionLabConfiguration);
     }
 
-    private void updateUserInterface(Scion.State state) {
+    private void updateUserInterface(ScionAS.State state) {
         if (state == null)
-            state = Scion.State.STOPPED;
+            state = ScionAS.State.STOPPED;
 
-        if (state == Scion.State.STOPPED) {
+        if (state == ScionAS.State.STOPPED) {
             scionButton.setText(R.string.scionButtonStart);
             scionButton.setOnClickListener(view -> {
                 logTextView.setText("");
@@ -141,14 +141,14 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     chooseScionLabConfiguration(scionLabConfiguration ->
-                            ScionLabService.start(this,
+                            ScionService.start(this,
                                     scionLabConfiguration,
                                     pingAddressEditText.getText().toString()));
                 });
             });
         } else {
             scionButton.setText(R.string.scionButtonStop);
-            scionButton.setOnClickListener(view -> ScionLabService.stop(this));
+            scionButton.setOnClickListener(view -> ScionService.stop(this));
         }
     }
 

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import android.util.Log;
 
@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 import timber.log.Timber;
 
-import static org.scionlab.endhost.scion.Config.Logger.*;
+import static org.scionlab.scion.as.Config.Logger.*;
 
 public class Logger {
     static class LogThread extends Thread {

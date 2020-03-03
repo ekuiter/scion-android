@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import java.util.regex.Pattern;
 
-import static org.scionlab.endhost.scion.Logger.*;
+import static org.scionlab.scion.as.Logger.*;
 
 public class Config {
     static class Process {

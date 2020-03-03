@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
-import static org.scionlab.endhost.scion.Config.CertificateServer.*;
+import static org.scionlab.scion.as.Config.BeaconServer.*;
 
-class CertificateServer extends Component {
+class BeaconServer extends Component {
     @Override
     Class[] dependsOn() {
         return new Class[]{Dispatcher.class, VPNClient.class};
@@ -27,14 +27,14 @@ class CertificateServer extends Component {
 
     @Override
     boolean prepare() {
-        storage.prepareFiles(TRUST_DATABASE_PATH);
+        storage.prepareFiles(TRUST_DATABASE_PATH, BEACON_DATABASE_PATH);
         storage.writeFile(CONFIG_PATH, String.format(
                 storage.readAssetFile(CONFIG_TEMPLATE_PATH),
                 storage.getAbsolutePath(Config.Scion.CONFIG_DIRECTORY_PATH),
                 storage.getAbsolutePath(LOG_PATH),
                 LOG_LEVEL,
                 storage.getAbsolutePath(TRUST_DATABASE_PATH),
-                storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH)));
+                storage.getAbsolutePath(BEACON_DATABASE_PATH)));
         createLogThread(LOG_PATH, READY_PATTERN).start();
         return true;
     }

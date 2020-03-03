@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import android.content.Context;
 
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 import timber.log.Timber;
 
-import static org.scionlab.endhost.scion.Config.Process.*;
+import static org.scionlab.scion.as.Config.Process.*;
 
 /**
  * Runs a SCION component via the binary supplied in jniLibs.

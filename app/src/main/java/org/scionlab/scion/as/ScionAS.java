@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
 import android.app.Service;
 
@@ -32,9 +32,12 @@ import java.util.stream.Stream;
 
 import timber.log.Timber;
 
-import static org.scionlab.endhost.scion.Config.Scion.*;
+import static org.scionlab.scion.as.Config.Scion.*;
 
-public class Scion {
+/**
+ * Runs a SCION AS (= autonomous system) by starting all its components.
+ */
+public class ScionAS {
     private final Service service;
     protected final Storage storage;
     private final ComponentRegistry componentRegistry;
@@ -59,12 +62,12 @@ public class Scion {
         }
     }
 
-    public Scion(Service service, BiConsumer<State, Map<String, Scion.State>> stateCallback) {
+    public ScionAS(Service service, BiConsumer<State, Map<String, ScionAS.State>> stateCallback) {
         this.service = service;
         Process.initialize(service);
         storage = Storage.from(service);
         componentRegistry = new ComponentRegistry(storage,
-                (Map<String, Scion.State> componentState) ->
+                (Map<String, ScionAS.State> componentState) ->
                         stateCallback.accept(getState(), componentState));
     }
 
@@ -102,7 +105,7 @@ public class Scion {
         String localAddress = publicAddress.substring(0, publicAddress.lastIndexOf(":"));
         storage.deleteFileOrDirectory(GEN_DIRECTORY_PATH);
 
-        Timber.i("starting SCION components");
+        Timber.i("starting SCION AS");
         componentRegistry
                 .setBinaryPath(version.getBinaryPath())
                 .start(new VPNClient(service, storage.readFile(new File(vpnConfigFile))))
@@ -117,7 +120,7 @@ public class Scion {
     }
 
     public void stop() {
-        Timber.i("stopping SCION components");
+        Timber.i("stopping SCION AS");
         componentRegistry.stopAll().notifyStateChange();
         scmp = null;
     }

@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.scionlab.endhost.scion;
+package org.scionlab.scion.as;
 
-import static org.scionlab.endhost.scion.Config.Dispatcher.*;
+import static org.scionlab.scion.as.Config.Dispatcher.*;
 
 /**
  * Dispatches requests/responses from other SCION components to the outside world and vice-versa.
