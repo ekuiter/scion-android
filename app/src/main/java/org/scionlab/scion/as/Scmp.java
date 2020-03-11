@@ -17,6 +17,8 @@
 
 package org.scionlab.scion.as;
 
+import org.scionlab.scion.UncaughtExceptionHandler;
+
 import static org.scionlab.scion.as.Config.Scmp.*;
 
 class Scmp extends Component {
@@ -51,6 +53,7 @@ class Scmp extends Component {
                 } catch (InterruptedException ignored) {
                 }
         });
+        notifyStateChangeThread.setUncaughtExceptionHandler(componentRegistry.getUncaughtExceptionHandler());
         notifyStateChangeThread.start();
 
         process.addArgument(BINARY_FLAG)

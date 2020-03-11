@@ -19,6 +19,8 @@ package org.scionlab.scion.as;
 
 import android.content.Context;
 
+import org.scionlab.scion.UncaughtExceptionHandler;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,8 +54,8 @@ class Process {
             throw new RuntimeException("process class must be initialized first");
     }
 
-    static Process from(String binaryPath, String tag, Storage storage) {
-        return new Process(binaryPath, tag, storage).setLogThread(Logger.createLogThread(tag));
+    static Process from(String binaryPath, String tag, Storage storage, UncaughtExceptionHandler uncaughtExceptionHandler) {
+        return new Process(binaryPath, tag, storage).setLogThread(Logger.createLogThread(tag, uncaughtExceptionHandler));
     }
 
     static void initialize(Context context) {

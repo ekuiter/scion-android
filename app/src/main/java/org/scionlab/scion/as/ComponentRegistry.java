@@ -17,6 +17,10 @@
 
 package org.scionlab.scion.as;
 
+import android.app.Service;
+
+import org.scionlab.scion.UncaughtExceptionHandler;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -29,13 +33,19 @@ import java.util.stream.Stream;
  */
 class ComponentRegistry {
     private String binaryPath;
+    private Service service;
     private Storage storage;
     private Consumer<Map<String, ScionAS.State>> stateCallback;
     private ConcurrentHashMap<Class<? extends Component>, Component> components = new ConcurrentHashMap<>();
 
-    ComponentRegistry(Storage storage, Consumer<Map<String, ScionAS.State>> stateCallback) {
+    ComponentRegistry(Service service, Storage storage, Consumer<Map<String, ScionAS.State>> stateCallback) {
+        this.service = service;
         this.storage = storage;
         this.stateCallback = stateCallback;
+    }
+
+    UncaughtExceptionHandler getUncaughtExceptionHandler() {
+        return new UncaughtExceptionHandler(service);
     }
 
     Storage getStorage() {

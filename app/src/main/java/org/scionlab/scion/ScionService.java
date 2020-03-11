@@ -68,6 +68,7 @@ public class ScionService extends Service {
         super.onCreate();
         setupNotification();
         HandlerThread handlerThread = new HandlerThread("ScionService");
+        handlerThread.setUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         handlerThread.start();
         Looper looper = handlerThread.getLooper();
         handler = new Handler(looper);

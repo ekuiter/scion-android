@@ -21,6 +21,8 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import org.scionlab.scion.UncaughtExceptionHandler;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,10 +46,12 @@ public class Logger {
         private long interval;
         InputStream inputStream;
 
-        LogThread(Consumer<String> outputConsumer, Pattern deletePattern, long interval) {
+        LogThread(Consumer<String> outputConsumer, Pattern deletePattern, long interval,
+                  org.scionlab.scion.UncaughtExceptionHandler uncaughtExceptionHandler) {
             this.outputConsumer = outputConsumer;
             this.deletePattern = deletePattern;
             this.interval = interval;
+            setUncaughtExceptionHandler(uncaughtExceptionHandler);
         }
 
         LogThread setInputStream(InputStream inputStream) {
@@ -139,12 +143,13 @@ public class Logger {
         }
     }
 
-    static LogThread createLogThread(String tag) {
+    static LogThread createLogThread(String tag, UncaughtExceptionHandler uncaughtExceptionHandler) {
         // log all tailed files and processes as Log.DEBUG
-        return new Logger.LogThread(line -> Timber.tag(tag).d(line), DELETE_PATTERN, UPDATE_INTERVAL);
+        return new Logger.LogThread(line -> Timber.tag(tag).d(line),
+                DELETE_PATTERN, UPDATE_INTERVAL, uncaughtExceptionHandler);
     }
 
-    static LogThread createLogThread(String tag, InputStream inputStream) {
-        return createLogThread(tag).setInputStream(inputStream);
+    static LogThread createLogThread(String tag, UncaughtExceptionHandler uncaughtExceptionHandler, InputStream inputStream) {
+        return createLogThread(tag, uncaughtExceptionHandler).setInputStream(inputStream);
     }
 }

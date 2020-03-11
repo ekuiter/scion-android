@@ -17,6 +17,8 @@
 
 package org.scionlab.scion.as;
 
+import org.scionlab.scion.UncaughtExceptionHandler;
+
 import java.util.regex.Pattern;
 
 import timber.log.Timber;
@@ -27,7 +29,7 @@ import timber.log.Timber;
  * This serves the same purpose as the SCION services in /lib/systemd/system on Linux.
  */
 abstract class Component {
-    private ComponentRegistry componentRegistry;
+    ComponentRegistry componentRegistry;
     Storage storage;
     Process process;
     private Thread thread;
@@ -88,7 +90,9 @@ abstract class Component {
 
     Logger.LogThread createLogThread(String logPath, Pattern readyPattern) {
         storage.prepareFile(logPath);
-        return Logger.createLogThread(getTag(), storage.getEmptyInputStream(logPath))
+        return Logger.createLogThread(getTag(),
+                componentRegistry.getUncaughtExceptionHandler(),
+                storage.getEmptyInputStream(logPath))
                 .watchFor(readyPattern, this::setReady);
     }
 
@@ -111,7 +115,8 @@ abstract class Component {
         String binaryPath = componentRegistry.getBinaryPath();
         if (binaryPath == null)
             throw new RuntimeException("no binary path given");
-        process = Process.from(binaryPath, getTag(), storage);
+        process = Process.from(binaryPath, getTag(), storage,
+                componentRegistry.getUncaughtExceptionHandler());
 
         if (!prepare()) {
             timber().e("failed to prepare component");
@@ -139,6 +144,7 @@ abstract class Component {
                     componentRegistry.notifyStateChange();
             }
         });
+        thread.setUncaughtExceptionHandler(componentRegistry.getUncaughtExceptionHandler());
         thread.start();
         componentRegistry.notifyStateChange();
     }

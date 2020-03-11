@@ -66,7 +66,7 @@ public class ScionAS {
         this.service = service;
         Process.initialize(service);
         storage = Storage.from(service);
-        componentRegistry = new ComponentRegistry(storage,
+        componentRegistry = new ComponentRegistry(service, storage,
                 (Map<String, ScionAS.State> componentState) ->
                         stateCallback.accept(getState(), componentState));
     }
