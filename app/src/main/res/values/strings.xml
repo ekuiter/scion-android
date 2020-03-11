@@ -1,18 +1,28 @@
 <resources>
     <string name="applicationName">SCION</string>
-    <string name="scionButtonStart">Start</string>
-    <string name="scionButtonStop">Stop</string>
+    <string name="log">Log</string>
+    <string name="how">How to use</string>
+    <string name="about">About this app</string>
     <string name="chooseScionLabConfiguration">Choose SCIONLab configuration</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="notificationChannelDescription">Provides a connection to the SCION network.</string>
+    <string name="pingAddressHint">Ping SCION address</string>
     <string name="pingAddress">17-ffaa:0:1102,[0.0.0.0]</string>
+    <string name="beaconServer">Beacon Server</string>
+    <string name="borderRouter">Border Router</string>
+    <string name="certificateServer">Certificate Server</string>
+    <string name="daemon">Daemon</string>
+    <string name="dispatcher">Dispatcher</string>
+    <string name="pathServer">Path Server</string>
+    <string name="scmp">Ping</string>
+    <string name="vpnClient">VPN</string>
     <string-array name="logLevels">
-        <item>CRIT</item>
-        <item>ERROR</item>
-        <item>WARN</item>
-        <item>INFO</item>
-        <item>DEBUG</item>
         <item>TRACE</item>
+        <item>DEBUG</item>
+        <item>INFO</item>
+        <item>WARN</item>
+        <item>ERROR</item>
+        <item>CRIT</item>
     </string-array>
 </resources>

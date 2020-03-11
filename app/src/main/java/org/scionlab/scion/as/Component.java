@@ -17,8 +17,6 @@
 
 package org.scionlab.scion.as;
 
-import org.scionlab.scion.UncaughtExceptionHandler;
-
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 

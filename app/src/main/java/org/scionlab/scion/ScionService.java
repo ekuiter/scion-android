@@ -34,7 +34,8 @@ import androidx.core.app.NotificationCompat;
 import org.scionlab.scion.as.ScionAS;
 import org.scionlab.scion.as.ScionLabAS;
 
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -47,7 +48,8 @@ public class ScionService extends Service {
     private NotificationCompat.Builder notificationBuilder;
     private Handler handler;
     private ScionLabAS scionLabAS;
-    private static ScionAS.State state;
+    private static ScionAS.State state = ScionAS.State.STOPPED;
+    private static Map<String, ScionAS.State> componentState = new HashMap<>();
 
     static void start(Context context, String scionLabConfiguration, String pingAddress) {
         context.startService(new Intent(context, ScionService.class)
@@ -63,6 +65,10 @@ public class ScionService extends Service {
         return state;
     }
 
+    static Map<String, ScionAS.State> getComponentState() {
+        return componentState;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -74,11 +80,9 @@ public class ScionService extends Service {
         handler = new Handler(looper);
         scionLabAS = new ScionLabAS(this, (state, componentState) -> {
             ScionService.state = state;
-            MainActivity.updateUserInterface(this, state);
-            notify(state, "SCION: " + state + "\n" +
-                    componentState.entrySet().stream()
-                            .map(e -> e.getKey() + ": " + e.getValue())
-                            .collect(Collectors.joining("\n")));
+            ScionService.componentState = componentState;
+            MainActivity.updateUserInterface(this, state, componentState);
+            notify(state, "SCION is " + state.toString().toLowerCase() + ".");
         });
     }
 
@@ -141,7 +145,7 @@ public class ScionService extends Service {
 
     private void notify(ScionAS.State state, String text) {
         if (state != ScionAS.State.STOPPED) {
-            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(text));
+            notificationBuilder.setContentText(text);
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         }
     }

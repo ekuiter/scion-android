@@ -1,0 +1,46 @@
+<html>
+<head>
+    <style>
+        li {
+            padding-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+<h2>How to use</h2>
+<p>To connect to the SCIONLab network using this app, perform the following steps:</p>
+<ol>
+    <li>Register for a free user account on <a href="https://www.scionlab.org/">scionlab.org</a>.</li>
+    <li>
+        In &quot;<a href="https://www.scionlab.org/user/">My ASes</a>&quot;, create a new SCIONLab AS with the following settings:
+        <ul>
+            <li><em>Label</em>: Enter any value, ignored by this app</li>
+            <li><em>Installation type</em>: Choose <strong>SCION installation from sources</strong></li>
+            <li><em>Attachment point</em>: Choose any attachment point you like, preferably the nearest to your location</li>
+            <li><em>Use VPN</em>: You <strong>must</strong> check this box</li>
+            <li><em>Public Port</em>: You <strong>must not</strong> change this from its default value 50000</li>
+        </ul>
+        Alternatively, you can also use an existing SCIONLab AS if you adjust its settings as described above.
+        In that case, also make sure that the <em>Active</em> box is checked.
+    </li>
+    <li>
+        Once you have created the AS, you can download its configuration from &quot;My ASes&quot; as a <em>.tar.gz</em> archive.
+        Store this archive somewhere on your smartphone (e.g., on the SD card).
+    </li>
+    <li>
+        In the app, press the blue SCION button.
+        The app will ask you to install <em>OpenVPN for Android</em>, which is required to connect to SCIONLab.
+        <em>You do not need to start OpenVPN for Android manually, everything is set up by the SCION app.</em>
+    </li>
+    <li>
+        Once <em>OpenVPN for Android</em> is installed, press the SCION button again.
+        You may have to grant permissions regarding VPN and media storage.
+        Then choose the <em>.tar.gz</em> SCIONLab configuration you have downloaded previously.
+    </li>
+    <li>
+        The app will now connect to SCIONLab and ping the given SCION address.
+        To disconnect, press the SCION button again.
+    </li>
+</ol>
+</body>
+</html>

@@ -17,8 +17,6 @@
 
 package org.scionlab.scion.as;
 
-import org.scionlab.scion.UncaughtExceptionHandler;
-
 import static org.scionlab.scion.as.Config.Scmp.*;
 
 class Scmp extends Component {
@@ -45,13 +43,13 @@ class Scmp extends Component {
     @Override
     void run() {
         Thread notifyStateChangeThread = new Thread(() -> {
-                try {
-                    while (true) {
-                        notifyStateChange();
-                        Thread.sleep(HEALTH_TIMEOUT);
-                    }
-                } catch (InterruptedException ignored) {
+            try {
+                while (true) {
+                    notifyStateChange();
+                    Thread.sleep(HEALTH_TIMEOUT);
                 }
+            } catch (InterruptedException ignored) {
+            }
         });
         notifyStateChangeThread.setUncaughtExceptionHandler(componentRegistry.getUncaughtExceptionHandler());
         notifyStateChangeThread.start();

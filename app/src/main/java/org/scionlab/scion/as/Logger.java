@@ -120,6 +120,10 @@ public class Logger {
             this.outputConsumer = outputConsumer;
         }
 
+        public LogLevel getLogLevel(LogLevel logLevel) {
+            return logLevel;
+        }
+
         public void setLogLevel(LogLevel logLevel) {
             this.logLevel = logLevel;
         }

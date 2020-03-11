@@ -19,6 +19,8 @@ package org.scionlab.scion.as;
 
 import android.app.Service;
 
+import androidx.annotation.NonNull;
+
 import com.moandjiezana.toml.Toml;
 
 import org.json.JSONException;
@@ -44,7 +46,14 @@ public class ScionAS {
     private Scmp scmp;
 
     public enum State {
-        STOPPED, STARTING, HEALTHY, UNHEALTHY
+        STOPPED, STARTING, HEALTHY, UNHEALTHY;
+
+        public @NonNull String toString() {
+            return this == STOPPED ? "Stopped" :
+                    this == STARTING ? "Starting" :
+                            this == HEALTHY ? "Healthy" :
+                                    "Unhealthy";
+        }
     }
 
     public enum Version {
@@ -62,12 +71,12 @@ public class ScionAS {
         }
     }
 
-    public ScionAS(Service service, BiConsumer<State, Map<String, ScionAS.State>> stateCallback) {
+    ScionAS(Service service, BiConsumer<State, Map<String, State>> stateCallback) {
         this.service = service;
         Process.initialize(service);
         storage = Storage.from(service);
         componentRegistry = new ComponentRegistry(service, storage,
-                (Map<String, ScionAS.State> componentState) ->
+                (Map<String, State> componentState) ->
                         stateCallback.accept(getState(), componentState));
     }
 

@@ -30,9 +30,7 @@ import java.util.function.BiConsumer;
 
 import timber.log.Timber;
 
-import static org.scionlab.scion.as.Config.Scion.TMP_DIRECTORY_PATH;
-import static org.scionlab.scion.as.Config.Scion.TMP_GEN_DIRECTORY_PATH;
-import static org.scionlab.scion.as.Config.Scion.TMP_VPN_CONFIG_PATH;
+import static org.scionlab.scion.as.Config.Scion.*;
 
 /**
  * Starts a SCION AS from a given scionlab.org .tar.gz configuration file.

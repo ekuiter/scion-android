@@ -19,6 +19,7 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
     public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
         try {
             StringWriter sw = new StringWriter();
+            e.printStackTrace();
             e.printStackTrace(new PrintWriter(sw));
 
             Intent intent = new Intent(Intent.ACTION_SEND);
