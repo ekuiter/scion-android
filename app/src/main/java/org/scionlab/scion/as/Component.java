@@ -19,6 +19,7 @@ package org.scionlab.scion.as;
 
 import org.scionlab.scion.UncaughtExceptionHandler;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import timber.log.Timber;
@@ -32,7 +33,7 @@ abstract class Component {
     ComponentRegistry componentRegistry;
     Storage storage;
     Process process;
-    private Thread thread;
+    private AtomicReference<Thread> threadRef;
     private boolean doneWaiting = false, isReady = false;
 
     enum State {
@@ -41,10 +42,11 @@ abstract class Component {
 
     void setComponentRegistry(ComponentRegistry componentRegistry) {
         this.componentRegistry = componentRegistry;
+        threadRef = new AtomicReference<>();
     }
 
     private boolean isRunning() {
-        return thread != null;
+        return threadRef.get() != null;
     }
 
     private Timber.Tree timber() {
@@ -102,7 +104,7 @@ abstract class Component {
     }
 
     synchronized void start() {
-        if (thread != null)
+        if (threadRef.get() != null)
             return;
 
         if (componentRegistry == null) {
@@ -123,7 +125,7 @@ abstract class Component {
             return;
         }
 
-        thread = new Thread(() -> {
+        Thread thread = new Thread(() -> {
             try {
                 int retries = 0;
                 for (; retries < Config.Component.READY_RETRIES && !mayRun(); retries++) {
@@ -139,17 +141,19 @@ abstract class Component {
             } catch (InterruptedException ignored) {
             } finally {
                 timber().i("component has stopped");
-                thread = null;
+                threadRef.set(null);
                 if (componentRegistry != null)
                     componentRegistry.notifyStateChange();
             }
         });
         thread.setUncaughtExceptionHandler(componentRegistry.getUncaughtExceptionHandler());
         thread.start();
+        threadRef.set(thread);
         componentRegistry.notifyStateChange();
     }
 
     synchronized void stop() {
+        Thread thread = threadRef.get();
         if (thread == null)
             return;
 
