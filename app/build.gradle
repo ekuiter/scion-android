@@ -10,8 +10,8 @@ android {
         applicationId 'org.scionlab.scion'
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 2
-        versionName '1.1.0'
+        versionCode 3
+        versionName '1.1.1'
     }
     signingConfigs {
         release {
