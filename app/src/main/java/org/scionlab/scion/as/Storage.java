@@ -66,6 +66,10 @@ class Storage {
                 .replaceFirst("^INTERNAL/", ""));
     }
 
+    boolean exists(String path) {
+        return getFile(path).exists();
+    }
+
     private InputStream getInputStream(File file) {
         try {
             return new FileInputStream(file);

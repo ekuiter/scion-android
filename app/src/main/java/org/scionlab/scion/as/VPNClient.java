@@ -44,6 +44,23 @@ class VPNClient extends Component {
 
     @Override
     void run() {
+        if (config == null) {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignored) {
+                }
+                setReady();
+            }).start();
+            try {
+                //noinspection InfiniteLoopStatement
+                while (true)
+                    Thread.sleep(Long.MAX_VALUE);
+            } catch (InterruptedException ignored) {
+            }
+            return;
+        }
+
         Intent intent = new Intent(IOpenVPNAPIService.class.getName()).setPackage(PACKAGE_NAME);
 
         IOpenVPNStatusCallback openVPNStatusCallback = new IOpenVPNStatusCallback.Stub() {

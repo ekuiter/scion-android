@@ -47,7 +47,7 @@ public class ScionLabAS extends ScionAS {
                     .extract(new File(scionLabConfiguration), storage.getFile(TMP_DIRECTORY_PATH));
             start(Version.SCIONLAB,
                     storage.getAbsolutePath(TMP_GEN_DIRECTORY_PATH),
-                    storage.getAbsolutePath(TMP_VPN_CONFIG_PATH),
+                    storage.exists(TMP_VPN_CONFIG_PATH) ? storage.getAbsolutePath(TMP_VPN_CONFIG_PATH) : null,
                     pingAddress);
             storage.deleteFileOrDirectory(TMP_DIRECTORY_PATH);
         } catch (IOException e) {

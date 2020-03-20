@@ -118,7 +118,9 @@ public class ScionAS {
         Timber.i("starting SCION AS");
         componentRegistry
                 .setBinaryPath(version.getBinaryPath())
-                .start(new VPNClient(service, storage.readFile(new File(vpnConfigFile))))
+                .start(new VPNClient(service, vpnConfigFile == null
+                        ? null
+                        : storage.readFile(new File(vpnConfigFile))))
                 .start(new BeaconServer())
                 .start(new BorderRouter())
                 .start(new CertificateServer())
