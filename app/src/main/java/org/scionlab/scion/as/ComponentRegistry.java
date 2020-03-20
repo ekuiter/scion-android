@@ -91,7 +91,7 @@ class ComponentRegistry {
         return this;
     }
 
-    private void stop(Component component) {
+    void stop(Component component) {
         component.stop();
         unregister(component);
     }

@@ -32,10 +32,13 @@
                     android:text="@string/start"/>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/pingAddressTextInputLayout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/pingAddressHint">
+                    android:hint="@string/pingAddressHint"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@drawable/ic_check_circle_24dp">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/pingAddressEditText"
                             android:layout_width="match_parent"

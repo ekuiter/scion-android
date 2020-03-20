@@ -43,6 +43,7 @@ public class ScionAS {
     private final Service service;
     protected final Storage storage;
     private final ComponentRegistry componentRegistry;
+    private String localAddress;
     private Scmp scmp;
 
     public enum State {
@@ -111,7 +112,7 @@ public class ScionAS {
         if (!writeTopology(topologyPath.get()))
             return;
         String publicAddress = readDaemonConfig(daemonConfigPath.get());
-        String localAddress = publicAddress.substring(0, publicAddress.lastIndexOf(":"));
+        localAddress = publicAddress.substring(0, publicAddress.lastIndexOf(":"));
         storage.deleteFileOrDirectory(GEN_DIRECTORY_PATH);
 
         Timber.i("starting SCION AS");
@@ -143,6 +144,13 @@ public class ScionAS {
         if (scmp != null && scmp.isHealthy())
             return State.HEALTHY;
         return State.UNHEALTHY;
+    }
+
+    public void setPingAddress(String pingAddress) {
+        if (scmp != null) {
+            componentRegistry.stop(scmp);
+            componentRegistry.start(scmp = new Scmp(localAddress, pingAddress));
+        }
     }
 
     private String readDaemonConfig(String daemonConfigPath) {

@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.textfield.TextInputLayout;
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
 import org.scionlab.scion.as.Config;
@@ -78,12 +79,18 @@ public class MainActivity extends AppCompatActivity {
         getPreferences = getPreferences(MODE_PRIVATE);
         scionButton = findViewById(R.id.scionbutton);
         pingAddressEditText = findViewById(R.id.pingAddressEditText);
+        TextInputLayout pingAddressTextInputLayout = findViewById(R.id.pingAddressTextInputLayout);
         if (savedInstanceState != null) {
             scionLabConfiguration = savedInstanceState.getString(SCIONLAB_CONFIGURATION);
             pingAddress = savedInstanceState.getString(PING_ADDRESS);
         } else
             pingAddress = getResources().getString(R.string.pingAddress);
         pingAddressEditText.setText(getPreferences.getString(PING_ADDRESS, getResources().getString(R.string.pingAddress)));
+        pingAddressTextInputLayout.setEndIconOnClickListener(view -> {
+            pingAddress = pingAddressEditText.getText().toString();
+            getPreferences.edit().putString(PING_ADDRESS, pingAddress).apply();
+            ScionService.setPingAddress(pingAddress);
+        });
         LogActivity.plantTree(new Logger.Tree((tag, message) -> runOnUiThread(() ->
                 LogActivity.append(tag, message))));
     }
@@ -160,11 +167,8 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        chooseScionLabConfiguration(scionLabConfiguration -> {
-                            pingAddress = pingAddressEditText.getText().toString();
-                            getPreferences.edit().putString(PING_ADDRESS, pingAddress).apply();
-                            ScionService.start(this, scionLabConfiguration, pingAddress);
-                        });
+                        chooseScionLabConfiguration(scionLabConfiguration ->
+                                ScionService.start(this, scionLabConfiguration, pingAddress));
                     }));
         } else {
             scionButton.setText(R.string.stop);

@@ -47,7 +47,7 @@ public class ScionService extends Service {
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
     private Handler handler;
-    private ScionLabAS scionLabAS;
+    private static ScionLabAS scionLabAS;
     private static ScionAS.State state = ScionAS.State.STOPPED;
     private static Map<String, ScionAS.State> componentState = new HashMap<>();
 
@@ -67,6 +67,11 @@ public class ScionService extends Service {
 
     static Map<String, ScionAS.State> getComponentState() {
         return componentState;
+    }
+
+    static void setPingAddress(String pingAddress) {
+        if (scionLabAS != null)
+            scionLabAS.setPingAddress(pingAddress);
     }
 
     @Override
