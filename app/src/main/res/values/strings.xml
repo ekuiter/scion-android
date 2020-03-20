@@ -1,5 +1,7 @@
 <resources>
     <string name="applicationName">SCION</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
     <string name="log">Log</string>
     <string name="how">How to use</string>
     <string name="about">About this app</string>

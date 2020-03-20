@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
             state = ScionAS.State.STOPPED;
 
         if (state == ScionAS.State.STOPPED) {
+            scionButton.setText(R.string.start);
             scionButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
             scionButton.setOnClickListener(view ->
                     VPNPermissionFragment.askPermission(this, (String errorMessage) -> {
@@ -166,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }));
         } else {
+            scionButton.setText(R.string.stop);
             scionButton.setBackgroundColor(ContextCompat.getColor(this,
                     state == ScionAS.State.STARTING ? R.color.colorStarting :
                             state == ScionAS.State.HEALTHY ? R.color.colorHealthy : R.color.colorUnhealthy));
