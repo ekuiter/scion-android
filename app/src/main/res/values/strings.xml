@@ -6,8 +6,7 @@
     <string name="how">How to use</string>
     <string name="about">About this app</string>
     <string name="chooseScionLabConfiguration">Choose SCIONLab configuration</string>
-    <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
+    <string name="chooseScionLabConfigurationToast">Please choose a .tar.gz SCIONLab configuration file.</string>
     <string name="notificationChannelDescription">Provides a connection to the SCION network.</string>
     <string name="pingAddressHint">Ping SCION address</string>
     <string name="pingAddress">17-ffaa:0:1102,[0.0.0.0]</string>

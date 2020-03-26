@@ -25,6 +25,7 @@ import org.rauschig.jarchivelib.CompressionType;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -40,18 +41,14 @@ public class ScionLabAS extends ScionAS {
         super(service, stateCallback);
     }
 
-    public void start(String scionLabConfiguration, String pingAddress) {
-        try {
-            Timber.i("extracting SCIONLab configuration");
-            ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
-                    .extract(new File(scionLabConfiguration), storage.getFile(TMP_DIRECTORY_PATH));
-            start(Version.SCIONLAB,
-                    storage.getAbsolutePath(TMP_GEN_DIRECTORY_PATH),
-                    storage.exists(TMP_VPN_CONFIG_PATH) ? storage.getAbsolutePath(TMP_VPN_CONFIG_PATH) : null,
-                    pingAddress);
-            storage.deleteFileOrDirectory(TMP_DIRECTORY_PATH);
-        } catch (IOException e) {
-            Timber.e(e);
-        }
+    public void start(InputStream scionLabConfigurationInputStream, String pingAddress) throws IOException {
+        Timber.i("extracting SCIONLab configuration");
+        ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
+                .extract(scionLabConfigurationInputStream, storage.getFile(TMP_DIRECTORY_PATH));
+        start(Version.SCIONLAB,
+                storage.getAbsolutePath(TMP_GEN_DIRECTORY_PATH),
+                storage.exists(TMP_VPN_CONFIG_PATH) ? storage.getAbsolutePath(TMP_VPN_CONFIG_PATH) : null,
+                pingAddress);
+        storage.deleteFileOrDirectory(TMP_DIRECTORY_PATH);
     }
 }

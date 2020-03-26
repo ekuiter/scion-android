@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +36,6 @@ import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.textfield.TextInputLayout;
-import com.obsez.android.lib.filechooser.ChooserDialog;
 
 import org.scionlab.scion.as.Config;
 import org.scionlab.scion.as.Logger;
@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String SCIONLAB_CONFIGURATION = MainActivity.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION";
+    private static final String SCIONLAB_CONFIGURATION_URI = MainActivity.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION_URI";
     private static final String PING_ADDRESS = MainActivity.class.getCanonicalName() + ".PING_ADDRESS";
     private static final String UPDATE_USER_INTERFACE = MainActivity.class.getCanonicalName() + ".UPDATE_USER_INTERFACE";
     private static final String SCION_STATE = MainActivity.class.getCanonicalName() + ".SCION_STATE";
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver updateUserInterfaceReceiver;
     private MaterialButton scionButton;
     private EditText pingAddressEditText;
-    private String scionLabConfiguration;
+    private String scionLabConfigurationUri;
     private String pingAddress;
 
     static void updateUserInterface(Context context, ScionAS.State state, Map<String, ScionAS.State> componentState) {
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         pingAddressEditText = findViewById(R.id.pingAddressEditText);
         TextInputLayout pingAddressTextInputLayout = findViewById(R.id.pingAddressTextInputLayout);
         if (savedInstanceState != null) {
-            scionLabConfiguration = savedInstanceState.getString(SCIONLAB_CONFIGURATION);
+            scionLabConfigurationUri = savedInstanceState.getString(SCIONLAB_CONFIGURATION_URI);
             pingAddress = savedInstanceState.getString(PING_ADDRESS);
         } else
             pingAddress = getResources().getString(R.string.pingAddress);
@@ -119,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (scionLabConfiguration != null)
-            outState.putString(SCIONLAB_CONFIGURATION, scionLabConfiguration);
+        if (scionLabConfigurationUri != null)
+            outState.putString(SCIONLAB_CONFIGURATION_URI, scionLabConfigurationUri);
         if (pingAddress != null)
             outState.putString(PING_ADDRESS, pingAddress);
     }
@@ -166,9 +166,7 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
                             return;
                         }
-
-                        chooseScionLabConfiguration(scionLabConfiguration ->
-                                ScionService.start(this, scionLabConfiguration, pingAddress));
+                        chooseScionLabConfiguration();
                     }));
         } else {
             scionButton.setText(R.string.stop);
@@ -209,17 +207,28 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void chooseScionLabConfiguration(Consumer<String> callback) {
-        new ChooserDialog(this)
-                .withResources(R.string.chooseScionLabConfiguration, R.string.ok, R.string.cancel)
-                .withStartFile(getPreferences.getString(SCIONLAB_CONFIGURATION, null))
-                .withFilterRegex(false, false, Config.Scion.SCIONLAB_CONFIGURATION_REGEX)
-                .withChosenListener((path, pathFile) -> {
-                    if (path != null) {
-                        scionLabConfiguration = path;
-                        getPreferences.edit().putString(SCIONLAB_CONFIGURATION, scionLabConfiguration).apply();
-                        callback.accept(path);
-                    }
-                }).build().show();
+    private void chooseScionLabConfiguration() {
+        Intent chooseFile;
+        Intent intent;
+        chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
+        chooseFile.addCategory(Intent.CATEGORY_OPENABLE);
+        chooseFile.setType("*/*");
+        intent = Intent.createChooser(chooseFile, getString(R.string.chooseScionLabConfiguration));
+        startActivityForResult(intent, 0);
+        Toast.makeText(this, R.string.chooseScionLabConfigurationToast, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode != RESULT_OK)
+            return;
+        Uri uri = data.getData();
+        if (uri != null) {
+            scionLabConfigurationUri = uri.toString();
+            getPreferences.edit().putString(SCIONLAB_CONFIGURATION_URI, scionLabConfigurationUri).apply();
+            ScionService.start(this, scionLabConfigurationUri, pingAddress);
+        }
     }
 }

@@ -23,17 +23,22 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
 import org.scionlab.scion.as.ScionAS;
 import org.scionlab.scion.as.ScionLabAS;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +47,7 @@ import timber.log.Timber;
 public class ScionService extends Service {
     private static final int NOTIFICATION_ID  = 1;
     private static final String NOTIFICATION_CHANNEL = ScionService.class.getCanonicalName() + ".NOTIFICATION_CHANNEL";
-    private static final String SCIONLAB_CONFIGURATION = ScionService.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION";
+    private static final String SCIONLAB_CONFIGURATION_URI = ScionService.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION_URI";
     private static final String PING_ADDRESS = ScionService.class.getCanonicalName() + ".PING_ADDRESS";
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
@@ -51,9 +56,9 @@ public class ScionService extends Service {
     private static ScionAS.State state = ScionAS.State.STOPPED;
     private static Map<String, ScionAS.State> componentState = new HashMap<>();
 
-    static void start(Context context, String scionLabConfiguration, String pingAddress) {
+    static void start(Context context, String scionLabConfigurationUri, String pingAddress) {
         context.startService(new Intent(context, ScionService.class)
-                .putExtra(SCIONLAB_CONFIGURATION, scionLabConfiguration)
+                .putExtra(SCIONLAB_CONFIGURATION_URI, scionLabConfigurationUri)
                 .putExtra(PING_ADDRESS, pingAddress));
     }
 
@@ -97,9 +102,18 @@ public class ScionService extends Service {
         if (intent == null || scionLabAS.getState() != ScionAS.State.STOPPED)
             return ret;
 
-        final String scionLabConfiguration = intent.getStringExtra(SCIONLAB_CONFIGURATION);
-        if (scionLabConfiguration == null) {
+        final String scionLabConfigurationUri = intent.getStringExtra(SCIONLAB_CONFIGURATION_URI);
+        if (scionLabConfigurationUri == null) {
             Timber.e("no SCIONLab configuration given");
+            return ret;
+        }
+
+        InputStream scionLabConfigurationInputStream;
+        try {
+            scionLabConfigurationInputStream =
+                    getContentResolver().openInputStream(Uri.parse(scionLabConfigurationUri));
+        } catch (FileNotFoundException e) {
+            Timber.e(e);
             return ret;
         }
 
@@ -112,7 +126,11 @@ public class ScionService extends Service {
         handler.post(() -> {
             // make this a foreground service, decreasing the probability that Android arbitrarily kills this service
             startForeground(NOTIFICATION_ID, notificationBuilder.build());
-            scionLabAS.start(scionLabConfiguration, pingAddress);
+            try {
+                scionLabAS.start(scionLabConfigurationInputStream, pingAddress);
+            } catch (IOException e) {
+                Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
         });
 
         return ret;
