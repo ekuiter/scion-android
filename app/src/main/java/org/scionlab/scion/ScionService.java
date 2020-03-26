@@ -130,6 +130,7 @@ public class ScionService extends Service {
                 scionLabAS.start(scionLabConfigurationInputStream, pingAddress);
             } catch (IOException e) {
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                stopForeground(STOP_FOREGROUND_REMOVE);
             }
         });
 

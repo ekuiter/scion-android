@@ -29,7 +29,6 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -37,13 +36,11 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.scionlab.scion.as.Config;
 import org.scionlab.scion.as.Logger;
 import org.scionlab.scion.as.ScionAS;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class MainActivity extends AppCompatActivity {
     private static final String SCIONLAB_CONFIGURATION_URI = MainActivity.class.getCanonicalName() + ".SCIONLAB_CONFIGURATION_URI";
@@ -52,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String SCION_STATE = MainActivity.class.getCanonicalName() + ".SCION_STATE";
     private static final String COMPONENT_STATE = MainActivity.class.getCanonicalName() + ".COMPONENT_STATE";
 
-    private SharedPreferences getPreferences;
+    private SharedPreferences preferences;
     private BroadcastReceiver updateUserInterfaceReceiver;
     private MaterialButton scionButton;
     private EditText pingAddressEditText;
@@ -76,19 +73,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         setContentView(R.layout.activity_main);
-        getPreferences = getPreferences(MODE_PRIVATE);
+        preferences = getPreferences(MODE_PRIVATE);
         scionButton = findViewById(R.id.scionbutton);
         pingAddressEditText = findViewById(R.id.pingAddressEditText);
         TextInputLayout pingAddressTextInputLayout = findViewById(R.id.pingAddressTextInputLayout);
-        if (savedInstanceState != null) {
-            scionLabConfigurationUri = savedInstanceState.getString(SCIONLAB_CONFIGURATION_URI);
-            pingAddress = savedInstanceState.getString(PING_ADDRESS);
-        } else
-            pingAddress = getResources().getString(R.string.pingAddress);
-        pingAddressEditText.setText(getPreferences.getString(PING_ADDRESS, getResources().getString(R.string.pingAddress)));
+        scionLabConfigurationUri = preferences.getString(SCIONLAB_CONFIGURATION_URI, null);
+        pingAddress = preferences.getString(PING_ADDRESS, getResources().getString(R.string.pingAddress));
+        pingAddressEditText.setText(pingAddress);
         pingAddressTextInputLayout.setEndIconOnClickListener(view -> {
             pingAddress = pingAddressEditText.getText().toString();
-            getPreferences.edit().putString(PING_ADDRESS, pingAddress).apply();
+            preferences.edit().putString(PING_ADDRESS, pingAddress).apply();
             ScionService.setPingAddress(pingAddress);
         });
         LogActivity.plantTree(new Logger.Tree((tag, message) -> runOnUiThread(() ->
@@ -114,15 +108,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(updateUserInterfaceReceiver);
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (scionLabConfigurationUri != null)
-            outState.putString(SCIONLAB_CONFIGURATION_URI, scionLabConfigurationUri);
-        if (pingAddress != null)
-            outState.putString(PING_ADDRESS, pingAddress);
     }
 
     @Override
@@ -227,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         Uri uri = data.getData();
         if (uri != null) {
             scionLabConfigurationUri = uri.toString();
-            getPreferences.edit().putString(SCIONLAB_CONFIGURATION_URI, scionLabConfigurationUri).apply();
+            preferences.edit().putString(SCIONLAB_CONFIGURATION_URI, scionLabConfigurationUri).apply();
             ScionService.start(this, scionLabConfigurationUri, pingAddress);
         }
     }
