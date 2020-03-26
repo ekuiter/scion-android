@@ -98,11 +98,12 @@ class Process {
 
     private ProcessBuilder build() {
         ArrayList<String> command = new ArrayList<>();
-        command.add("./" + binaryPath);
+        command.add(nativeLibraryDir + "/" + binaryPath);
         command.addAll(arguments);
 
+        storage.createDirectory(WORKING_DIRECTORY_PATH);
         ProcessBuilder processBuilder = new ProcessBuilder()
-                .directory(new File(nativeLibraryDir))
+                .directory(new File(storage.getAbsolutePath(WORKING_DIRECTORY_PATH)))
                 .command(command)
                 .redirectErrorStream(true);
         processBuilder.environment().putAll(environment);

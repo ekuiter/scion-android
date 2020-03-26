@@ -23,6 +23,7 @@ import static org.scionlab.scion.as.Logger.*;
 
 public class Config {
     static class Process {
+        static final String WORKING_DIRECTORY_PATH = "EXTERNAL/workdir"; // working directory of SCION processes
         static final String CONFIG_FLAG = "-lib_env_config"; // flag that specifies a configuration file
         static final String DISPATCHER_SOCKET_ENV = "DISPATCHER_SOCKET"; // environment variable that specifies the dispatcher socket
     }
