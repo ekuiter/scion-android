@@ -128,6 +128,7 @@ public class ScionAS {
                 .start(new Daemon(publicAddress))
                 .start(new PathServer())
                 .start(scmp = new Scmp(localAddress, pingAddress))
+                .start(new SensorFetcher(localAddress))
                 .notifyStateChange();
     }
 

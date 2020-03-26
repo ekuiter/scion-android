@@ -123,6 +123,15 @@ public class Config {
         static final long HEALTH_TIMEOUT = 2000; // how long the component is considered healthy after the last received ping
     }
 
+    static class SensorFetcher {
+        static final String BINARY_FLAG = "sensorfetcher"; // value of binary's first argument to run the sensorfetcher tool
+        static final String IA_PATH = Process.WORKING_DIRECTORY_PATH + "/gen/ia"; // path file including ISD-AS information
+        static final String CLIENT_FLAG = "-scion-android_c"; // flag that specifies the local address
+        static final String SERVER_FLAG = "-scion-android_s"; // flag that specifies the remote address
+        static final String DISPATCHER_SOCKET_FLAG = "-scion-android_dispatcher"; // flag that specifies the dispatcher socket
+        static final String DAEMON_SOCKET_FLAG = "-scion-android_sciond"; // flag that specifies the daemon socket
+    }
+
     public static class Scion {
         static final String V0_4_0_BINARY_PATH = "libscion-v0.4.0.so"; // file name of SCION v0.4.0 binary in jniLibs (not shipped by default)
         static final String SCIONLAB_BINARY_PATH = "libscion-scionlab.so"; // same for the scionlab fork of SCION (shipped and used by default)
