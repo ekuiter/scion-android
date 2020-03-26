@@ -125,7 +125,6 @@ public class Config {
 
     static class SensorFetcher {
         static final String BINARY_FLAG = "sensorfetcher"; // value of binary's first argument to run the sensorfetcher tool
-        static final String IA_PATH = Process.WORKING_DIRECTORY_PATH + "/gen/ia"; // path file including ISD-AS information
         static final String CLIENT_FLAG = "-scion-android_c"; // flag that specifies the local address
         static final String SERVER_FLAG = "-scion-android_s"; // flag that specifies the remote address
         static final String DISPATCHER_SOCKET_FLAG = "-scion-android_dispatcher"; // flag that specifies the dispatcher socket
