@@ -65,7 +65,7 @@ public class VPNPermissionFragment extends Fragment {
             Timber.e("OpenVPN for Android is not installed");
             callback.accept("Please install OpenVPN for Android to run SCION, then try again.");
             startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("https://play.google.com/store/apps/details?id=" + PACKAGE_NAME)));
+                    Uri.parse("market://details?id=" + PACKAGE_NAME)));
             return;
         }
 
