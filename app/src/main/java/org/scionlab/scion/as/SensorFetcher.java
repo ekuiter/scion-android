@@ -20,12 +20,6 @@ package org.scionlab.scion.as;
 import static org.scionlab.scion.as.Config.SensorFetcher.*;
 
 class SensorFetcher extends Component {
-    private String localAddress;
-
-    SensorFetcher(String localAddress) {
-        this.localAddress = localAddress;
-    }
-
     @Override
     Class[] dependsOn() {
         return new Class[]{Scmp.class};
@@ -38,10 +32,8 @@ class SensorFetcher extends Component {
 
     @Override
     void run() {
-        process.addArgument(BINARY_FLAG)
-                .addArgument(DISPATCHER_SOCKET_FLAG, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH))
-                .addArgument(DAEMON_SOCKET_FLAG, storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH))
-                .addArgument(CLIENT_FLAG, localAddress)
+        process.addEnvironmentVariable(DISPATCHER_SOCKET_ENV, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH))
+                .addArgument(BINARY_FLAG)
                 .addArgument(SERVER_FLAG, "17-ffaa:0:1102,[192.33.93.177]:42003") // TODO: make this configurable from user interface
                 .run();
 

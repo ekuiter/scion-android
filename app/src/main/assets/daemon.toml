@@ -3,27 +3,24 @@
 # The structure of this file depends on the SCION version and is thus linked to the binary located in jniLibs.
 
 [general]
-ID = "daemon"
-ReconnectToDispatcher = true
-ConfigDir = "%s"
+id = "daemon"
+reconnect_to_dispatcher = true
+config_dir = "%s"
 
 [metrics]
-Prometheus = "[127.0.0.1]:30455"
+prometheus = "127.0.0.1:30455"
 
-[logging.file]
-Path = "%s"
-Level = "%s"
-MaxAge = 3
-MaxBackups = 1
+[log.file]
+path = "%s"
+level = "%s"
+max_age = 3
+max_backups = 1
 
-[trustDB]
-Connection = "%s"
+[trust_db]
+connection = "%s"
 
-[sd.PathDB]
-Connection = "%s"
+[path_db]
+connection = "%s"
 
 [sd]
-Public = "%s"
-SocketFileMode = "0777"
-Reliable = "%s"
-Unix = "%s"
+address = "127.0.0.1:30255"

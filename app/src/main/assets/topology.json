@@ -1,16 +1,5 @@
 {
-  "BeaconService": {
-    "beacon_server": {
-      "Addrs": {
-        "IPv4": {
-          "Public": {
-            "Addr": "127.0.0.1",
-            "L4Port": 31041
-          }
-        }
-      }
-    }
-  },
+  "Attributes": [],
   "BorderRouters": {
     "border_router": {
       "CtrlAddr": {
@@ -60,21 +49,19 @@
       }
     }
   },
-  "Core": false,
-  "Discovery": {},
-  "ISD_AS": "%s",
-  "MTU": 1472,
-  "Overlay": "UDP/IPv4",
-  "PathService": {
-    "path_server": {
+  "ControlService": {
+    "control_server": {
       "Addrs": {
         "IPv4": {
           "Public": {
             "Addr": "127.0.0.1",
-            "L4Port": 31043
+            "L4Port": 30254
           }
         }
       }
     }
-  }
+  },
+  "ISD_AS": "%s",
+  "MTU": 1472,
+  "Overlay": "UDP/IPv4"
 }

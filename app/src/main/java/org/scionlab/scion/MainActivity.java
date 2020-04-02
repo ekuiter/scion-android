@@ -26,6 +26,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -38,7 +40,9 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.navigation.NavigationView;
 
+import org.scionlab.scion.as.Logger;
 import org.scionlab.scion.as.ScionAS;
+import org.scionlab.scion.as.ScionLabAS;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -90,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(abdt);
 
         getSupportActionBar().setHomeButtonEnabled(true);
+	getSupportActionBar().setSubtitle(ScionLabAS.getScionVersion(this));
         abdt.syncState();
 
         navigationView = findViewById(R.id.nav_view);

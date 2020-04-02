@@ -35,7 +35,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'com.google.android:flexbox:2.0.1'
-    implementation 'com.moandjiezana.toml:toml4j:0.7.2'
     implementation 'com.jakewharton.timber:timber:4.7.1'
     //noinspection GradleDependency
     implementation 'org.rauschig:jarchivelib:0.8.0' // do not update this (due to https://github.com/thrau/jarchivelib/issues/75)

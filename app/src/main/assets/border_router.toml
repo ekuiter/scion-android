@@ -3,17 +3,15 @@
 # The structure of this file depends on the SCION version and is thus linked to the binary located in jniLibs.
 
 [general]
-ID = "border_router"
-ConfigDir = "%s"
+id = "border_router"
+config_dir = "%s"
+reconnect_to_dispatcher = true
 
 [metrics]
-Prometheus = "[127.0.0.1]:32045"
+prometheus = "127.0.0.1:31445"
 
-[logging.file]
-Path = "%s"
-Level = "%s"
-MaxAge = 3
-MaxBackups = 1
-
-[br]
-Profile = false
+[log.file]
+path = "%s"
+level = "%s"
+max_age = 3
+max_backups = 1
