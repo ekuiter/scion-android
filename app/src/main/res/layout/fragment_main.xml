@@ -97,7 +97,7 @@
                 android:text="@string/borderRouter"
                 android:layout_marginEnd="10sp"/>
             <com.google.android.material.chip.Chip
-                android:id="@+id/beaconServer"
+                android:id="@+id/controlServer"
                 style="@style/Widget.MaterialComponents.Chip.Action"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -105,29 +105,7 @@
                 app:chipIconTint="@color/colorPrimary"
                 app:chipIconSize="18sp"
                 app:chipStartPadding="8sp"
-                android:text="@string/beaconServer"
-                android:layout_marginEnd="10sp"/>
-            <com.google.android.material.chip.Chip
-                android:id="@+id/certificateServer"
-                style="@style/Widget.MaterialComponents.Chip.Action"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:chipIcon="@drawable/ic_chip"
-                app:chipIconTint="@color/colorPrimary"
-                app:chipIconSize="18sp"
-                app:chipStartPadding="8sp"
-                android:text="@string/certificateServer"
-                android:layout_marginEnd="10sp"/>
-            <com.google.android.material.chip.Chip
-                android:id="@+id/pathServer"
-                style="@style/Widget.MaterialComponents.Chip.Action"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:chipIcon="@drawable/ic_chip"
-                app:chipIconTint="@color/colorPrimary"
-                app:chipIconSize="18sp"
-                app:chipStartPadding="8sp"
-                android:text="@string/pathServer"
+                android:text="@string/controlServer"
                 android:layout_marginEnd="10sp"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/scmp"

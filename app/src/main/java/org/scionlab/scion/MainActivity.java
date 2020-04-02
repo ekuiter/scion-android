@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(abdt);
 
         getSupportActionBar().setHomeButtonEnabled(true);
-	getSupportActionBar().setSubtitle(ScionLabAS.getScionVersion(this));
+        getSupportActionBar().setSubtitle("Version: " + ScionLabAS.getScionVersion(this));
         abdt.syncState();
 
         navigationView = findViewById(R.id.nav_view);

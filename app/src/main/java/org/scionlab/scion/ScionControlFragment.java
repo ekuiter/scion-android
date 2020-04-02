@@ -39,14 +39,12 @@ public class ScionControlFragment extends Fragment {
     private String pingAddress;
     private Chip[] chips;
 
-    private static final int CHIP_BEACON_INDEX = 0;
+    private static final int CHIP_CONTROL_INDEX = 0;
     private static final int CHIP_BORDER_ROUTER_INDEX = 1;
-    private static final int CHIP_CERTIFICATE_INDEX = 2;
-    private static final int CHIP_DAEMON_INDEX = 3;
-    private static final int CHIP_DISPATCHER_INDEX = 4;
-    private static final int CHIP_PATH_SERVER_INDEX = 5;
-    private static final int CHIP_SCMP_INDEX = 6;
-    private static final int CHIP_VPN_CLIENT_INDEX = 7;
+    private static final int CHIP_DAEMON_INDEX = 2;
+    private static final int CHIP_DISPATCHER_INDEX = 3;
+    private static final int CHIP_SCMP_INDEX = 4;
+    private static final int CHIP_VPN_CLIENT_INDEX = 5;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -69,10 +67,12 @@ public class ScionControlFragment extends Fragment {
 
 
         chips = new Chip[] {
-                layout.findViewById(R.id.beaconServer), layout.findViewById(R.id.borderRouter),
-                layout.findViewById(R.id.certificateServer), layout.findViewById(R.id.daemon),
-                layout.findViewById(R.id.dispatcher), layout.findViewById(R.id.pathServer),
-                layout.findViewById(R.id.scmp), layout.findViewById(R.id.vpnClient)};
+                layout.findViewById(R.id.controlServer),
+                layout.findViewById(R.id.borderRouter),
+                layout.findViewById(R.id.daemon),
+                layout.findViewById(R.id.dispatcher),
+                layout.findViewById(R.id.scmp),
+                layout.findViewById(R.id.vpnClient)};
 
         updateUserInterface(ScionService.getState(), ScionService.getComponentState());
         return layout;
@@ -113,18 +113,14 @@ public class ScionControlFragment extends Fragment {
             int color = v == ScionAS.State.STOPPED ? R.color.colorPrimary :
                     v == ScionAS.State.STARTING ? R.color.colorStarting :
                     v == ScionAS.State.HEALTHY ? R.color.colorHealthy : R.color.colorUnhealthy;
-            if (k.equals("BeaconServer"))
-                chips[CHIP_BEACON_INDEX].setChipIconTintResource(color);
+            if (k.equals("ControlServer"))
+                chips[CHIP_CONTROL_INDEX].setChipIconTintResource(color);
             if (k.equals("BorderRouter"))
                 chips[CHIP_BORDER_ROUTER_INDEX].setChipIconTintResource(color);
-            if (k.equals("CertificateServer"))
-                chips[CHIP_CERTIFICATE_INDEX].setChipIconTintResource(color);
             if (k.equals("Daemon"))
                 chips[CHIP_DAEMON_INDEX].setChipIconTintResource(color);
             if (k.equals("Dispatcher"))
                 chips[CHIP_DISPATCHER_INDEX].setChipIconTintResource(color);
-            if (k.equals("PathServer"))
-                chips[CHIP_PATH_SERVER_INDEX].setChipIconTintResource(color);
             if (k.equals("Scmp"))
                 chips[CHIP_SCMP_INDEX].setChipIconTintResource(color);
             if (k.equals("VPNClient"))
