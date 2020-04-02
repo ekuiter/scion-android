@@ -1,0 +1,32 @@
+# This is a configuration file template for the SCION control server.
+# It is instantiated with concrete values in the ControlServer class.
+# The structure of this file depends on the SCION version and is thus linked to the binary located in jniLibs.
+
+[general]
+id = "control_server"
+reconnect_to_dispatcher = true
+config_dir = "%s"
+
+[metrics]
+prometheus = "127.0.0.1:30454"
+
+[log.file]
+path = "%s"
+level = "%s"
+max_age = 3
+max_backups = 1
+
+[trust_db]
+connection = "%s"
+
+[path_db]
+connection = "%s"
+
+[beacon_db]
+connection = "%s"
+
+[bs]
+origination_interval = "5s"
+propagation_interval = "5s"
+rev_overlap = "5s"
+rev_ttl = "20s"

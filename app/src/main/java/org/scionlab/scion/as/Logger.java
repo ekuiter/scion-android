@@ -51,7 +51,8 @@ public class Logger {
             this.outputConsumer = outputConsumer;
             this.deletePattern = deletePattern;
             this.interval = interval;
-            setUncaughtExceptionHandler(uncaughtExceptionHandler);
+            if (uncaughtExceptionHandler != null)
+                setUncaughtExceptionHandler(uncaughtExceptionHandler);
         }
 
         LogThread setInputStream(InputStream inputStream) {
@@ -118,10 +119,6 @@ public class Logger {
 
         public Tree(BiConsumer<String, String> outputConsumer) {
             this.outputConsumer = outputConsumer;
-        }
-
-        public LogLevel getLogLevel(LogLevel logLevel) {
-            return logLevel;
         }
 
         public void setLogLevel(LogLevel logLevel) {

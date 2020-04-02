@@ -21,18 +21,15 @@ import static org.scionlab.scion.as.Config.Scmp.*;
 
 class Scmp extends Component {
     private long lastPingReceived;
-    private String localAddress, remoteAddress;
+    private String remoteAddress;
 
-    Scmp(String localAddress, String remoteAddress) {
-        this.localAddress = localAddress;
+    Scmp(String remoteAddress) {
         this.remoteAddress = remoteAddress;
     }
 
     @Override
     Class[] dependsOn() {
-        return new Class[]{Dispatcher.class, VPNClient.class,
-                BeaconServer.class, BorderRouter.class, CertificateServer.class,
-                Daemon.class, PathServer.class};
+        return new Class[]{Dispatcher.class, VPNClient.class, BorderRouter.class, ControlServer.class, Daemon.class};
     }
 
     @Override
@@ -57,8 +54,6 @@ class Scmp extends Component {
         process.addArgument(BINARY_FLAG)
                 .addArgument(ECHO_FLAG)
                 .addArgument(DISPATCHER_SOCKET_FLAG, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH))
-                .addArgument(DAEMON_SOCKET_FLAG, storage.getAbsolutePath(Config.Daemon.RELIABLE_SOCKET_PATH))
-                .addArgument(LOCAL_FLAG, localAddress)
                 .addArgument(REMOTE_FLAG, remoteAddress)
                 .watchFor(READY_PATTERN, () -> {
                     lastPingReceived = System.currentTimeMillis();

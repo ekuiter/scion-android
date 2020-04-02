@@ -18,15 +18,16 @@
 package org.scionlab.scion.as;
 
 import android.app.Service;
+import android.content.Context;
 
 import org.rauschig.jarchivelib.ArchiveFormat;
 import org.rauschig.jarchivelib.ArchiverFactory;
 import org.rauschig.jarchivelib.CompressionType;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import timber.log.Timber;
@@ -45,10 +46,16 @@ public class ScionLabAS extends ScionAS {
         Timber.i("extracting SCIONLab configuration");
         ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
                 .extract(scionLabConfigurationInputStream, storage.getFile(TMP_DIRECTORY_PATH));
+        Optional<String> vpnConfigPath = storage.findInDirectory(TMP_DIRECTORY_PATH, TMP_VPN_CONFIG_PATH_REGEX);
         start(Version.SCIONLAB,
                 storage.getAbsolutePath(TMP_GEN_DIRECTORY_PATH),
-                storage.exists(TMP_VPN_CONFIG_PATH) ? storage.getAbsolutePath(TMP_VPN_CONFIG_PATH) : null,
+                vpnConfigPath.map(storage::getAbsolutePath).orElse(null),
                 pingAddress);
         storage.deleteFileOrDirectory(TMP_DIRECTORY_PATH);
+    }
+
+    public static String getScionVersion(Context context) {
+        Process.initialize(context);
+        return Version.SCIONLAB.getScionVersion(Storage.from(context));
     }
 }

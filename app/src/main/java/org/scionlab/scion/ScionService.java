@@ -17,6 +17,7 @@
 
 package org.scionlab.scion;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -52,6 +53,7 @@ public class ScionService extends Service {
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
     private Handler handler;
+    @SuppressLint("StaticFieldLeak")
     private static ScionLabAS scionLabAS;
     private static ScionAS.State state = ScionAS.State.STOPPED;
     private static Map<String, ScionAS.State> componentState = new HashMap<>();

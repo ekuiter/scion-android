@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -38,6 +39,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.scionlab.scion.as.Logger;
 import org.scionlab.scion.as.ScionAS;
+import org.scionlab.scion.as.ScionLabAS;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -87,6 +89,10 @@ public class MainActivity extends AppCompatActivity {
         });
         LogActivity.plantTree(new Logger.Tree((tag, message) -> runOnUiThread(() ->
                 LogActivity.append(tag, message))));
+
+        ActionBar supportActionBar = getSupportActionBar();
+        if (supportActionBar != null)
+            supportActionBar.setSubtitle(ScionLabAS.getScionVersion(this));
     }
 
     @Override
@@ -162,9 +168,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Chip[] chips = new Chip[] {
-                findViewById(R.id.beaconServer), findViewById(R.id.borderRouter),
-                findViewById(R.id.certificateServer), findViewById(R.id.daemon),
-                findViewById(R.id.dispatcher), findViewById(R.id.pathServer),
+                findViewById(R.id.borderRouter), findViewById(R.id.controlServer),
+                findViewById(R.id.daemon), findViewById(R.id.dispatcher),
                 findViewById(R.id.scmp), findViewById(R.id.vpnClient)};
         for (Chip chip : chips)
             chip.setChipIconTintResource(R.color.colorPrimary);
@@ -173,18 +178,14 @@ public class MainActivity extends AppCompatActivity {
             int color = v == ScionAS.State.STOPPED ? R.color.colorPrimary :
                     v == ScionAS.State.STARTING ? R.color.colorStarting :
                     v == ScionAS.State.HEALTHY ? R.color.colorHealthy : R.color.colorUnhealthy;
-            if (k.equals("BeaconServer"))
-                ((Chip) findViewById(R.id.beaconServer)).setChipIconTintResource(color);
             if (k.equals("BorderRouter"))
                 ((Chip) findViewById(R.id.borderRouter)).setChipIconTintResource(color);
-            if (k.equals("CertificateServer"))
-                ((Chip) findViewById(R.id.certificateServer)).setChipIconTintResource(color);
+            if (k.equals("ControlServer"))
+                ((Chip) findViewById(R.id.controlServer)).setChipIconTintResource(color);
             if (k.equals("Daemon"))
                 ((Chip) findViewById(R.id.daemon)).setChipIconTintResource(color);
             if (k.equals("Dispatcher"))
                 ((Chip) findViewById(R.id.dispatcher)).setChipIconTintResource(color);
-            if (k.equals("PathServer"))
-                ((Chip) findViewById(R.id.pathServer)).setChipIconTintResource(color);
             if (k.equals("Scmp"))
                 ((Chip) findViewById(R.id.scmp)).setChipIconTintResource(color);
             if (k.equals("VPNClient"))

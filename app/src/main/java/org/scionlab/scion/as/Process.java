@@ -54,8 +54,12 @@ class Process {
             throw new RuntimeException("process class must be initialized first");
     }
 
+    static Process from(String binaryPath, String tag, Storage storage, Logger.LogThread logThread) {
+        return new Process(binaryPath, tag, storage).setLogThread(logThread);
+    }
+
     static Process from(String binaryPath, String tag, Storage storage, UncaughtExceptionHandler uncaughtExceptionHandler) {
-        return new Process(binaryPath, tag, storage).setLogThread(Logger.createLogThread(tag, uncaughtExceptionHandler));
+        return from(binaryPath, tag, storage, Logger.createLogThread(tag, uncaughtExceptionHandler));
     }
 
     static void initialize(Context context) {
@@ -82,8 +86,13 @@ class Process {
         return this;
     }
 
+    Process addEnvironmentVariable(String key, String value) {
+        environment.put(key, value);
+        return this;
+    }
+
     Process connectToDispatcher() {
-        environment.put(DISPATCHER_SOCKET_ENV, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
+        addEnvironmentVariable(DISPATCHER_SOCKET_ENV, storage.getAbsolutePath(Config.Dispatcher.SOCKET_PATH));
         return this;
     }
 

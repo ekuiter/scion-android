@@ -21,19 +21,21 @@ import android.app.Service;
 
 import androidx.annotation.NonNull;
 
-import com.moandjiezana.toml.Toml;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import timber.log.Timber;
 
+import static org.scionlab.scion.as.Config.Dispatcher.BINARY_FLAG;
+import static org.scionlab.scion.as.Config.Logger.DELETE_PATTERN;
+import static org.scionlab.scion.as.Config.Logger.UPDATE_INTERVAL;
 import static org.scionlab.scion.as.Config.Scion.*;
 
 /**
@@ -43,7 +45,6 @@ public class ScionAS {
     private final Service service;
     protected final Storage storage;
     private final ComponentRegistry componentRegistry;
-    private String localAddress;
     private Scmp scmp;
 
     public enum State {
@@ -58,7 +59,6 @@ public class ScionAS {
     }
 
     public enum Version {
-        V0_4_0(V0_4_0_BINARY_PATH),
         SCIONLAB(SCIONLAB_BINARY_PATH);
 
         private String binaryPath;
@@ -69,6 +69,23 @@ public class ScionAS {
 
         public String getBinaryPath() {
             return binaryPath;
+        }
+
+        public String getScionVersion(Storage storage) {
+            AtomicReference<String> version = new AtomicReference<>();
+            Process.from(binaryPath, null, storage, new Logger.LogThread(
+                    version::set, DELETE_PATTERN, UPDATE_INTERVAL, null))
+                    .addArgument(BINARY_FLAG).addArgument(VERSION_FLAG).run();
+            String _version = version.get();
+            if (_version != null) {
+                if (!_version.contains("Scion version:"))
+                    _version = null;
+                else
+                    _version = _version
+                            .replaceFirst("^.*Scion version: ", "")
+                            .replaceFirst("-dirty", "");
+            }
+            return _version;
         }
     }
 
@@ -98,21 +115,19 @@ public class ScionAS {
         Optional<String> certsPath = storage.findInDirectory(componentPath, CERTS_DIRECTORY_PATH_REGEX);
         Optional<String> keysPath = storage.findInDirectory(componentPath, KEYS_DIRECTORY_PATH_REGEX);
         Optional<String> topologyPath = storage.findInDirectory(componentPath, TOPOLOGY_PATH_REGEX);
-        Optional<String> daemonConfigPath = storage.findInDirectory(endhostPath, DAEMON_CONFIG_PATH_REGEX);
 
-        if (!Stream.of(isdPath, asPath, componentPath, endhostPath, certsPath, keysPath,
-                topologyPath, daemonConfigPath).allMatch(Optional::isPresent)) {
+        if (!Stream.of(isdPath, asPath, componentPath, endhostPath, certsPath, keysPath, topologyPath)
+                .allMatch(Optional::isPresent)) {
             Timber.e("unexpected gen directory structure");
             return;
         }
 
+        storage.deleteFileOrDirectory(CONFIG_DIRECTORY_PATH);
         storage.createDirectory(CONFIG_DIRECTORY_PATH);
         storage.copyFileOrDirectory(certsPath.get(), CERTS_DIRECTORY_PATH);
         storage.copyFileOrDirectory(keysPath.get(), KEYS_DIRECTORY_PATH);
         if (!writeTopology(topologyPath.get()))
             return;
-        String publicAddress = readDaemonConfig(daemonConfigPath.get());
-        localAddress = publicAddress.substring(0, publicAddress.lastIndexOf(":"));
         storage.deleteFileOrDirectory(GEN_DIRECTORY_PATH);
 
         Timber.i("starting SCION AS");
@@ -121,14 +136,12 @@ public class ScionAS {
                 .start(new VPNClient(service, vpnConfigFile == null
                         ? null
                         : storage.readFile(new File(vpnConfigFile))))
-                .start(new BeaconServer())
                 .start(new BorderRouter())
-                .start(new CertificateServer())
+                .start(new ControlServer())
                 .start(new Dispatcher())
-                .start(new Daemon(publicAddress))
-                .start(new PathServer())
-                .start(scmp = new Scmp(localAddress, pingAddress))
-                .start(new SensorFetcher(localAddress))
+                .start(new Daemon())
+                .start(scmp = new Scmp(pingAddress))
+                //.start(new SensorFetcher())
                 .notifyStateChange();
     }
 
@@ -152,14 +165,8 @@ public class ScionAS {
     public void setPingAddress(String pingAddress) {
         if (scmp != null) {
             componentRegistry.stop(scmp);
-            componentRegistry.start(scmp = new Scmp(localAddress, pingAddress));
+            componentRegistry.start(scmp = new Scmp(pingAddress));
         }
-    }
-
-    private String readDaemonConfig(String daemonConfigPath) {
-        return new Toml()
-                .read(storage.getInputStream(daemonConfigPath))
-                .getString(DAEMON_CONFIG_PUBLIC_TOML_PATH);
     }
 
     private boolean writeTopology(String topologyPath) {
@@ -174,9 +181,10 @@ public class ScionAS {
             String remoteIa = iface.getString(IA_JSON_PATH);
             String remoteOverlayAddr = iface.getJSONObject(REMOTE_OVERLAY_JSON_PATH).getString(OVERLAY_ADDR_JSON_PATH);
             int remoteOverlayPort = iface.getJSONObject(REMOTE_OVERLAY_JSON_PATH).getInt(OVERLAY_PORT_JSON_PATH);
-            storage.writeFile(TOPOLOGY_PATH, String.format(storage.readAssetFile(TOPOLOGY_TEMPLATE_PATH),
-                    remoteIa, overlayAddr, overlayPort,
-                    remoteOverlayAddr, remoteOverlayPort, ia));
+            storage.writeFile(TOPOLOGY_PATH,
+                    String.format(storage.readAssetFile(TOPOLOGY_TEMPLATE_PATH),
+                        remoteIa, overlayAddr, overlayPort,
+                        remoteOverlayAddr, remoteOverlayPort, ia));
         } catch (JSONException e) {
             Timber.e(e);
             return false;

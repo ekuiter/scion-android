@@ -3,15 +3,15 @@
 # The structure of this file depends on the SCION version and is thus linked to the binary located in jniLibs.
 
 [dispatcher]
-ID = "dispatcher"
-SocketFileMode = "0777"
-ApplicationSocket = "%s"
+id = "dispatcher"
+socket_file_mode = "0777"
+application_socket = "%s"
 
 [metrics]
-Prometheus = "[127.0.0.1]:30441"
+prometheus = "127.0.0.1:30441"
 
-[logging.file]
-Path = "%s"
-Level = "%s"
-MaxAge = 3
-MaxBackups = 1
+[log.file]
+path = "%s"
+level = "%s"
+max_age = 3
+max_backups = 1

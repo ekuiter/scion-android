@@ -10,12 +10,10 @@
     <string name="notificationChannelDescription">Provides a connection to the SCION network.</string>
     <string name="pingAddressHint">Ping SCION address</string>
     <string name="pingAddress">17-ffaa:0:1102,[0.0.0.0]</string>
-    <string name="beaconServer">Beacon Server</string>
     <string name="borderRouter">Border Router</string>
-    <string name="certificateServer">Certificate Server</string>
+    <string name="controlServer">Control Server</string>
     <string name="daemon">Daemon</string>
     <string name="dispatcher">Dispatcher</string>
-    <string name="pathServer">Path Server</string>
     <string name="scmp">Ping</string>
     <string name="vpnClient">VPN</string>
     <string-array name="logLevels">
