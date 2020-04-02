@@ -1,8 +1,12 @@
 package org.scionlab.scion;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -13,9 +17,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.scionlab.scion.as.Config;
 import org.scionlab.scion.as.Logger;
 
+import androidx.fragment.app.Fragment;
 import timber.log.Timber;
 
-public class LogActivity extends AppCompatActivity {
+public class LogActivity extends Fragment {
     private static Logger.Tree tree;
     private static StringBuffer buffer = new StringBuffer();
     private static Logger.LogLevel logLevel = Config.Logger.DEFAULT_LOG_LEVEL;
@@ -23,14 +28,13 @@ public class LogActivity extends AppCompatActivity {
     private ScrollView scrollView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_log);
-        Spinner logLevelSpinner = findViewById(R.id.logLevelSpinner);
-        scrollView = findViewById(R.id.scrollView);
-        logTextView = findViewById(R.id.logTextView);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.activity_log, container, false);
+        Spinner logLevelSpinner = layout.findViewById(R.id.logLevelSpinner);
+        scrollView = layout.findViewById(R.id.scrollView);
+        logTextView = layout.findViewById(R.id.logTextView);
 
-        Logger.Tree newTree = new Logger.Tree((tag, message) -> runOnUiThread(() -> {
+        Logger.Tree newTree = new Logger.Tree((tag, message) -> this.getActivity().runOnUiThread(() -> {
             logTextView.append(formatMessage(tag, message));
             scrollDown();
         }));
@@ -51,12 +55,13 @@ public class LogActivity extends AppCompatActivity {
         scrollDown();
         buffer = new StringBuffer();
         plantTree(newTree);
+        return layout;
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         buffer = new StringBuffer(logTextView.getText());
-        plantTree(new Logger.Tree((tag, message) -> runOnUiThread(() ->
+        plantTree(new Logger.Tree((tag, message) -> this.getActivity().runOnUiThread(() ->
                 LogActivity.append(tag, message))));
         super.onDestroy();
     }

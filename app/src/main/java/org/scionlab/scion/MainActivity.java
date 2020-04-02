@@ -26,17 +26,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.navigation.NavigationView;
 
-import org.scionlab.scion.as.Logger;
 import org.scionlab.scion.as.ScionAS;
 
 import java.io.Serializable;
@@ -51,10 +52,17 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences preferences;
     private BroadcastReceiver updateUserInterfaceReceiver;
-    private MaterialButton scionButton;
-    private EditText pingAddressEditText;
     private String scionLabConfigurationUri;
     private String pingAddress;
+
+    private ScionControlFragment controlFragment;
+    private SensorFetcherFragment sensorFetcherFragment;
+    private LogActivity logFragment;
+    private WebActivity howtoFragment;
+    private WebActivity aboutFragment;
+
+    private NavigationView navigationView;
+    private DrawerLayout drawer;
 
     static void updateUserInterface(Context context, ScionAS.State state, Map<String, ScionAS.State> componentState) {
         context.sendBroadcast(new Intent(UPDATE_USER_INTERFACE)
@@ -71,22 +79,84 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
+        //Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this));
         setContentView(R.layout.activity_main);
-        preferences = getPreferences(MODE_PRIVATE);
-        scionButton = findViewById(R.id.scionbutton);
-        pingAddressEditText = findViewById(R.id.pingAddressEditText);
-        TextInputLayout pingAddressTextInputLayout = findViewById(R.id.pingAddressTextInputLayout);
-        scionLabConfigurationUri = preferences.getString(SCIONLAB_CONFIGURATION_URI, null);
-        pingAddress = preferences.getString(PING_ADDRESS, getResources().getString(R.string.pingAddress));
-        pingAddressEditText.setText(pingAddress);
-        pingAddressTextInputLayout.setEndIconOnClickListener(view -> {
-            pingAddress = pingAddressEditText.getText().toString();
-            preferences.edit().putString(PING_ADDRESS, pingAddress).apply();
-            ScionService.setPingAddress(pingAddress);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle abdt = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.drawerOpen, R.string.drawerClosed);
+        drawer.addDrawerListener(abdt);
+
+        getSupportActionBar().setHomeButtonEnabled(true);
+        abdt.syncState();
+
+        navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                showFragment(item.getItemId());
+                return false;
+            }
         });
-        LogActivity.plantTree(new Logger.Tree((tag, message) -> runOnUiThread(() ->
-                LogActivity.append(tag, message))));
+
+        showFragment(R.id.nav_scion_control);
+
+        preferences = getPreferences(MODE_PRIVATE);
+        pingAddress = preferences.getString(PING_ADDRESS, getResources().getString(R.string.pingAddress));
+        scionLabConfigurationUri = preferences.getString(SCIONLAB_CONFIGURATION_URI, null);
+    }
+
+    private void showFragment(int id) {
+
+        navigationView.setCheckedItem(id);
+        drawer.closeDrawer(GravityCompat.START);
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment fragment = null;
+
+        switch (id) {
+            case R.id.nav_scion_control:
+                if (controlFragment == null) {
+                    controlFragment = new ScionControlFragment();
+                }
+                fragment = controlFragment;
+                break;
+            case R.id.nav_sensor_fetcher:
+                if (sensorFetcherFragment == null) {
+                    sensorFetcherFragment = new SensorFetcherFragment();
+                }
+                fragment = sensorFetcherFragment;
+                break;
+            case R.id.nav_log:
+                if (logFragment == null) {
+                    logFragment = new LogActivity();
+                }
+                fragment = logFragment;
+                break;
+            case R.id.nav_howto:
+                if (howtoFragment == null) {
+                    WebActivity f = new WebActivity();
+                    f.ContentURL = "file:///android_asset/how.html";
+                    howtoFragment = f;
+                }
+                fragment = howtoFragment;
+                break;
+            case R.id.nav_about:
+                if (aboutFragment == null) {
+                    WebActivity f = new WebActivity();
+                    f.ContentURL = "file:///android_asset/about.html";
+                    aboutFragment = f;
+                }
+                fragment = aboutFragment;
+                break;
+        }
+
+        if (fragment != null) {
+            ft.replace(R.id.main_activity_fragment_view, fragment);
+            ft.commit();
+        }
     }
 
     @Override
@@ -112,96 +182,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int menuItem = item.getItemId();
-
-        switch (menuItem) {
-            case R.id.log:
-                startActivity(new Intent(this, LogActivity.class));
-                break;
-
-            case R.id.how:
-                startActivity(new Intent(this, WebActivity.class)
-                        .putExtra(WebActivity.ASSET, "file:///android_asset/how.html"));
-                break;
-
-            case R.id.about:
-                startActivity(new Intent(this, WebActivity.class)
-                        .putExtra(WebActivity.ASSET, "file:///android_asset/about.html"));
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     private void updateUserInterface(ScionAS.State state, Map<String, ScionAS.State> componentState) {
-        if (state == null)
-            state = ScionAS.State.STOPPED;
-
-        if (state == ScionAS.State.STOPPED) {
-            scionButton.setText(R.string.start);
-            scionButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
-            scionButton.setOnClickListener(view ->
-                    VPNPermissionFragment.askPermission(this, (String errorMessage) -> {
-                        if (errorMessage != null) {
-                            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        chooseScionLabConfiguration();
-                    }));
-        } else {
-            scionButton.setText(R.string.stop);
-            scionButton.setBackgroundColor(ContextCompat.getColor(this,
-                    state == ScionAS.State.STARTING ? R.color.colorStarting :
-                            state == ScionAS.State.HEALTHY ? R.color.colorHealthy : R.color.colorUnhealthy));
-            scionButton.setOnClickListener(view -> ScionService.stop(this));
-        }
-
-        Chip[] chips = new Chip[] {
-                findViewById(R.id.beaconServer), findViewById(R.id.borderRouter),
-                findViewById(R.id.certificateServer), findViewById(R.id.daemon),
-                findViewById(R.id.dispatcher), findViewById(R.id.pathServer),
-                findViewById(R.id.scmp), findViewById(R.id.vpnClient)};
-        for (Chip chip : chips)
-            chip.setChipIconTintResource(R.color.colorPrimary);
-
-        componentState.forEach((k, v) -> {
-            int color = v == ScionAS.State.STOPPED ? R.color.colorPrimary :
-                    v == ScionAS.State.STARTING ? R.color.colorStarting :
-                    v == ScionAS.State.HEALTHY ? R.color.colorHealthy : R.color.colorUnhealthy;
-            if (k.equals("BeaconServer"))
-                ((Chip) findViewById(R.id.beaconServer)).setChipIconTintResource(color);
-            if (k.equals("BorderRouter"))
-                ((Chip) findViewById(R.id.borderRouter)).setChipIconTintResource(color);
-            if (k.equals("CertificateServer"))
-                ((Chip) findViewById(R.id.certificateServer)).setChipIconTintResource(color);
-            if (k.equals("Daemon"))
-                ((Chip) findViewById(R.id.daemon)).setChipIconTintResource(color);
-            if (k.equals("Dispatcher"))
-                ((Chip) findViewById(R.id.dispatcher)).setChipIconTintResource(color);
-            if (k.equals("PathServer"))
-                ((Chip) findViewById(R.id.pathServer)).setChipIconTintResource(color);
-            if (k.equals("Scmp"))
-                ((Chip) findViewById(R.id.scmp)).setChipIconTintResource(color);
-            if (k.equals("VPNClient"))
-                ((Chip) findViewById(R.id.vpnClient)).setChipIconTintResource(color);
-        });
+        if (controlFragment != null)
+            controlFragment.updateUserInterface(state, componentState);
     }
 
-    private void chooseScionLabConfiguration() {
-        Intent chooseFile;
-        Intent intent;
-        chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
-        chooseFile.addCategory(Intent.CATEGORY_OPENABLE);
-        chooseFile.setType("*/*");
-        intent = Intent.createChooser(chooseFile, getString(R.string.chooseScionLabConfiguration));
-        startActivityForResult(intent, 0);
-        Toast.makeText(this, R.string.chooseScionLabConfigurationToast, Toast.LENGTH_LONG).show();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

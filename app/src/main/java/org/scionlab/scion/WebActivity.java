@@ -1,19 +1,27 @@
 package org.scionlab.scion;
 
 import android.os.Bundle;
+import android.text.Layout;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
-public class WebActivity extends AppCompatActivity {
+public class WebActivity extends Fragment {
     static final String ASSET = WebActivity.class.getCanonicalName() + ".ASSET";
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_web);
+    public String ContentURL;
 
-        WebView browser = findViewById(R.id.webView);
-        browser.loadUrl(getIntent().getStringExtra(ASSET));
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.activity_web, container, false);
+        WebView browser = layout.findViewById(R.id.webView);
+        browser.loadUrl(ContentURL);
+        return layout;
     }
 }
