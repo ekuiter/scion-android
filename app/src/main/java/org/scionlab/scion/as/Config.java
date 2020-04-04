@@ -101,7 +101,7 @@ public class Config {
 
     public static class SensorFetcher {
         public static final String BINARY_FLAG = "sensorfetcher"; // value of binary's first argument to run the sensorfetcher tool
-        public static final String SERVER_FLAG = "-s"; // flag that specifies the remote address
+        public static final String SERVER_FLAG = "-scion-android_s"; // flag that specifies the remote address
         public static final String DISPATCHER_SOCKET_ENV = "SCION_DISPATCHER_SOCKET"; // flag that specifies the dispatcher socket
     }
 

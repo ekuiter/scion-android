@@ -17,7 +17,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/sensorAddressHint"
             app:endIconMode="custom"
-            app:endIconDrawable="@drawable/ic_check_circle_24dp">
+            app:endIconDrawable="@drawable/ic_check_circle_24dp"
+            android:layout_marginTop="12sp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/sensorFetcherAddressEdit"
                 android:layout_width="match_parent"
