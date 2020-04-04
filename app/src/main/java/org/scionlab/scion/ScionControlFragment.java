@@ -1,6 +1,8 @@
 package org.scionlab.scion;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -78,9 +80,21 @@ public class ScionControlFragment extends Fragment {
         return layout;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
     public void updateUserInterface(ScionAS.State state, Map<String, ScionAS.State> componentState) {
         if (scionButton == null) {
             // Layout hasn't been created yet!
+            return;
+        }
+
+        Context context = this.getContext();
+        FragmentActivity activity = this.getActivity();
+
+        if (context == null || activity == null) {
             return;
         }
 
@@ -89,9 +103,9 @@ public class ScionControlFragment extends Fragment {
 
         if (state == ScionAS.State.STOPPED) {
             scionButton.setText(R.string.start);
-            scionButton.setBackgroundColor(ContextCompat.getColor(this.getContext(), R.color.colorPrimary));
+            scionButton.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary));
             scionButton.setOnClickListener(view ->
-                    VPNPermissionFragment.askPermission(this.getActivity(), (String errorMessage) -> {
+                    VPNPermissionFragment.askPermission(activity, (String errorMessage) -> {
                         if (errorMessage != null) {
                             Toast.makeText(this.getActivity(), errorMessage, Toast.LENGTH_LONG).show();
                             return;
@@ -100,10 +114,10 @@ public class ScionControlFragment extends Fragment {
                     }));
         } else {
             scionButton.setText(R.string.stop);
-            scionButton.setBackgroundColor(ContextCompat.getColor(this.getContext(),
+            scionButton.setBackgroundColor(ContextCompat.getColor(context,
                     state == ScionAS.State.STARTING ? R.color.colorStarting :
                             state == ScionAS.State.HEALTHY ? R.color.colorHealthy : R.color.colorUnhealthy));
-            scionButton.setOnClickListener(view -> ScionService.stop(this.getContext()));
+            scionButton.setOnClickListener(view -> ScionService.stop(context));
         }
 
         for (Chip chip : chips)

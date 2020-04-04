@@ -80,14 +80,14 @@ public class Config {
         static final Pattern READY_PATTERN = Pattern.compile("^.*started listening.*$"); // when encountered, consider component ready
     }
 
-    static class Dispatcher {
-        static final String BINARY_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher
-        static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml"; // path to configuration file template, located in assets folder
-        static final String CONFIG_PATH = "EXTERNAL/config/dispatcher.toml"; // path to configuration file
-        static final String LOG_PATH = "EXTERNAL/logs/dispatcher.log"; // path to log file
-        static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
-        static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
-        static final Pattern READY_PATTERN = Pattern.compile("^.*Dispatcher starting.*$"); // when encountered, consider component ready
+    public static class Dispatcher {
+        public static final String BINARY_FLAG = "godispatcher"; // value of binary's first argument to run the dispatcher
+        public static final String CONFIG_TEMPLATE_PATH = "dispatcher.toml"; // path to configuration file template, located in assets folder
+        public static final String CONFIG_PATH = "EXTERNAL/config/dispatcher.toml"; // path to configuration file
+        public static final String LOG_PATH = "EXTERNAL/logs/dispatcher.log"; // path to log file
+        public static final String SOCKET_PATH = "INTERNAL/dispatcher.sock"; // path to socket
+        public static final String LOG_LEVEL = "trace"; // log level passed to process (log messages are later filtered by the Logger.Tree class)
+        public static final Pattern READY_PATTERN = Pattern.compile("^.*Dispatcher starting.*$"); // when encountered, consider component ready
     }
 
     static class Scmp {
@@ -99,39 +99,39 @@ public class Config {
         static final long HEALTH_TIMEOUT = 2000; // how long the component is considered healthy after the last received ping
     }
 
-    static class SensorFetcher {
-        static final String BINARY_FLAG = "sensorfetcher"; // value of binary's first argument to run the sensorfetcher tool
-        static final String SERVER_FLAG = "-s"; // flag that specifies the remote address
-        static final String DISPATCHER_SOCKET_ENV = "SCION_DISPATCHER_SOCKET"; // flag that specifies the dispatcher socket
+    public static class SensorFetcher {
+        public static final String BINARY_FLAG = "sensorfetcher"; // value of binary's first argument to run the sensorfetcher tool
+        public static final String SERVER_FLAG = "-s"; // flag that specifies the remote address
+        public static final String DISPATCHER_SOCKET_ENV = "SCION_DISPATCHER_SOCKET"; // flag that specifies the dispatcher socket
     }
 
-    static class Scion {
-        static final String SCIONLAB_BINARY_PATH = "libscion-scionlab.so"; // file name of SCION's scionlab binary in jniLibs (shipped and used by default)
-        static final String VERSION_FLAG = "-lib_env_version"; // flag to obtain version information
-        static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config"; // path to config directory where all configuration files are stored
-        static final String TMP_DIRECTORY_PATH = "EXTERNAL/tmp"; // path to temporary directory used for extracting SCIONLab configuration
-        static final String TMP_GEN_DIRECTORY_PATH = TMP_DIRECTORY_PATH + "/gen"; // path to gen directory extracted from configuration
-        static final String TMP_VPN_CONFIG_PATH_REGEX = "^client.*\\.conf$"; // regex for OpenVPN configuration extracted from configuration
-        static final String GEN_DIRECTORY_PATH = "EXTERNAL/gen"; // path to gen directory created in external storage
-        static final String CERTS_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/certs"; // path to certs directory created in external storage
-        static final String KEYS_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/keys"; // path to keys directory created in external storage
-        static final String TOPOLOGY_PATH = CONFIG_DIRECTORY_PATH + "/topology.json"; // path to topology file created in external storage
-        static final String TOPOLOGY_TEMPLATE_PATH = "topology.json"; // path to topology file template, located in assets folder
-        static final int GEN_DIRECTORY_FILE_LIMIT = 100; // number of files allowed in imported directory (failsafe if the user chooses wrong)
-        static final String ISD_DIRECTORY_PATH_REGEX = "^ISD.*$"; // regex for ISD directory
-        static final String AS_DIRECTORY_PATH_REGEX = "^AS.*$"; // regex for AS directory
-        static final String COMPONENT_DIRECTORY_PATH_REGEX = "^cs.*$"; // regex for a component directory including certs, keys, and topology.json
-        static final String ENDHOST_DIRECTORY_PATH_REGEX = "^endhost$"; // regex for the endhost directory including the daemon configuration file
-        static final String CERTS_DIRECTORY_PATH_REGEX = "^certs$"; // regex for the certs directory
-        static final String KEYS_DIRECTORY_PATH_REGEX = "^keys$"; // regex for the keys directory
-        static final String TOPOLOGY_PATH_REGEX = "^topology\\.json$"; // regex for the topology file
-        static final String BORDER_ROUTERS_JSON_PATH = "BorderRouters"; // JSON path for border routers object in topology file
-        static final String INTERFACES_JSON_PATH = "Interfaces"; // JSON path for interfaces object in topology file
-        static final String IA_JSON_PATH = "ISD_AS"; // JSON path for IA string in topology file
-        static final String PUBLIC_OVERLAY_JSON_PATH = "PublicOverlay"; // JSON path for public overlay object in topology file
-        static final String REMOTE_OVERLAY_JSON_PATH = "RemoteOverlay"; // JSON path for public overlay object in topology file
-        static final String OVERLAY_ADDR_JSON_PATH = "Addr"; // JSON path for overlay address string in topology file
-        static final String OVERLAY_PORT_JSON_PATH = "OverlayPort"; // JSON path for overlay port integer object in topology file
+    public static class Scion {
+        public static final String SCIONLAB_BINARY_PATH = "libscion-scionlab.so"; // file name of SCION's scionlab binary in jniLibs (shipped and used by default)
+        public static final String VERSION_FLAG = "-lib_env_version"; // flag to obtain version information
+        public static final String CONFIG_DIRECTORY_PATH = "EXTERNAL/config"; // path to config directory where all configuration files are stored
+        public static final String TMP_DIRECTORY_PATH = "EXTERNAL/tmp"; // path to temporary directory used for extracting SCIONLab configuration
+        public static final String TMP_GEN_DIRECTORY_PATH = TMP_DIRECTORY_PATH + "/gen"; // path to gen directory extracted from configuration
+        public static final String TMP_VPN_CONFIG_PATH_REGEX = "^client.*\\.conf$"; // regex for OpenVPN configuration extracted from configuration
+        public static final String GEN_DIRECTORY_PATH = "EXTERNAL/gen"; // path to gen directory created in external storage
+        public static final String CERTS_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/certs"; // path to certs directory created in external storage
+        public static final String KEYS_DIRECTORY_PATH = CONFIG_DIRECTORY_PATH + "/keys"; // path to keys directory created in external storage
+        public static final String TOPOLOGY_PATH = CONFIG_DIRECTORY_PATH + "/topology.json"; // path to topology file created in external storage
+        public static final String TOPOLOGY_TEMPLATE_PATH = "topology.json"; // path to topology file template, located in assets folder
+        public static final int GEN_DIRECTORY_FILE_LIMIT = 100; // number of files allowed in imported directory (failsafe if the user chooses wrong)
+        public static final String ISD_DIRECTORY_PATH_REGEX = "^ISD.*$"; // regex for ISD directory
+        public static final String AS_DIRECTORY_PATH_REGEX = "^AS.*$"; // regex for AS directory
+        public static final String COMPONENT_DIRECTORY_PATH_REGEX = "^cs.*$"; // regex for a component directory including certs, keys, and topology.json
+        public static final String ENDHOST_DIRECTORY_PATH_REGEX = "^endhost$"; // regex for the endhost directory including the daemon configuration file
+        public static final String CERTS_DIRECTORY_PATH_REGEX = "^certs$"; // regex for the certs directory
+        public static final String KEYS_DIRECTORY_PATH_REGEX = "^keys$"; // regex for the keys directory
+        public static final String TOPOLOGY_PATH_REGEX = "^topology\\.json$"; // regex for the topology file
+        public static final String BORDER_ROUTERS_JSON_PATH = "BorderRouters"; // JSON path for border routers object in topology file
+        public static final String INTERFACES_JSON_PATH = "Interfaces"; // JSON path for interfaces object in topology file
+        public static final String IA_JSON_PATH = "ISD_AS"; // JSON path for IA string in topology file
+        public static final String PUBLIC_OVERLAY_JSON_PATH = "PublicOverlay"; // JSON path for public overlay object in topology file
+        public static final String REMOTE_OVERLAY_JSON_PATH = "RemoteOverlay"; // JSON path for public overlay object in topology file
+        public static final String OVERLAY_ADDR_JSON_PATH = "Addr"; // JSON path for overlay address string in topology file
+        public static final String OVERLAY_PORT_JSON_PATH = "OverlayPort"; // JSON path for overlay port integer object in topology file
     }
 
     public static class VPNClient {

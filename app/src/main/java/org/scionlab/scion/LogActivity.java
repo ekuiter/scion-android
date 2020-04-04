@@ -27,6 +27,8 @@ public class LogActivity extends Fragment {
     private TextView logTextView;
     private ScrollView scrollView;
 
+    private MainActivity activity;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.activity_log, container, false);
@@ -34,7 +36,9 @@ public class LogActivity extends Fragment {
         scrollView = layout.findViewById(R.id.scrollView);
         logTextView = layout.findViewById(R.id.logTextView);
 
-        Logger.Tree newTree = new Logger.Tree((tag, message) -> this.getActivity().runOnUiThread(() -> {
+        activity = (MainActivity)getActivity();
+
+        Logger.Tree newTree = new Logger.Tree((tag, message) -> activity.runOnUiThread(() -> {
             logTextView.append(formatMessage(tag, message));
             scrollDown();
         }));
@@ -61,7 +65,7 @@ public class LogActivity extends Fragment {
     @Override
     public void onDestroy() {
         buffer = new StringBuffer(logTextView.getText());
-        plantTree(new Logger.Tree((tag, message) -> this.getActivity().runOnUiThread(() ->
+        plantTree(new Logger.Tree((tag, message) -> activity.runOnUiThread(() ->
                 LogActivity.append(tag, message))));
         super.onDestroy();
     }
@@ -82,6 +86,7 @@ public class LogActivity extends Fragment {
     }
 
     private void scrollDown() {
-        scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+        // dont always scroll down or you cannot read older messages!!
+        //scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
     }
 }

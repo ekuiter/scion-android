@@ -41,14 +41,14 @@ import java.util.stream.Stream;
  * however, some security restrictions apply (e.g., Unix sockets must be stored internally).
  * In general, we try to store as much files externally as possible to facilitate debugging.
  */
-class Storage {
+public class Storage {
     private Context context;
 
     private Storage(Context context) {
         this.context = context;
     }
 
-    static Storage from(Context context) {
+    public static Storage from(Context context) {
         return new Storage(context);
     }
 
@@ -89,7 +89,7 @@ class Storage {
         return storage + getFilesDir(context, path).toURI().relativize(file.toURI()).getPath();
     }
 
-    String getAbsolutePath(String path) {
+    public String getAbsolutePath(String path) {
         return getFile(path).getAbsolutePath();
     }
 
