@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -36,6 +37,10 @@ public class SensorFetcherFragment extends Fragment {
     TextView resultText;
     TextInputEditText addressInput;
     String result;
+    volatile InputStream executableInputStream;
+    FragmentActivity activity;
+    Thread inputStreamReaderThread;
+    Thread backgroundThread;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,45 +54,65 @@ public class SensorFetcherFragment extends Fragment {
         resultText = layout.findViewById(R.id.sensorFetcherResult);
         addressInput = layout.findViewById(R.id.sensorFetcherAddressEdit);
         addressInput.setText("17-ffaa:0:1102,[192.33.93.177]:42003");
+        activity = getActivity();
 
         return layout;
     }
 
+    void startInputStreamReadThread() {
+        if (inputStreamReaderThread != null) {
+            inputStreamReaderThread.interrupt();
+        }
+
+        inputStreamReaderThread = new Thread(() -> {
+            InputStreamReader isr = new InputStreamReader(executableInputStream);
+            BufferedReader br = new BufferedReader(isr);
+
+            while (true) {
+                try {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        final String line2 = line;
+                        activity.runOnUiThread(() -> {
+                            result += "\r\n" + line2;
+                            resultText.setText(result);
+                        });
+                    }
+                } catch (Exception e) {
+                    return;
+                }
+
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    return;
+                }
+            }
+        });
+        inputStreamReaderThread.start();
+    }
+
     void run() {
+        if (backgroundThread != null && backgroundThread.isAlive()) {
+            Toast.makeText(getActivity(), "Already Running",
+                Toast.LENGTH_LONG).show();
+            return;
+        }
+
         result = "";
         final Context context = getContext();
         final Storage storage = Storage.from(context);
-        final FragmentActivity activity = getActivity();
         final String destinationAddress = addressInput.getText().toString();
 
         final Process.InputStreamHandler inputStreamHandler = new Process.InputStreamHandler() {
             @Override
             public void handle(InputStream stream) {
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            InputStreamReader isr = new InputStreamReader(stream);
-                            BufferedReader br = new BufferedReader(isr);
-
-                            while (true) {
-                                final String line = br.readLine();
-                                if (line != null) {
-                                    activity.runOnUiThread(() -> {
-                                        result += "\r\n" + line;
-                                        resultText.setText(result);
-                                    });
-                                }
-                            }
-                        }
-                        catch (Exception e) { }
-                    }
-                });
-                thread.start();
+                executableInputStream = stream;
+                startInputStreamReadThread();
             }
         };
 
-        Thread backgroundThread = new Thread(() -> {
+        backgroundThread = new Thread(() -> {
             Process process = Process.from(
                     Config.Scion.SCIONLAB_BINARY_PATH,
                     "SensorFetcher",
